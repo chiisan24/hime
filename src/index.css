@@ -1,0 +1,74 @@
+@import 'tailwindcss';
+
+/*
+ * えひめ投票ナビ デザイントークン
+ * 指示書 3.デザインコンセプト に対応
+ *  - メインカラー: 青 (primary)
+ *  - アクセント  : みかんオレンジ (accent)
+ *  - 補助カラー  : 薄いグレー (surface / line)
+ *  - 文字       : 濃い紺 (ink)
+ *  - 白を基調 / 角丸のカード・ボタン
+ */
+@theme {
+  /* メインカラー: 信頼感のある青 */
+  --color-primary: #1f6fd6;
+  --color-primary-dark: #1557ad;
+  --color-primary-light: #e9f2fd;
+
+  /* アクセント: みかんをイメージしたオレンジ（強調は控えめに使用） */
+  --color-accent: #f5872b;
+  --color-accent-dark: #d96f14;
+  --color-accent-light: #fff2e6;
+
+  /* 文字: 濃い紺を基本 */
+  --color-ink: #16294d;
+  --color-ink-soft: #566180;
+  --color-ink-faint: #8a93a8;
+
+  /* 補助: 白基調 + 薄いグレー */
+  --color-surface: #f4f6f9;
+  --color-surface-2: #eef2f7;
+  --color-line: #e3e8ef;
+
+  /* 状態色（情報提示用。候補者の優劣には使わない） */
+  --color-seto: #3aa6b9; /* 瀬戸内海イメージの補助アクセント */
+
+  /* 角丸 */
+  --radius-card: 1rem;
+  --radius-btn: 0.875rem;
+
+  /* 日本語フォント */
+  --font-sans: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP',
+    'Yu Gothic', 'Meiryo', system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: #ffffff;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* タップ操作時の見やすさを優先 */
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  /* フォーカスリング（アクセシビリティ） */
+  :focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--color-primary) 55%, white);
+    outline-offset: 2px;
+  }
+}
