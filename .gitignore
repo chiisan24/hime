@@ -1,0 +1,13 @@
+node_modules/
+**/dist/
+*.tsbuildinfo
+
+# Machine-local environment files may contain deployment settings.
+.env
+.env.*
+!.env.example
+
+# Real source material and every derived artifact stay local. This covers
+# raw sources, manifests, extracted text, indexes, runs, approvals,
+# evaluations, P0 records, and temporary artifacts.
+data/real/**

@@ -1,0 +1,30 @@
+{
+  "name": "@ehime-vote-navigator/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "start": "node dist/server.js",
+    "lint": "eslint src --max-warnings=0",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --root ../.. apps/api/src",
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock": "3.1162.0",
+    "@aws-sdk/client-bedrock-runtime": "3.1162.0",
+    "@aws-sdk/client-sts": "3.1162.0",
+    "@ehime-vote-navigator/domain": "0.0.0",
+    "express": "5.3.0",
+    "zod": "4.6.7"
+  }
+}
