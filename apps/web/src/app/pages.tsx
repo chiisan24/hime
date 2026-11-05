@@ -49,13 +49,13 @@ type PageIntroProps = Readonly<{
 function PageIntro({ eyebrow, title, description }: PageIntroProps) {
   return (
     <div className="max-w-3xl">
-      <p className="text-sm font-bold uppercase tracking-[0.16em] text-orange-800">
+      <p className="text-sm font-bold uppercase tracking-[0.16em] text-accent-dark">
         {eyebrow}
       </p>
-      <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+      <h1 className="mt-2 text-3xl font-black tracking-tight text-ink sm:text-4xl">
         {title}
       </h1>
-      <p className="mt-4 text-base leading-7 text-slate-700">{description}</p>
+      <p className="mt-4 text-base leading-7 text-ink-soft">{description}</p>
     </div>
   );
 }
@@ -72,15 +72,15 @@ function StatusPanel({ statusCode, title, children }: StatusPanelProps) {
   const headingId = useId();
   const palette =
     statusCode === "404"
-      ? "border-rose-300 bg-rose-50 text-rose-950"
+      ? "border-red-300 bg-red-50 text-red-900"
       : statusCode === "NOT_READY"
-        ? "border-amber-300 bg-amber-50 text-amber-950"
-        : "border-slate-300 bg-slate-50 text-slate-900";
+        ? "border-accent/40 bg-accent-light text-accent-dark"
+        : "border-line bg-surface text-ink";
 
   return (
     <section
       aria-labelledby={headingId}
-      className={`mt-8 rounded-2xl border p-5 sm:p-6 ${palette}`}
+      className={`mt-8 rounded-[var(--radius-card)] border p-5 sm:p-6 ${palette}`}
       data-terminal-state={statusCode}
     >
       <p className="font-mono text-sm font-black tracking-wide">{statusCode}</p>
@@ -93,7 +93,7 @@ function StatusPanel({ statusCode, title, children }: StatusPanelProps) {
 }
 
 function MissingValue() {
-  return <span className="font-medium text-slate-600">{MISSING_VALUE}</span>;
+  return <span className="font-medium text-ink-soft">{MISSING_VALUE}</span>;
 }
 
 type FutureFieldListProps = Readonly<{
@@ -102,10 +102,10 @@ type FutureFieldListProps = Readonly<{
 
 function FutureFieldList({ fields }: FutureFieldListProps) {
   return (
-    <dl className="mt-4 divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
+    <dl className="mt-4 divide-y divide-line rounded-xl border border-line bg-white">
       {fields.map((field) => (
         <div className="grid gap-1 px-4 py-3 sm:grid-cols-[12rem_1fr]" key={field}>
-          <dt className="font-semibold text-slate-900">{field}</dt>
+          <dt className="font-semibold text-ink">{field}</dt>
           <dd>
             <MissingValue />
           </dd>
@@ -128,11 +128,11 @@ function FeatureLinkGrid({ links }: Readonly<{ links: readonly FeatureLink[] }>)
         <li key={link.to}>
           <AppLink
             aria-label={link.label}
-            className="flex min-h-24 h-full flex-col justify-center rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm transition hover:border-orange-400 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700"
+            className="flex min-h-24 h-full flex-col justify-center rounded-xl border border-line bg-white px-5 py-4 shadow-sm transition hover:border-primary/50 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             to={link.to}
           >
-            <span className="font-bold text-slate-950">{link.label}</span>
-            <span className="mt-1 text-sm leading-6 text-slate-600">
+            <span className="font-bold text-ink">{link.label}</span>
+            <span className="mt-1 text-sm leading-6 text-ink-soft">
               {link.description}
             </span>
           </AppLink>
@@ -224,18 +224,18 @@ export function HomePage() {
 
       <section
         aria-labelledby="election-identity-heading"
-        className="mt-8 rounded-2xl bg-slate-950 p-6 text-white"
+        className="mt-8 rounded-2xl bg-ink p-6 text-white"
       >
         <h2 className="text-xl font-bold" id="election-identity-heading">
           対象選挙
         </h2>
         <dl className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
-            <dt className="text-sm text-slate-300">選挙名</dt>
+            <dt className="text-sm text-white/70">選挙名</dt>
             <dd className="mt-1 font-semibold">{ELECTION_NAME}</dd>
           </div>
           <div>
-            <dt className="text-sm text-slate-300">投票日</dt>
+            <dt className="text-sm text-white/70">投票日</dt>
             <dd className="mt-1 font-semibold">2022-11-20</dd>
           </div>
         </dl>
@@ -248,17 +248,17 @@ export function HomePage() {
       </StatusPanel>
 
       <section aria-labelledby="visitor-links-heading" className="mt-10">
-        <h2 className="text-2xl font-bold text-slate-950" id="visitor-links-heading">
+        <h2 className="text-2xl font-bold text-ink" id="visitor-links-heading">
           会場閲覧のP0画面
         </h2>
         <FeatureLinkGrid links={PUBLIC_HOME_LINKS} />
       </section>
 
       <section aria-labelledby="analyst-links-heading" className="mt-10">
-        <h2 className="text-2xl font-bold text-slate-950" id="analyst-links-heading">
+        <h2 className="text-2xl font-bold text-ink" id="analyst-links-heading">
           ローカル分析のP0画面
         </h2>
-        <p className="mt-2 text-slate-700">
+        <p className="mt-2 text-ink-soft">
           共同開発者向けの画面枠です。実資料へのアクセスやAWS要求は、この画面表示では実行しません。
         </p>
         <FeatureLinkGrid links={ANALYST_HOME_LINKS} />
@@ -276,21 +276,21 @@ export function SchedulePage() {
         title="選挙日程"
       />
 
-      <section aria-labelledby="past-schedule-heading" className="mt-8 rounded-2xl border border-slate-200 bg-white p-6">
+      <section aria-labelledby="past-schedule-heading" className="mt-8 rounded-2xl border border-line bg-white p-6">
         <h2 className="text-xl font-bold" id="past-schedule-heading">
           確認対象
         </h2>
         <dl className="mt-4 grid gap-4 sm:grid-cols-3">
           <div>
-            <dt className="text-sm font-semibold text-slate-600">投票日</dt>
+            <dt className="text-sm font-semibold text-ink-soft">投票日</dt>
             <dd className="mt-1 font-bold">2022-11-20</dd>
           </div>
           <div>
-            <dt className="text-sm font-semibold text-slate-600">選挙状態</dt>
+            <dt className="text-sm font-semibold text-ink-soft">選挙状態</dt>
             <dd className="mt-1 font-bold">終了済み</dd>
           </div>
           <div>
-            <dt className="text-sm font-semibold text-slate-600">扱い</dt>
+            <dt className="text-sm font-semibold text-ink-soft">扱い</dt>
             <dd className="mt-1 font-bold">過去の参照情報</dd>
           </div>
         </dl>
@@ -308,7 +308,7 @@ function CandidatePhotoPlaceholder() {
   return (
     <div
       aria-label="候補者写真の共通プレースホルダー"
-      className="flex h-44 w-full items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-100 px-4 text-center text-sm font-semibold text-slate-600"
+      className="flex h-44 w-full items-center justify-center rounded-xl border-2 border-dashed border-line bg-surface px-4 text-center text-sm font-semibold text-ink-soft"
       role="img"
     >
       候補者写真は未確認です
@@ -330,8 +330,8 @@ function CandidateListFields({ name }: Readonly<{ name: string }>) {
     <dl className="mt-5 space-y-3">
       {fields.map((field) => (
         <div key={field.label}>
-          <dt className="text-sm font-semibold text-slate-600">{field.label}</dt>
-          <dd className="mt-1 text-slate-900">{field.value}</dd>
+          <dt className="text-sm font-semibold text-ink-soft">{field.label}</dt>
+          <dd className="mt-1 text-ink">{field.value}</dd>
         </div>
       ))}
     </dl>
@@ -365,12 +365,12 @@ export function CandidatesPage() {
             return (
               <article
                 aria-labelledby={titleId}
-                className="flex h-full min-h-[38rem] flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                className="flex h-full min-h-[38rem] flex-col rounded-2xl border border-line bg-white p-5 shadow-sm"
                 data-candidate-card="true"
                 key={candidate.candidateId}
               >
                 <CandidatePhotoPlaceholder />
-                <p className="mt-5 text-xs font-bold uppercase tracking-[0.14em] text-orange-800">
+                <p className="mt-5 text-xs font-bold uppercase tracking-[0.14em] text-accent-dark">
                   共通表示構造
                 </p>
                 <h3 className="mt-2 text-2xl font-black" id={titleId}>
@@ -380,7 +380,7 @@ export function CandidatesPage() {
                 <div className="mt-auto pt-6">
                   <AppLink
                     aria-label={`${candidate.name}の候補者詳細へ移動`}
-                    className="inline-flex min-h-11 min-w-11 w-full items-center justify-center rounded-xl bg-orange-700 px-4 py-3 font-bold text-white hover:bg-orange-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700"
+                    className="inline-flex min-h-11 min-w-11 w-full items-center justify-center rounded-xl bg-primary px-4 py-3 font-bold text-white hover:bg-primary-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                     to={`/candidates/${candidate.candidateId}`}
                   >
                     {candidate.name}の詳細を見る
@@ -397,7 +397,7 @@ export function CandidatesPage() {
 
 function CandidateDetailFields({ name }: Readonly<{ name: string | null }>) {
   return (
-    <dl className="mt-5 divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
+    <dl className="mt-5 divide-y divide-line rounded-xl border border-line bg-white">
       <div className="grid gap-1 px-4 py-3 sm:grid-cols-[12rem_1fr]">
         <dt className="font-semibold">氏名</dt>
         <dd>{name ?? MISSING_VALUE}</dd>
@@ -466,12 +466,12 @@ export function CandidateDetailPage() {
           <CandidatePhotoPlaceholder />
           <div>
             {candidateId === undefined ? null : (
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-ink-soft">
                 候補者ID: <code className="break-all font-mono">{candidateId}</code>
               </p>
             )}
             {candidate === undefined ? (
-              <p className="mt-3 font-semibold text-rose-800">
+              <p className="mt-3 font-semibold text-red-700">
                 この候補者IDに対応する表示データはno-dataです。
               </p>
             ) : null}
@@ -484,9 +484,9 @@ export function CandidateDetailPage() {
         <h2 className="text-2xl font-bold" id="approved-policy-heading">
           承認済み政策情報
         </h2>
-        <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-5">
-          <p className="font-mono font-black text-amber-950">NOT_READY</p>
-          <p className="mt-2 text-amber-950">
+        <div className="mt-4 rounded-xl border border-accent/40 bg-accent-light p-5">
+          <p className="font-mono font-black text-accent-dark">NOT_READY</p>
+          <p className="mt-2 text-accent-dark">
             公開可能な承認済み政策情報はありません。資料未入手のため、AI生成文による補完は行いません。
           </p>
         </div>
@@ -516,7 +516,7 @@ export function ComparisonPage() {
         </h2>
         <ul className="mt-4 flex flex-wrap gap-2" role="list">
           {POLICY_THEMES.map((theme) => (
-            <li className="rounded-full border border-slate-300 bg-white px-4 py-2 font-semibold text-slate-700" key={theme}>
+            <li className="rounded-full border border-line bg-white px-4 py-2 font-semibold text-ink-soft" key={theme}>
               {theme}
             </li>
           ))}
@@ -527,7 +527,7 @@ export function ComparisonPage() {
         <h2 className="text-2xl font-bold" id="comparison-frame-heading">
           候補者別の共通比較項目
         </h2>
-        <p className="mt-2 text-slate-700">
+        <p className="mt-2 text-ink-soft">
           通常の比較表ではなく、準備完了後に使う同一構造だけを示しています。
         </p>
         <div className="mt-5 grid items-stretch gap-5 md:grid-cols-2">
@@ -537,21 +537,21 @@ export function ComparisonPage() {
             return (
               <article
                 aria-labelledby={headingId}
-                className="h-full rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                className="h-full rounded-2xl border border-line bg-white p-5 shadow-sm"
                 data-comparison-candidate="true"
                 key={candidate.candidateId}
               >
                 <h3 className="text-xl font-black" id={headingId}>
                   {candidate.name}
                 </h3>
-                <p className="mt-2 font-semibold text-amber-900">
+                <p className="mt-2 font-semibold text-accent-dark">
                   NOT_READY: 2022年の政策一次資料が未入手です。
                 </p>
-                <dl className="mt-5 divide-y divide-slate-200">
+                <dl className="mt-5 divide-y divide-line">
                   {COMPARISON_FIELDS.map((field) => (
                     <div className="grid gap-1 py-3 sm:grid-cols-[8rem_1fr]" key={field}>
                       <dt className="font-semibold">{field}</dt>
-                      <dd className="font-mono text-sm text-amber-900">NOT_READY</dd>
+                      <dd className="font-mono text-sm text-accent-dark">NOT_READY</dd>
                     </div>
                   ))}
                 </dl>
@@ -606,7 +606,7 @@ export function AnalystReadinessPage() {
       <StatusPanel statusCode="NOT_READY" title="両候補者の政策一次資料が不足しています">
         <div className="grid gap-3 sm:grid-cols-2">
           {CANDIDATE_SKELETONS.map((candidate) => (
-            <section className="rounded-xl border border-amber-200 bg-white p-4" key={candidate.candidateId}>
+            <section className="rounded-xl border border-accent/30 bg-white p-4" key={candidate.candidateId}>
               <h3 className="font-bold">{candidate.name}</h3>
               <p className="mt-2">不足項目: 2022年の採用可能な政策一次資料</p>
             </section>
@@ -668,7 +668,7 @@ export function AnalystRunDetailPage() {
         title="解析run詳細"
       />
       {runId === undefined ? null : (
-        <p className="mt-6 text-sm text-slate-600">
+        <p className="mt-6 text-sm text-ink-soft">
           run ID: <code className="break-all font-mono">{runId}</code>
         </p>
       )}
@@ -676,9 +676,9 @@ export function AnalystRunDetailPage() {
         <p>runは実行していません。以下は進捗ではなく、今後表示する段階名です。</p>
         <ol className="mt-4 grid gap-2 sm:grid-cols-2" aria-label="今後表示する解析段階">
           {stages.map((stage, index) => (
-            <li className="rounded-lg border border-slate-200 bg-white px-4 py-3" key={stage}>
+            <li className="rounded-lg border border-line bg-white px-4 py-3" key={stage}>
               <span className="font-semibold">{index + 1}. {stage}</span>
-              <span className="ml-2 font-mono text-sm text-slate-600">no-data</span>
+              <span className="ml-2 font-mono text-sm text-ink-soft">no-data</span>
             </li>
           ))}
         </ol>
@@ -698,7 +698,7 @@ export function AnalystVerificationPage() {
         title="根拠検証"
       />
       {artifactId === undefined ? null : (
-        <p className="mt-6 text-sm text-slate-600">
+        <p className="mt-6 text-sm text-ink-soft">
           artifact ID: <code className="break-all font-mono">{artifactId}</code>
         </p>
       )}
@@ -720,7 +720,7 @@ export function AnalystReviewPage() {
         title="人間確認"
       />
       {artifactId === undefined ? null : (
-        <p className="mt-6 text-sm text-slate-600">
+        <p className="mt-6 text-sm text-ink-soft">
           artifact ID: <code className="break-all font-mono">{artifactId}</code>
         </p>
       )}
@@ -790,7 +790,7 @@ export function NotFoundPage() {
       <StatusPanel statusCode="404" title="定義されていないURLです">
         <p>P1/P2を含む未登録の経路は、この404画面を表示します。</p>
         <AppLink
-          className="mt-4 inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-950 px-5 py-3 font-bold text-white hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-950"
+          className="mt-4 inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-ink px-5 py-3 font-bold text-white hover:bg-ink/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           to="/"
         >
           ホームへ移動
