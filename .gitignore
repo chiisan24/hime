@@ -6,7 +6,9 @@ node_modules
 # build output
 dist
 dist-ssr
+**/dist/
 *.local
+*.tsbuildinfo
 
 # logs
 logs
@@ -23,10 +25,12 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
-# env
+# Machine-local environment files may contain deployment settings.
 .env
 .env.*
 !.env.example
 
-# TypeScript incremental build info
-*.tsbuildinfo
+# Real source material and every derived artifact stay local. This covers
+# raw sources, manifests, extracted text, indexes, runs, approvals,
+# evaluations, P0 records, and temporary artifacts.
+data/real/**

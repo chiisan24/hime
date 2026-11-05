@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+/*
+ * えひめ投票ナビ デザイントークン（UI担当の正式デザイン）。
+ * 会場ローカルデモの意味論・文言・構造は変更せず、見た目のみ統一する。
+ *  - メインカラー: 信頼感のある青 (primary)
+ *  - アクセント  : みかんオレンジ (accent)
+ *  - 文字       : 濃い紺 (ink)
+ *  - 補助       : 白基調 + 薄いグレー (surface / line)
+ */
+@theme {
+  --color-primary: #1f6fd6;
+  --color-primary-dark: #1557ad;
+  --color-primary-light: #e9f2fd;
+
+  --color-accent: #f5872b;
+  --color-accent-dark: #c25d10;
+  --color-accent-light: #fff2e6;
+
+  --color-ink: #16294d;
+  --color-ink-soft: #566180;
+  --color-ink-faint: #8a93a8;
+
+  --color-surface: #f4f6f9;
+  --color-surface-2: #eef2f7;
+  --color-line: #e3e8ef;
+
+  --color-seto: #3aa6b9;
+
+  --radius-card: 1rem;
+  --radius-btn: 0.875rem;
+
+  --font-sans:
+    Inter, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP",
+    "Yu Gothic", Meiryo, system-ui, sans-serif;
+}
+
+:root {
+  color: var(--color-ink);
+  background: #ffffff;
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
