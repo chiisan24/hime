@@ -34,3 +34,6 @@ Thumbs.db
 # raw sources, manifests, extracted text, indexes, runs, approvals,
 # evaluations, P0 records, and temporary artifacts.
 data/real/**
+
+# Kiro task execution metadata is machine-local and changes frequently.
+.kiro/specs/**/tasks.meta.json
