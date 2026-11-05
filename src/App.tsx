@@ -1,7 +1,16 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
 import { Home } from './pages/Home'
-import { Placeholder } from './pages/Placeholder'
+import { Candidates } from './pages/Candidates'
+import { CandidateDetail } from './pages/CandidateDetail'
+import { Compare } from './pages/Compare'
+import { PollingPlace } from './pages/PollingPlace'
+import { Chat } from './pages/Chat'
+import { More } from './pages/More'
+import { Schedule } from './pages/Schedule'
+import { Guide } from './pages/Guide'
+import { Reminder } from './pages/Reminder'
+import { Settings } from './pages/Settings'
 import { NotFound } from './pages/NotFound'
 
 export default function App() {
@@ -11,17 +20,16 @@ export default function App() {
         <Route element={<AppLayout />}>
           <Route index element={<Home />} />
 
-          {/* 以降のSTEPで実装予定（現在は仮表示） */}
-          <Route path="candidates" element={<Placeholder title="候補者一覧" />} />
-          <Route path="candidates/:id" element={<Placeholder title="候補者詳細" />} />
-          <Route path="compare" element={<Placeholder title="政策比較" />} />
-          <Route path="polling" element={<Placeholder title="投票所検索" />} />
-          <Route path="chat" element={<Placeholder title="AIに質問" />} />
-          <Route path="more" element={<Placeholder title="その他" />} />
-          <Route path="schedule" element={<Placeholder title="投票日・選挙日程" />} />
-          <Route path="guide" element={<Placeholder title="投票方法ガイド" />} />
-          <Route path="reminder" element={<Placeholder title="投票日リマインダー" />} />
-          <Route path="settings" element={<Placeholder title="表示・読み上げ設定" />} />
+          <Route path="candidates" element={<Candidates />} />
+          <Route path="candidates/:id" element={<CandidateDetail />} />
+          <Route path="compare" element={<Compare />} />
+          <Route path="polling" element={<PollingPlace />} />
+          <Route path="chat" element={<Chat />} />
+          <Route path="more" element={<More />} />
+          <Route path="schedule" element={<Schedule />} />
+          <Route path="guide" element={<Guide />} />
+          <Route path="reminder" element={<Reminder />} />
+          <Route path="settings" element={<Settings />} />
 
           <Route path="*" element={<NotFound />} />
         </Route>
