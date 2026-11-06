@@ -1,3 +1,13 @@
+import {
+  Activity,
+  CalendarDays,
+  Eye,
+  FileText,
+  Home,
+  Scale,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import {
@@ -20,15 +30,22 @@ type AppShellProps = Readonly<{
   dataKind?: DataKind;
 }>;
 
-const COMMON_NAV_ITEMS = [
-  { to: "/", label: "ホーム", end: true },
-  { to: "/schedule", label: "選挙日程", end: true },
-  { to: "/candidates", label: "候補者", end: false },
-  { to: "/comparison", label: "政策比較", end: true },
-  { to: "/sources", label: "出典", end: true },
-  { to: "/venue", label: "会場閲覧", end: true },
-  { to: "/analyst/readiness", label: "分析状態", end: true },
-] as const;
+type NavItem = Readonly<{
+  to: string;
+  label: string;
+  end: boolean;
+  icon: LucideIcon;
+}>;
+
+const COMMON_NAV_ITEMS: readonly NavItem[] = [
+  { to: "/", label: "ホーム", end: true, icon: Home },
+  { to: "/schedule", label: "選挙日程", end: true, icon: CalendarDays },
+  { to: "/candidates", label: "候補者", end: false, icon: Users },
+  { to: "/comparison", label: "政策比較", end: true, icon: Scale },
+  { to: "/sources", label: "出典", end: true, icon: FileText },
+  { to: "/venue", label: "会場閲覧", end: true, icon: Eye },
+  { to: "/analyst/readiness", label: "分析状態", end: true, icon: Activity },
+];
 
 function BackControl() {
   const location = useLocation();
@@ -62,7 +79,7 @@ function BackControl() {
 
 export function AppShell({ dataKind = "REAL_AI" }: AppShellProps) {
   return (
-    <div className="min-h-screen bg-surface text-ink">
+    <div className="flex min-h-screen flex-col bg-surface text-ink">
       <a
         className="fixed left-3 top-3 z-50 -translate-y-24 rounded-lg bg-ink px-4 py-3 font-semibold text-white shadow-lg transition focus:translate-y-0 focus:outline-2 focus:outline-offset-2 focus:outline-accent"
         href="#main-content"
@@ -71,33 +88,33 @@ export function AppShell({ dataKind = "REAL_AI" }: AppShellProps) {
       </a>
 
       <header className="border-b border-line bg-white shadow-sm">
-        <div className="bg-ink px-4 py-2 text-center text-sm font-bold tracking-wide text-white">
+        <div className="bg-ink px-4 py-2 text-center text-xs font-bold tracking-wide text-white sm:text-sm">
           会場ローカルデモ・一般公開ではありません
         </div>
-        <div className="border-b border-accent/30 bg-accent-light px-4 py-3 text-center text-sm font-semibold text-accent-dark">
+        <div className="border-b border-accent/30 bg-accent-light px-4 py-2.5 text-center text-xs font-semibold text-accent-dark sm:text-sm">
           2022年に終了した過去選挙です。現在または将来の投票所判断には使えません
         </div>
 
         <div className="relative overflow-hidden">
           {/* 愛媛らしさを感じる控えめな装飾（瀬戸内海＋みかん） */}
-          <div className="pointer-events-none absolute inset-0 opacity-50">
+          <div className="pointer-events-none absolute inset-0 opacity-40">
             <SetouchiScene className="h-full w-full" />
           </div>
 
-          <div className="relative mx-auto flex max-w-6xl flex-col gap-4 px-4 py-5 sm:px-6 lg:px-8">
+          <div className="relative mx-auto flex w-full max-w-[1200px] flex-col gap-4 px-4 py-5 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <AppLink
                 aria-label="えひめ投票ナビのホーム"
                 className="inline-flex min-h-11 items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
                 to="/"
               >
-                <BrandLogo className="size-9 shrink-0" />
-                <span className="text-xl font-black tracking-tight text-ink">
+                <BrandLogo className="size-9 shrink-0 sm:size-10" />
+                <span className="text-lg font-black tracking-tight text-ink sm:text-xl">
                   えひめ投票ナビ
                 </span>
               </AppLink>
               <p
-                className="inline-flex w-fit min-h-11 items-center rounded-full border border-primary/30 bg-primary-light px-4 py-2 text-sm font-bold text-primary-dark"
+                className="inline-flex w-fit min-h-9 items-center rounded-full border border-primary/30 bg-primary-light px-3.5 py-1.5 text-xs font-bold text-primary-dark sm:text-sm"
                 data-kind={dataKind}
               >
                 データ種別: {DATA_KIND_LABELS[dataKind]}
@@ -105,25 +122,33 @@ export function AppShell({ dataKind = "REAL_AI" }: AppShellProps) {
             </div>
 
             <nav aria-label="共通ナビゲーション">
-              <ul className="flex flex-wrap gap-2" role="list">
-                {COMMON_NAV_ITEMS.map((item) => (
-                  <li key={item.to}>
-                    <AppNavLink
-                      className={({ isActive }) =>
-                        [
-                          "inline-flex min-h-11 min-w-11 items-center justify-center rounded-[var(--radius-btn)] px-3 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-                          isActive
-                            ? "bg-primary text-white"
-                            : "bg-surface text-ink-soft hover:bg-surface-2",
-                        ].join(" ")
-                      }
-                      end={item.end}
-                      to={item.to}
-                    >
-                      {item.label}
-                    </AppNavLink>
-                  </li>
-                ))}
+              {/* スマホは横スクロール、PCは折り返しで散らばらせない */}
+              <ul
+                className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:gap-2 sm:overflow-visible sm:px-0 sm:pb-0"
+                role="list"
+              >
+                {COMMON_NAV_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <li className="shrink-0" key={item.to}>
+                      <AppNavLink
+                        className={({ isActive }) =>
+                          [
+                            "inline-flex min-h-11 items-center gap-1.5 rounded-[var(--radius-btn)] px-3 py-2 text-sm font-semibold whitespace-nowrap transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                            isActive
+                              ? "bg-primary text-white"
+                              : "bg-surface text-ink-soft hover:bg-surface-2",
+                          ].join(" ")
+                        }
+                        end={item.end}
+                        to={item.to}
+                      >
+                        <Icon aria-hidden="true" className="size-4 shrink-0" />
+                        {item.label}
+                      </AppNavLink>
+                    </li>
+                  );
+                })}
               </ul>
             </nav>
           </div>
@@ -131,7 +156,7 @@ export function AppShell({ dataKind = "REAL_AI" }: AppShellProps) {
       </header>
 
       <main
-        className="mx-auto min-h-[60vh] max-w-6xl px-4 py-8 sm:px-6 lg:px-8"
+        className="mx-auto w-full max-w-[1200px] flex-1 px-4 py-8 sm:px-6 lg:px-8"
         id="main-content"
         tabIndex={-1}
       >

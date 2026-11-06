@@ -1,3 +1,18 @@
+import {
+  BarChart3,
+  CalendarDays,
+  CheckCircle2,
+  ClipboardCheck,
+  Cloud,
+  Database,
+  Eye,
+  FileText,
+  Play,
+  Scale,
+  UserRound,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { useId, type ReactNode } from "react";
 import { useParams } from "react-router-dom";
 
@@ -119,25 +134,34 @@ type FeatureLink = Readonly<{
   to: string;
   label: string;
   description: string;
+  icon: LucideIcon;
 }>;
 
 function FeatureLinkGrid({ links }: Readonly<{ links: readonly FeatureLink[] }>) {
   return (
     <ul className="mt-4 grid gap-3 sm:grid-cols-2" role="list">
-      {links.map((link) => (
-        <li key={link.to}>
-          <AppLink
-            aria-label={link.label}
-            className="flex min-h-24 h-full flex-col justify-center rounded-xl border border-line bg-white px-5 py-4 shadow-sm transition hover:border-primary/50 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-            to={link.to}
-          >
-            <span className="font-bold text-ink">{link.label}</span>
-            <span className="mt-1 text-sm leading-6 text-ink-soft">
-              {link.description}
-            </span>
-          </AppLink>
-        </li>
-      ))}
+      {links.map((link) => {
+        const Icon = link.icon;
+        return (
+          <li key={link.to}>
+            <AppLink
+              aria-label={link.label}
+              className="flex min-h-24 h-full items-center gap-4 rounded-[var(--radius-card)] border border-line bg-white px-5 py-4 shadow-sm transition hover:border-primary/50 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              to={link.to}
+            >
+              <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary-light text-primary">
+                <Icon aria-hidden="true" className="size-5" />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-bold text-ink">{link.label}</span>
+                <span className="mt-0.5 block text-sm leading-6 text-ink-soft">
+                  {link.description}
+                </span>
+              </span>
+            </AppLink>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -147,36 +171,43 @@ const PUBLIC_HOME_LINKS: readonly FeatureLink[] = [
     to: "/schedule",
     label: "選挙日程を見る",
     description: "投票日と終了済みの過去選挙であることを確認します。",
+    icon: CalendarDays,
   },
   {
     to: "/candidates",
     label: "候補者一覧を見る",
     description: "対象候補者を同じ画面構造で確認します。",
+    icon: Users,
   },
   {
     to: "/candidates/nakamura-tokihiro",
     label: "中村時広氏の詳細を見る",
     description: "候補者詳細の共通表示枠を確認します。",
+    icon: UserRound,
   },
   {
     to: "/candidates/hayashi-noriko",
     label: "林紀子氏の詳細を見る",
     description: "候補者詳細の共通表示枠を確認します。",
+    icon: UserRound,
   },
   {
     to: "/comparison",
     label: "政策比較を見る",
     description: "資料未入手のため、現在はNOT_READYを表示します。",
+    icon: Scale,
   },
   {
     to: "/sources",
     label: "出典一覧を見る",
     description: "出典と来歴の表示枠を確認します。",
+    icon: FileText,
   },
   {
     to: "/venue",
     label: "会場閲覧画面を見る",
     description: "公開条件を満たした情報の表示先を確認します。",
+    icon: Eye,
   },
 ];
 
@@ -185,31 +216,37 @@ const ANALYST_HOME_LINKS: readonly FeatureLink[] = [
     to: "/analyst/readiness",
     label: "解析準備状態を見る",
     description: "両候補者の資料不足を確認します。",
+    icon: ClipboardCheck,
   },
   {
     to: "/analyst/sources",
     label: "Source Manifest画面を見る",
     description: "資料版と来歴の管理画面枠です。",
+    icon: Database,
   },
   {
     to: "/analyst/runs",
     label: "解析実行と履歴を見る",
     description: "runは開始せず、未準備状態を確認します。",
+    icon: Play,
   },
   {
     to: "/analyst/evaluation",
     label: "評価画面を見る",
     description: "評価結果の表示枠です。",
+    icon: BarChart3,
   },
   {
     to: "/analyst/p0",
     label: "P0完成判定を見る",
     description: "P0検査と未達項目の表示枠です。",
+    icon: CheckCircle2,
   },
   {
     to: "/analyst/aws",
     label: "AWS診断画面を見る",
     description: "読み取り診断の結果表示枠です。",
+    icon: Cloud,
   },
 ];
 
