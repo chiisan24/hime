@@ -2,6 +2,7 @@
 
 import { render, screen, within } from "@testing-library/react";
 import fc from "fast-check";
+import { Circle, type LucideIcon } from "lucide-react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 
@@ -22,6 +23,7 @@ type PresentationItem = Readonly<{
   label: string;
   description: string;
   end: boolean;
+  icon: LucideIcon;
 }>;
 
 type PresentationEntry = Readonly<{
@@ -38,6 +40,9 @@ type CurrentAnalystContent = Readonly<{
 const RETIRED_SOURCES_LABEL = "出典一覧を見る";
 const RETIRED_SOURCES_NAV_LABEL = "出典一覧";
 const RETIRED_SOURCES_DESCRIPTION = "出典と来歴の表示枠を確認します。";
+
+// Icon for generated and DOM-collected items. Icons render aria-hidden with no text.
+const GENERATED_ICON: LucideIcon = Circle;
 
 // Markers that never occur in visitor copy, so generated excluded text is unambiguous.
 const ANALYST_MARKER = "［分析者内部］";
@@ -70,7 +75,7 @@ const PUBLIC_DESTINATION_BASES = [
 const CONFIGURED_NAV_ENTRIES: readonly PresentationEntry[] = VISITOR_NAV_ITEMS.map(
   (item): PresentationEntry => ({
     category: "PUBLIC",
-    item: { to: item.to, label: item.label, description: "", end: item.end },
+    item: { to: item.to, label: item.label, description: "", end: item.end, icon: item.icon },
   }),
 );
 
@@ -119,6 +124,7 @@ function collectCurrentAnalystContent(): CurrentAnalystContent {
           label: link.getAttribute("aria-label") ?? "",
           description: spans.item(spans.length - 1)?.textContent ?? "",
           end: true,
+          icon: GENERATED_ICON,
         };
       });
 
@@ -134,6 +140,7 @@ function collectCurrentAnalystContent(): CurrentAnalystContent {
           label: link.textContent ?? "",
           description: "",
           end: true,
+          icon: GENERATED_ICON,
         }),
       );
 
@@ -201,6 +208,7 @@ function analystEntryArbitrary(
         label: markedTextArbitrary(ANALYST_MARKER),
         description: markedTextArbitrary(ANALYST_MARKER),
         end: fc.boolean(),
+        icon: fc.constant(GENERATED_ICON),
       }),
     )
     .map((item): PresentationEntry => ({ category: "ANALYST", item }));
@@ -224,6 +232,7 @@ const retiredSourcesEntryArbitrary: fc.Arbitrary<PresentationEntry> = fc
       markedTextArbitrary(RETIRED_MARKER),
     ),
     end: fc.boolean(),
+    icon: fc.constant(GENERATED_ICON),
   })
   .map((item): PresentationEntry => ({ category: "RETIRED_SOURCES", item }));
 
@@ -248,6 +257,7 @@ const generatedPublicEntriesArbitrary: fc.Arbitrary<readonly PresentationEntry[]
           label: `公開項目 ${slug}`,
           description: `公開説明 ${slug}`,
           end,
+          icon: GENERATED_ICON,
         },
       }),
     ),

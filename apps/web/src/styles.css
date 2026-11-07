@@ -2,34 +2,38 @@
 
 /*
  * えひめ投票ナビ デザイントークン（UI担当の正式デザイン）。
- * 会場ローカルデモの意味論・文言・構造は変更せず、見た目のみ統一する。
- *  - メインカラー: 信頼感のある青 (primary)
- *  - アクセント  : みかんオレンジ (accent)
- *  - 文字       : 濃い紺 (ink)
- *  - 補助       : 白基調 + 薄いグレー (surface / line)
+ * 会場ローカルデモの意味論・文言・構造・テストは変更せず、見た目のみ統一する。
+ * 配色は指示書 3 の指定に準拠。
  */
 @theme {
-  --color-primary: #1f6fd6;
-  --color-primary-dark: #1557ad;
-  --color-primary-light: #e9f2fd;
+  /* メインカラー: 青 / 濃い青 */
+  --color-primary: #1976d2;
+  --color-primary-dark: #123b68;
+  --color-primary-light: #e8f1fb;
 
-  --color-accent: #f5872b;
-  --color-accent-dark: #c25d10;
-  --color-accent-light: #fff2e6;
+  /* アクセント: みかんオレンジ（ロゴ・一部アクセントに限定） */
+  --color-accent: #ff9800;
+  --color-accent-dark: #c2410c; /* オレンジ地に載せる文字用（可読性確保） */
+  --color-accent-light: #fff3e0;
 
-  --color-ink: #16294d;
-  --color-ink-soft: #566180;
-  --color-ink-faint: #8a93a8;
+  /* 文字色 */
+  --color-ink: #243447;
+  --color-ink-soft: #51607a;
+  --color-ink-faint: #8a95a8;
 
-  --color-surface: #f4f6f9;
-  --color-surface-2: #eef2f7;
-  --color-line: #e3e8ef;
+  /* 白基調 + 薄い背景 */
+  --color-surface: #f4f8fc;
+  --color-surface-2: #e6eef8;
+  --color-line: #d7e1ee;
 
+  /* 瀬戸内海イメージの補助（装飾のみ） */
   --color-seto: #3aa6b9;
 
+  /* 角丸 */
   --radius-card: 1rem;
   --radius-btn: 0.875rem;
 
+  /* フォント */
   --font-sans:
     Inter, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP",
     "Yu Gothic", Meiryo, system-ui, sans-serif;
@@ -50,4 +54,10 @@ body {
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* 画像は縦横比を維持し、はみ出しを防ぐ（レスポンシブ共通要件） */
+img,
+svg {
+  max-width: 100%;
 }

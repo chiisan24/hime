@@ -471,7 +471,7 @@ describe.each(MODE_FIXTURES)("$mode Mode shared route regression", (fixture) => 
     const candidatesView = renderMode(fixture, "/candidates");
 
     expect(screen.getByRole("main")).toHaveClass(
-      "max-w-6xl",
+      "max-w-[1200px]",
       "px-4",
       "sm:px-6",
       "lg:px-8",

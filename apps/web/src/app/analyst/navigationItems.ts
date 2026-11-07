@@ -1,3 +1,5 @@
+import { Activity } from "lucide-react";
+
 import {
   type SharedNavigationItem,
   VISITOR_NAV_ITEMS,
@@ -11,5 +13,5 @@ import {
  */
 export const ANALYST_NAV_ITEMS: readonly SharedNavigationItem[] = [
   ...VISITOR_NAV_ITEMS,
-  { to: "/analyst/readiness", label: "分析状態", end: true },
+  { to: "/analyst/readiness", label: "分析状態", end: true, icon: Activity },
 ];

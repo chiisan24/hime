@@ -1,3 +1,11 @@
+import {
+  BarChart3,
+  CheckCircle2,
+  ClipboardCheck,
+  Cloud,
+  Database,
+  Play,
+} from "lucide-react";
 import { useParams } from "react-router-dom";
 
 import {
@@ -15,31 +23,37 @@ const ANALYST_HOME_LINKS: readonly FeatureLink[] = [
     to: "/analyst/readiness",
     label: "解析準備状態を見る",
     description: "両候補者の資料不足を確認します。",
+    icon: ClipboardCheck,
   },
   {
     to: "/analyst/sources",
     label: "Source Manifest画面を見る",
     description: "資料版と来歴の管理画面枠です。",
+    icon: Database,
   },
   {
     to: "/analyst/runs",
     label: "解析実行と履歴を見る",
     description: "runは開始せず、未準備状態を確認します。",
+    icon: Play,
   },
   {
     to: "/analyst/evaluation",
     label: "評価画面を見る",
     description: "評価結果の表示枠です。",
+    icon: BarChart3,
   },
   {
     to: "/analyst/p0",
     label: "P0完成判定を見る",
     description: "P0検査と未達項目の表示枠です。",
+    icon: CheckCircle2,
   },
   {
     to: "/analyst/aws",
     label: "AWS診断画面を見る",
     description: "読み取り診断の結果表示枠です。",
+    icon: Cloud,
   },
 ];
 

@@ -36,7 +36,7 @@ const SHARED_SHELL_MODULE = "src/shared/ui/AppShell.tsx";
 const ANALYST_NAVIGATION_MODULE = "src/app/analyst/navigationItems.ts";
 /** Mutation anchors in the real Visitor route entry and shared shell sources. */
 const VISITOR_SHELL_IMPORT = 'import { AppShell, VISITOR_NAV_ITEMS } from "../../shared/ui/AppShell.js";';
-const LAST_PUBLIC_NAV_ITEM = '{ to: "/venue", label: "会場閲覧", end: true },';
+const LAST_PUBLIC_NAV_ITEM = '{ to: "/venue", label: "会場閲覧", end: true, icon: Eye },';
 const VISITOR_LAYOUT_VIOLATION =
   "expected one AppShell layout whose navigationItems is VISITOR_NAV_ITEMS imported from src/shared/ui/AppShell.tsx";
 
@@ -456,7 +456,7 @@ describe("Visitor/Analyst build boundary checker", () => {
           replaceOnce(
             sourceText,
             LAST_PUBLIC_NAV_ITEM,
-            `${LAST_PUBLIC_NAV_ITEM}\n  { to: "/analyst/readiness", label: "分析状態", end: true },`,
+            `${LAST_PUBLIC_NAV_ITEM}\n  { to: "/analyst/readiness", label: "分析状態", end: true, icon: Activity },`,
           ),
         ),
       }),
@@ -518,7 +518,7 @@ describe("Visitor/Analyst build boundary checker", () => {
           replaceOnce(
             sourceText,
             LAST_PUBLIC_NAV_ITEM,
-            `${LAST_PUBLIC_NAV_ITEM}\n  { to: "/sources", label: "出典一覧", end: true },`,
+            `${LAST_PUBLIC_NAV_ITEM}\n  { to: "/sources", label: "出典", end: true, icon: FileText },`,
           ),
         ),
       }),
@@ -580,9 +580,9 @@ describe("Visitor/Analyst build boundary checker", () => {
           LAST_PUBLIC_NAV_ITEM,
           [
             LAST_PUBLIC_NAV_ITEM,
-            '  { to: "/analyst", label: "分析状態", end: true },',
-            '  { to: "/analyst/sources", label: "近似項目", end: true },',
-            '  { to: "/analysts", label: "分析状態一覧", end: true },',
+            '  { to: "/analyst", label: "分析状態", end: true, icon: Activity },',
+            '  { to: "/analyst/sources", label: "近似項目", end: true, icon: Database },',
+            '  { to: "/analysts", label: "分析状態一覧", end: true, icon: Activity },',
           ].join("\n"),
         ),
       ),

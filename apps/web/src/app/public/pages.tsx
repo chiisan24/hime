@@ -1,3 +1,11 @@
+import {
+  CalendarDays,
+  Eye,
+  Scale,
+  UserRound,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { useId, type ReactNode } from "react";
 import { useParams } from "react-router-dom";
 
@@ -120,25 +128,34 @@ export type FeatureLink = Readonly<{
   to: string;
   label: string;
   description: string;
+  icon: LucideIcon;
 }>;
 
 export function FeatureLinkGrid({ links }: Readonly<{ links: readonly FeatureLink[] }>) {
   return (
     <ul className="mt-4 grid gap-3 sm:grid-cols-2" role="list">
-      {links.map((link) => (
-        <li key={link.to}>
-          <AppLink
-            aria-label={link.label}
-            className="flex min-h-24 h-full flex-col justify-center rounded-xl border border-line bg-white px-5 py-4 shadow-sm transition hover:border-primary/50 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-            to={link.to}
-          >
-            <span className="font-bold text-ink">{link.label}</span>
-            <span className="mt-1 text-sm leading-6 text-ink-soft">
-              {link.description}
-            </span>
-          </AppLink>
-        </li>
-      ))}
+      {links.map((link) => {
+        const Icon = link.icon;
+        return (
+          <li key={link.to}>
+            <AppLink
+              aria-label={link.label}
+              className="flex min-h-24 h-full items-center gap-4 rounded-[var(--radius-card)] border border-line bg-white px-5 py-4 shadow-sm transition hover:border-primary/50 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              to={link.to}
+            >
+              <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary-light text-primary">
+                <Icon aria-hidden="true" className="size-5" />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-bold text-ink">{link.label}</span>
+                <span className="mt-0.5 block text-sm leading-6 text-ink-soft">
+                  {link.description}
+                </span>
+              </span>
+            </AppLink>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -148,31 +165,37 @@ const PUBLIC_HOME_LINKS: readonly FeatureLink[] = [
     to: "/schedule",
     label: "選挙日程を見る",
     description: "投票日と終了済みの過去選挙であることを確認します。",
+    icon: CalendarDays,
   },
   {
     to: "/candidates",
     label: "候補者一覧を見る",
     description: "対象候補者を同じ画面構造で確認します。",
+    icon: Users,
   },
   {
     to: "/candidates/nakamura-tokihiro",
     label: "中村時広氏の詳細を見る",
     description: "候補者詳細の共通表示枠を確認します。",
+    icon: UserRound,
   },
   {
     to: "/candidates/hayashi-noriko",
     label: "林紀子氏の詳細を見る",
     description: "候補者詳細の共通表示枠を確認します。",
+    icon: UserRound,
   },
   {
     to: "/comparison",
     label: "政策比較を見る",
     description: "資料未入手のため、現在はNOT_READYを表示します。",
+    icon: Scale,
   },
   {
     to: "/venue",
     label: "会場閲覧画面を見る",
     description: "公開条件を満たした情報の表示先を確認します。",
+    icon: Eye,
   },
 ];
 
