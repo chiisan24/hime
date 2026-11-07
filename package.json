@@ -17,10 +17,16 @@
     "apps/web"
   ],
   "scripts": {
+    "dev": "npm run dev --workspace @ehime-vote-navigator/web",
+    "dev:analyst": "npm run dev:analyst --workspace @ehime-vote-navigator/web",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "test": "vitest run",
-    "build": "npm run build --workspaces --if-present"
+    "build": "npm run build --workspaces --if-present",
+    "build:analyst": "npm run build --workspace @ehime-vote-navigator/contracts --workspace @ehime-vote-navigator/domain --workspace @ehime-vote-navigator/fixtures --workspace @ehime-vote-navigator/api --if-present && npm run build:analyst --workspace @ehime-vote-navigator/web",
+    "preview": "npm run preview --workspace @ehime-vote-navigator/web",
+    "preview:analyst": "npm run preview:analyst --workspace @ehime-vote-navigator/web",
+    "check:build-boundary": "npm run check:build-boundary --workspace @ehime-vote-navigator/web"
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.3.4",

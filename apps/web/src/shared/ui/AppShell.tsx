@@ -6,6 +6,7 @@ import {
   getAppHistoryDepth,
   HOME_NAVIGATION_STATE,
 } from "../../app/navigation.js";
+import { projectVisitorPresentation } from "../../app/public/visitorPresentation.js";
 import { BrandLogo } from "./BrandLogo.js";
 import { SetouchiScene } from "./SetouchiScene.js";
 
@@ -16,19 +17,60 @@ const DATA_KIND_LABELS = {
 
 type DataKind = keyof typeof DATA_KIND_LABELS;
 
-type AppShellProps = Readonly<{
-  dataKind?: DataKind;
+export type SharedNavigationItem = Readonly<{
+  to: string;
+  label: string;
+  end: boolean;
 }>;
 
-const COMMON_NAV_ITEMS = [
+type AppShellProps = Readonly<{
+  dataKind?: DataKind;
+  /**
+   * Fixed Shared Navigation items supplied by the selected route entry. The
+   * shell holds no mode table of its own, so analyst-only items live only in
+   * analyst-side modules and never reach the Visitor Build.
+   */
+  navigationItems: readonly SharedNavigationItem[];
+}>;
+
+const PUBLIC_NAV_ITEMS = [
   { to: "/", label: "ホーム", end: true },
   { to: "/schedule", label: "選挙日程", end: true },
   { to: "/candidates", label: "候補者", end: false },
   { to: "/comparison", label: "政策比較", end: true },
-  { to: "/sources", label: "出典", end: true },
   { to: "/venue", label: "会場閲覧", end: true },
-  { to: "/analyst/readiness", label: "分析状態", end: true },
 ] as const;
+
+export const VISITOR_NAV_ITEMS = projectVisitorPresentation(PUBLIC_NAV_ITEMS);
+
+export function SharedNavigation({
+  items,
+}: Readonly<{ items: readonly SharedNavigationItem[] }>) {
+  return (
+    <nav aria-label="共通ナビゲーション">
+      <ul className="flex flex-wrap gap-2" role="list">
+        {items.map((item) => (
+          <li key={item.to}>
+            <AppNavLink
+              className={({ isActive }) =>
+                [
+                  "inline-flex min-h-11 min-w-11 items-center justify-center rounded-[var(--radius-btn)] px-3 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                  isActive
+                    ? "bg-primary text-white"
+                    : "bg-surface text-ink-soft hover:bg-surface-2",
+                ].join(" ")
+              }
+              end={item.end}
+              to={item.to}
+            >
+              {item.label}
+            </AppNavLink>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
 
 function BackControl() {
   const location = useLocation();
@@ -60,7 +102,10 @@ function BackControl() {
   );
 }
 
-export function AppShell({ dataKind = "REAL_AI" }: AppShellProps) {
+export function AppShell({
+  dataKind = "REAL_AI",
+  navigationItems,
+}: AppShellProps) {
   return (
     <div className="min-h-screen bg-surface text-ink">
       <a
@@ -104,28 +149,7 @@ export function AppShell({ dataKind = "REAL_AI" }: AppShellProps) {
               </p>
             </div>
 
-            <nav aria-label="共通ナビゲーション">
-              <ul className="flex flex-wrap gap-2" role="list">
-                {COMMON_NAV_ITEMS.map((item) => (
-                  <li key={item.to}>
-                    <AppNavLink
-                      className={({ isActive }) =>
-                        [
-                          "inline-flex min-h-11 min-w-11 items-center justify-center rounded-[var(--radius-btn)] px-3 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-                          isActive
-                            ? "bg-primary text-white"
-                            : "bg-surface text-ink-soft hover:bg-surface-2",
-                        ].join(" ")
-                      }
-                      end={item.end}
-                      to={item.to}
-                    >
-                      {item.label}
-                    </AppNavLink>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+            <SharedNavigation items={navigationItems} />
           </div>
         </div>
       </header>

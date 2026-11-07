@@ -37,3 +37,4 @@ data/real/**
 
 # Kiro task execution metadata is machine-local and changes frequently.
 .kiro/specs/**/tasks.meta.json
+**/dist-analyst/

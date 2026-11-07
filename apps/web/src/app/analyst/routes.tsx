@@ -1,9 +1,19 @@
 import { Route, Routes } from "react-router-dom";
 
-import { AppShell } from "../shared/ui/AppShell.js";
+import { AppShell } from "../../shared/ui/AppShell.js";
+import {
+  CandidateDetailPage,
+  CandidatesPage,
+  ComparisonPage,
+  NotFoundPage,
+  SchedulePage,
+  VenuePage,
+} from "../public/pages.js";
+import { ANALYST_NAV_ITEMS } from "./navigationItems.js";
 import {
   AnalystAwsPage,
   AnalystEvaluationPage,
+  AnalystHomePage,
   AnalystP0Page,
   AnalystReadinessPage,
   AnalystReviewPage,
@@ -11,26 +21,17 @@ import {
   AnalystRunsPage,
   AnalystSourcesPage,
   AnalystVerificationPage,
-  CandidateDetailPage,
-  CandidatesPage,
-  ComparisonPage,
-  HomePage,
-  NotFoundPage,
-  SchedulePage,
-  SourcesPage,
-  VenuePage,
 } from "./pages.js";
 
 export function AppRoutes() {
   return (
     <Routes>
-      <Route element={<AppShell />}>
-        <Route index element={<HomePage />} />
+      <Route element={<AppShell navigationItems={ANALYST_NAV_ITEMS} />}>
+        <Route index element={<AnalystHomePage />} />
         <Route path="schedule" element={<SchedulePage />} />
         <Route path="candidates" element={<CandidatesPage />} />
         <Route path="candidates/:candidateId" element={<CandidateDetailPage />} />
         <Route path="comparison" element={<ComparisonPage />} />
-        <Route path="sources" element={<SourcesPage />} />
         <Route path="venue" element={<VenuePage />} />
         <Route path="analyst/readiness" element={<AnalystReadinessPage />} />
         <Route path="analyst/sources" element={<AnalystSourcesPage />} />

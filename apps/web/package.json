@@ -5,11 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "preview": "vite preview --host 127.0.0.1",
-    "lint": "eslint src vite.config.ts --max-warnings=0",
+    "dev:analyst": "vite --mode analyst --host 127.0.0.1",
+    "preview": "node ./scripts/preview.mjs visitor",
+    "preview:analyst": "node ./scripts/preview.mjs analyst",
+    "lint": "eslint src vite.config.ts scripts --max-warnings=0",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --root ../.. apps/web/src",
-    "build": "vite build"
+    "build": "vite build",
+    "build:analyst": "vite build --mode analyst",
+    "check:build-boundary": "node ./scripts/check-build-boundary.mjs"
   },
   "dependencies": {
     "lucide-react": "1.69.0",
