@@ -16,7 +16,6 @@ import {
 } from "../../app/navigation.js";
 import { projectVisitorPresentation } from "../../app/public/visitorPresentation.js";
 import { BrandLogo } from "./BrandLogo.js";
-import { SetouchiScene } from "./SetouchiScene.js";
 
 const DATA_KIND_LABELS = {
   REAL_AI: "2022年実資料・AI解析",
@@ -52,34 +51,41 @@ const PUBLIC_NAV_ITEMS = [
 
 export const VISITOR_NAV_ITEMS = projectVisitorPresentation(PUBLIC_NAV_ITEMS);
 
+/**
+ * 共通ナビゲーション。画面に1つだけ置き、画面幅で位置を切り替える。
+ * スマホ（767px以下）: 画面の下に固定。768px以上: ヘッダーの下に横並びで、スクロールしても上に残る。
+ */
 export function SharedNavigation({
   items,
 }: Readonly<{ items: readonly SharedNavigationItem[] }>) {
   return (
-    <nav aria-label="共通ナビゲーション">
-      {/* スマホは横スクロール、PCは折り返しで散らばらせない */}
+    <nav
+      aria-label="共通ナビゲーション"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white pb-[env(safe-area-inset-bottom)] shadow-[var(--shadow-nav)] md:sticky md:top-0 md:border-b md:border-t-0 md:pb-0 md:shadow-none"
+    >
       <ul
-        className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:gap-2 sm:overflow-visible sm:px-0 sm:pb-0"
+        className="mx-auto flex w-full max-w-[1200px] md:gap-1 md:px-6 md:py-2 lg:px-8"
         role="list"
       >
         {items.map((item) => {
           const Icon = item.icon;
           return (
-            <li className="shrink-0" key={item.to}>
+            <li className="min-w-0 flex-1 md:flex-none" key={item.to}>
               <AppNavLink
                 className={({ isActive }) =>
                   [
-                    "inline-flex min-h-11 min-w-11 items-center gap-1.5 rounded-[var(--radius-btn)] px-3 py-2 text-sm font-semibold whitespace-nowrap transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                    "flex h-16 min-h-11 min-w-11 flex-col items-center justify-center gap-0.5 px-1 text-xs font-bold transition",
+                    "md:h-11 md:flex-row md:gap-2 md:rounded-full md:px-4 md:text-sm",
                     isActive
-                      ? "bg-primary text-white"
-                      : "bg-surface text-ink-soft hover:bg-surface-2",
+                      ? "text-primary md:bg-primary md:text-white"
+                      : "text-ink-soft hover:text-primary md:hover:bg-primary-light md:hover:text-primary-dark",
                   ].join(" ")
                 }
                 end={item.end}
                 to={item.to}
               >
-                <Icon aria-hidden="true" className="size-4 shrink-0" />
-                {item.label}
+                <Icon aria-hidden="true" className="size-6 shrink-0 md:size-4" />
+                <span className="whitespace-nowrap">{item.label}</span>
               </AppNavLink>
             </li>
           );
@@ -109,7 +115,7 @@ function BackControl() {
   return (
     <button
       aria-label="前の画面に戻る。履歴がない場合はホームへ移動"
-      className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-[var(--radius-btn)] border border-line bg-white px-4 py-2 text-sm font-semibold text-ink-soft shadow-sm transition hover:border-primary/50 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full border border-line bg-white px-4 py-2 text-sm font-bold text-ink-soft shadow-[var(--shadow-card)] transition hover:border-primary/50 hover:text-primary"
       onClick={handleBack}
       type="button"
     >
@@ -124,65 +130,65 @@ export function AppShell({
   navigationItems,
 }: AppShellProps) {
   return (
-    <div className="flex min-h-screen flex-col bg-surface text-ink">
+    // スマホでは、下部固定ナビの高さ分だけ下に余白を取り、フッターが隠れないようにする
+    <div className="flex min-h-screen flex-col bg-surface pb-[calc(4rem+env(safe-area-inset-bottom))] text-ink md:pb-0">
       <a
-        className="fixed left-3 top-3 z-50 -translate-y-24 rounded-lg bg-ink px-4 py-3 font-semibold text-white shadow-lg transition focus:translate-y-0 focus:outline-2 focus:outline-offset-2 focus:outline-accent"
+        className="fixed left-3 top-3 z-50 -translate-y-24 rounded-lg bg-ink px-4 py-3 font-semibold text-white shadow-lg transition focus:translate-y-0"
         href="#main-content"
       >
         本文へ移動
       </a>
 
-      <header className="border-b border-line bg-white shadow-sm">
-        <div className="bg-ink px-4 py-2 text-center text-xs font-bold tracking-wide text-white sm:text-sm">
+      <header className="bg-white">
+        {/* 必須表示（文言は変更しない） */}
+        <div className="bg-primary-dark px-4 py-1.5 text-center text-xs font-bold leading-5 text-white">
           会場ローカルデモ・一般公開ではありません
         </div>
-        <div className="border-b border-accent/30 bg-accent-light px-4 py-2.5 text-center text-xs font-semibold text-accent-dark sm:text-sm">
+        <div className="bg-accent-light px-4 py-1.5 text-center text-xs font-bold leading-5 text-accent-dark">
           2022年に終了した過去選挙です。現在または将来の投票所判断には使えません
         </div>
 
-        <div className="relative overflow-hidden">
-          {/* 愛媛らしさを感じる控えめな装飾（瀬戸内海＋みかん） */}
-          <div className="pointer-events-none absolute inset-0 opacity-40">
-            <SetouchiScene className="h-full w-full" />
-          </div>
-
-          <div className="relative mx-auto flex w-full max-w-[1200px] flex-col gap-4 px-4 py-5 sm:px-6 lg:px-8">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <AppLink
-                aria-label="えひめ投票ナビのホーム"
-                className="inline-flex min-h-11 items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-                to="/"
-              >
-                <BrandLogo className="size-9 shrink-0 sm:size-10" />
-                <span className="text-lg font-black tracking-tight text-ink sm:text-xl">
-                  えひめ投票ナビ
-                </span>
-              </AppLink>
+        <div className="border-b border-line md:border-b-0">
+          <div className="mx-auto flex w-full max-w-[1200px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-6 lg:px-8">
+            <AppLink
+              aria-label="えひめ投票ナビのホーム"
+              className="inline-flex min-h-11 min-w-0 items-center gap-2 rounded-lg"
+              to="/"
+            >
+              <BrandLogo className="size-9 shrink-0 md:size-10" />
+              <span className="text-xl font-black tracking-tight text-primary-dark md:text-2xl">
+                えひめ投票ナビ
+              </span>
+            </AppLink>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:ml-auto">
               <p
-                className="inline-flex w-fit min-h-9 items-center rounded-full border border-primary/30 bg-primary-light px-3.5 py-1.5 text-xs font-bold text-primary-dark sm:text-sm"
+                className="inline-flex min-h-8 items-center rounded-full bg-primary-light px-3 text-xs font-bold text-primary-dark"
                 data-kind={dataKind}
               >
                 データ種別: {DATA_KIND_LABELS[dataKind]}
               </p>
+              <p className="text-xs leading-5 text-ink-soft">
+                AIの解析結果は、資料がそろうまで表示しません
+              </p>
             </div>
-
-            <SharedNavigation items={navigationItems} />
           </div>
         </div>
       </header>
 
+      <SharedNavigation items={navigationItems} />
+
       <main
-        className="mx-auto w-full max-w-[1200px] flex-1 px-4 py-8 sm:px-6 lg:px-8"
+        className="mx-auto w-full max-w-[1200px] flex-1 px-4 py-6 sm:px-6 md:py-8 lg:px-8"
         id="main-content"
         tabIndex={-1}
       >
-        <div className="mb-6">
+        <div className="mb-5">
           <BackControl />
         </div>
         <Outlet />
       </main>
 
-      <footer className="border-t border-line bg-white px-4 py-6 text-center text-sm text-ink-soft">
+      <footer className="border-t border-line bg-white px-4 py-5 text-center text-xs leading-5 text-ink-soft">
         <p>対象: 令和4年（2022年）第20回愛媛県知事選挙</p>
         <p className="mt-1">政策解析準備状態: NOT_READY</p>
       </footer>
