@@ -141,36 +141,31 @@ export function AppShell({
 
       <header className="bg-white">
         {/* 必須表示（文言は変更しない） */}
-        <div className="bg-primary-dark px-4 py-1.5 text-center text-xs font-bold leading-5 text-white">
+        <div className="bg-primary-dark px-4 py-1 text-center text-xs font-bold leading-5 text-white">
           会場ローカルデモ・一般公開ではありません
         </div>
-        <div className="bg-accent-light px-4 py-1.5 text-center text-xs font-bold leading-5 text-accent-dark">
+        <div className="bg-accent-light px-4 py-1 text-center text-xs font-bold leading-5 text-accent-dark">
           2022年に終了した過去選挙です。現在または将来の投票所判断には使えません
         </div>
 
         <div className="border-b border-line md:border-b-0">
-          <div className="mx-auto flex w-full max-w-[1200px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-6 lg:px-8">
+          <div className="mx-auto flex w-full max-w-[1200px] flex-wrap items-center gap-x-4 gap-y-1 px-4 py-1.5 sm:px-6 lg:px-8">
             <AppLink
               aria-label="えひめ投票ナビのホーム"
               className="inline-flex min-h-11 min-w-0 items-center gap-2 rounded-lg"
               to="/"
             >
-              <BrandLogo className="size-9 shrink-0 md:size-10" />
-              <span className="text-xl font-black tracking-tight text-primary-dark md:text-2xl">
+              <BrandLogo className="size-8 shrink-0 md:size-9" />
+              <span className="text-lg font-black tracking-tight text-primary-dark md:text-xl">
                 えひめ投票ナビ
               </span>
             </AppLink>
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:ml-auto">
-              <p
-                className="inline-flex min-h-8 items-center rounded-full bg-primary-light px-3 text-xs font-bold text-primary-dark"
-                data-kind={dataKind}
-              >
-                データ種別: {DATA_KIND_LABELS[dataKind]}
-              </p>
-              <p className="text-xs leading-5 text-ink-soft">
-                AIの解析結果は、資料がそろうまで表示しません
-              </p>
-            </div>
+            <p
+              className="mb-1.5 inline-flex min-h-7 items-center rounded-full bg-primary-light px-3 text-xs font-bold text-primary-dark sm:mb-0 sm:ml-auto"
+              data-kind={dataKind}
+            >
+              データ種別: {DATA_KIND_LABELS[dataKind]}
+            </p>
           </div>
         </div>
       </header>
@@ -178,11 +173,11 @@ export function AppShell({
       <SharedNavigation items={navigationItems} />
 
       <main
-        className="mx-auto w-full max-w-[1200px] flex-1 px-4 py-6 sm:px-6 md:py-8 lg:px-8"
+        className="mx-auto w-full max-w-[1200px] flex-1 px-4 py-4 sm:px-6 md:py-6 lg:px-8"
         id="main-content"
         tabIndex={-1}
       >
-        <div className="mb-5">
+        <div className="mb-3 md:mb-4">
           <BackControl />
         </div>
         <Outlet />
