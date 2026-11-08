@@ -3,20 +3,20 @@
 /*
  * えひめ投票ナビ デザイントークン（UI担当の正式デザイン）。
  * 会場ローカルデモの意味論・文言・構造・テストは変更せず、見た目のみ統一する。
- * 配色は指示書 3 の指定に準拠。
+ * 配色はUIリニューアル指示書（STEP 6）の指定に準拠。
  */
 @theme {
-  /* メインカラー: 青 / 濃い青 */
+  /* メインカラー: 青 / 濃い青 / 薄い青 */
   --color-primary: #1976d2;
   --color-primary-dark: #123b68;
-  --color-primary-light: #e8f1fb;
+  --color-primary-light: #eaf4ff;
 
-  /* アクセント: みかんオレンジ（ロゴ・一部アクセントに限定） */
+  /* アクセント: みかんオレンジ（ロゴ・準備状況の表示に限定。上に文字を載せない） */
   --color-accent: #ff9800;
   --color-accent-dark: #c2410c; /* オレンジ地に載せる文字用（可読性確保） */
   --color-accent-light: #fff3e0;
 
-  /* 文字色 */
+  /* 文字色。ink-faint は白地で約3.0:1のため、飾りのアイコン専用（文字に使わない） */
   --color-ink: #243447;
   --color-ink-soft: #51607a;
   --color-ink-faint: #8a95a8;
@@ -28,6 +28,10 @@
 
   /* 瀬戸内海イメージの補助（装飾のみ） */
   --color-seto: #3aa6b9;
+
+  /* 薄く自然な影 */
+  --shadow-card: 0 1px 2px rgb(18 59 104 / 0.04), 0 6px 18px rgb(18 59 104 / 0.06);
+  --shadow-nav: 0 -4px 16px rgb(18 59 104 / 0.08);
 
   /* 角丸 */
   --radius-card: 1rem;
@@ -54,6 +58,12 @@ body {
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* キーボード操作時のフォーカス表示を全画面でそろえる */
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* 画像は縦横比を維持し、はみ出しを防ぐ（レスポンシブ共通要件） */
