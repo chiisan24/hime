@@ -97,11 +97,13 @@ export function PageIntro({ eyebrow, title, description }: PageIntroProps) {
         </p>
       )}
       <h1
-        className={`${eyebrow === undefined ? "" : "mt-2 "}text-[1.75rem] font-black leading-tight tracking-tight text-primary-dark sm:text-4xl`}
+        className={`${eyebrow === undefined ? "" : "mt-2 "}text-2xl font-black leading-tight tracking-tight text-primary-dark sm:text-3xl`}
       >
         {title}
       </h1>
-      <p className="mt-3 text-base leading-7 text-ink-soft">{description}</p>
+      <p className="mt-2 text-sm leading-6 text-ink-soft sm:text-base sm:leading-7">
+        {description}
+      </p>
     </div>
   );
 }
@@ -133,14 +135,17 @@ export function StatusPanel({
   return (
     <section
       aria-labelledby={headingId}
-      className={`${className} rounded-[var(--radius-card)] border p-4 sm:p-6 ${palette}`}
+      className={`${className} rounded-[var(--radius-card)] border p-4 sm:p-5 ${palette}`}
       data-terminal-state={statusCode}
     >
-      <p className="text-sm font-bold tracking-wide">{statusCode}</p>
-      <h2 className="mt-1 text-lg font-bold sm:text-xl" id={headingId}>
+      <h2 className="text-base font-bold sm:text-lg" id={headingId}>
         {title}
       </h2>
-      <div className="mt-2 leading-7">{children}</div>
+      <div className="mt-1 text-sm leading-6 sm:text-base sm:leading-7">{children}</div>
+      {/* 状態コードは見出しより目立たせない。コードの文字だけを持つ要素はテストと共同開発者の確認で使う */}
+      <p className="mt-2 text-xs opacity-80">
+        状態コード: <span className="font-bold tracking-wide">{statusCode}</span>
+      </p>
     </section>
   );
 }
@@ -245,65 +250,117 @@ const PUBLIC_HOME_LINKS: readonly FeatureLink[] = [
 export const VISITOR_HOME_LINKS = projectVisitorPresentation(PUBLIC_HOME_LINKS);
 
 type HomeTileDetail = Readonly<{
-  question: string;
+  /** カードに出す短い名前。リンク名（VISITOR_HOME_LINKS の label）に含まれる文字にする */
+  title: string;
+  description: string;
   /** 行き先の中身が資料待ちで準備中か */
   preparing: boolean;
 }>;
 
-/** ホームのタイルに添える問いと状態。2人の候補者には同じ値を使う */
+/** ホームのカードに出す名前と説明 */
 const HOME_TILE_DETAILS: Readonly<Record<string, HomeTileDetail>> = {
-  "/schedule": { question: "いつ？", preparing: false },
-  "/candidates": { question: "だれ？", preparing: false },
-  "/candidates/nakamura-tokihiro": { question: "候補者を知る", preparing: true },
-  "/candidates/hayashi-noriko": { question: "候補者を知る", preparing: true },
-  "/comparison": { question: "違いは？", preparing: true },
-  "/venue": { question: "会場で見る", preparing: true },
+  "/schedule": { title: "選挙日程", description: "投票日を確認", preparing: false },
+  "/candidates": { title: "候補者一覧", description: "2人の候補者を知る", preparing: false },
+  "/comparison": { title: "政策比較", description: "政策の違いを見る", preparing: true },
+  "/venue": { title: "会場閲覧", description: "デモ会場向けのまとめ", preparing: true },
 };
 
-function homeTileDetail(to: string): HomeTileDetail {
-  return HOME_TILE_DETAILS[to] ?? { question: "", preparing: false };
+const CANDIDATE_DETAIL_PREFIX = "/candidates/";
+const CANDIDATE_LIST_PATH = "/candidates";
+
+/**
+ * ホームのメニュー（region）の名前。
+ * 共同開発者のテスト（visitorPresentation / analystRoutes）がこの名前で region を探すため、
+ * 画面には出さず読み上げ用の名前としてだけ残す。表示上の見出しはない。
+ */
+const HOME_MENU_REGION_NAME = "会場閲覧のP0画面";
+
+function homeTileDetail(link: FeatureLink): HomeTileDetail {
+  return (
+    HOME_TILE_DETAILS[link.to] ?? {
+      title: link.label,
+      description: link.description,
+      preparing: false,
+    }
+  );
+}
+
+function candidateNameOf(to: string): string {
+  return (
+    CANDIDATE_SKELETONS.find(
+      (candidate) => `${CANDIDATE_DETAIL_PREFIX}${candidate.candidateId}` === to,
+    )?.name ?? to
+  );
+}
+
+/** 「候補者一覧」カードの下に置く、候補者ごとの詳細へのリンク。2人とも同じ見た目にする */
+function CandidateSubLinks({ links }: Readonly<{ links: readonly FeatureLink[] }>) {
+  return (
+    <div>
+      <p className="mb-1 text-center text-xs text-ink-soft">ひとりずつ見る</p>
+      <ul className="grid grid-cols-2 gap-1.5 max-[359px]:grid-cols-1" role="list">
+        {links.map((link) => (
+          <li key={link.to}>
+            <AppLink
+              aria-label={link.label}
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-full bg-surface px-0.5 text-xs font-bold text-primary-dark transition hover:bg-primary-light active:bg-surface-2"
+              to={link.to}
+            >
+              {candidateNameOf(link.to)}
+            </AppLink>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 export function VisitorHomePage() {
+  // 候補者ごとの詳細リンクは「候補者一覧」カードの中に入れる（リンクの並び順は変えない）
+  const candidateLinks = VISITOR_HOME_LINKS.filter((link) =>
+    link.to.startsWith(CANDIDATE_DETAIL_PREFIX),
+  );
+  const menuLinks = VISITOR_HOME_LINKS.filter(
+    (link) => !link.to.startsWith(CANDIDATE_DETAIL_PREFIX),
+  );
+
   return (
-    <div className="flex flex-col gap-6 md:gap-8">
-      {/* ヒーロー：キャッチコピーと愛媛の風景 */}
+    <div className="flex flex-col gap-4 md:gap-6">
+      {/* 小さな表紙：キャッチコピーと控えめな愛媛の風景。アプリ名はヘッダーにあるので見出しは読み上げ用 */}
       <section
         aria-labelledby="home-hero-heading"
-        className="overflow-hidden rounded-[var(--radius-card)] bg-gradient-to-b from-white to-primary-light shadow-[var(--shadow-card)]"
+        className="relative overflow-hidden rounded-[var(--radius-card)] border border-line bg-white"
       >
-        <div className="px-5 pt-6 sm:px-8 md:pt-8">
-          <h1
-            className="text-[1.75rem] font-black leading-tight tracking-tight text-primary-dark sm:text-4xl"
-            id="home-hero-heading"
-          >
+        <SetouchiScene className="pointer-events-none absolute inset-y-0 right-0 h-full w-24 sm:w-48 md:w-72" />
+        <div className="relative py-3 pl-4 pr-28 sm:pl-6 sm:pr-52 md:py-4 md:pr-80">
+          <h1 className="sr-only" id="home-hero-heading">
             えひめ投票ナビ
           </h1>
-          <p className="mt-2 text-lg font-bold leading-snug text-ink md:text-2xl">
-            愛媛の選挙と政治を、
-            <br className="sm:hidden" />
-            もっと身近に、もっとわかりやすく
+          <p className="text-base font-bold leading-snug text-primary-dark md:text-xl">
+            愛媛の選挙を、わかりやすく
           </p>
         </div>
-        <SetouchiScene className="mt-3 block h-28 w-full md:h-40" />
       </section>
 
-      {/* メインメニュー：今ある6つの行き先（スマホ2列、768px以上は3列） */}
-      <section aria-labelledby="visitor-links-heading">
-        <h2 className="text-lg font-bold text-primary-dark sm:text-xl" id="visitor-links-heading">
-          会場閲覧のP0画面
-        </h2>
-        <p className="mt-1 text-sm text-ink-soft">知りたいことから選んでください</p>
-        <ul className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4" role="list">
-          {VISITOR_HOME_LINKS.map((link) => {
-            const detail = homeTileDetail(link.to);
+      {/* メインメニュー：スマホ2列、1024px以上は4列 */}
+      <section aria-label={HOME_MENU_REGION_NAME}>
+        <h2 className="sr-only">メインメニュー</h2>
+        <ul className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4" role="list">
+          {menuLinks.map((link) => {
+            const detail = homeTileDetail(link);
             return (
               <li key={link.to}>
                 <HomeTile
+                  description={detail.description}
                   icon={link.icon}
                   label={link.label}
                   preparing={detail.preparing}
-                  question={detail.question}
+                  subLinks={
+                    link.to === CANDIDATE_LIST_PATH && candidateLinks.length > 0 ? (
+                      <CandidateSubLinks links={candidateLinks} />
+                    ) : undefined
+                  }
+                  title={detail.title}
                   to={link.to}
                 />
               </li>
@@ -349,10 +406,10 @@ export function SchedulePage() {
       </SectionCard>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <SectionCard title="投票日（当日）">
+        {/* 投票日は上のカードで大きく出しているので、ここでは時刻だけを出す */}
+        <SectionCard title="当日の投票時間">
           <InfoList
             items={[
-              { label: "日付", value: ELECTION_DATE_LABEL },
               { label: "投票開始時刻", value: SCHEDULE_MISSING_VALUE },
               { label: "投票終了時刻", value: SCHEDULE_MISSING_VALUE },
             ]}
@@ -591,7 +648,7 @@ export function ComparisonPage() {
 
       <section aria-labelledby="comparison-frame-heading">
         <h2 className="text-lg font-bold text-primary-dark sm:text-xl" id="comparison-frame-heading">
-          候補者別の共通比較項目
+          候補者ごとの比較項目
         </h2>
         <NoticeBar className="mt-3">
           並び順について：公式届出順未確認。画面確認用の暫定の並びです。
@@ -644,10 +701,10 @@ export function VenuePage() {
   return (
     <div className="flex flex-col gap-5">
       <PageIntro
-        description="確認と承認がすんだ政策情報を、会場でまとめて見られる画面です。"
+        description="このデモの展示会場で、確認と承認がすんだ政策情報をまとめて見る画面です。投票所の案内ではありません。"
         title="会場閲覧"
       />
-      <StatusPanel className="" statusCode="NOT_READY" title="会場で表示できる情報はまだありません">
+      <StatusPanel className="" statusCode="NOT_READY" title="表示できる情報はまだありません">
         <p>資料の確認と承認がまだすんでいないため、表示できる情報はありません。</p>
       </StatusPanel>
       <SectionCard icon={Eye} title="この画面に表示されるもの（資料がそろったあと）">
