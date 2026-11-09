@@ -794,3 +794,15 @@ export async function writeContentAddressedFile(
     relativePath,
   });
 }
+
+// Shared with atomicReplaceFile.ts so that mutable replacements follow the same
+// root, relative-path, reserved-name and symbolic-link rules.
+export {
+  bestEffortUnlink,
+  establishRoot,
+  openUniqueTemporaryFile,
+  operationsWith,
+  prepareTarget,
+  writeAndSync,
+};
+export type { PreparedTarget, RootContext };

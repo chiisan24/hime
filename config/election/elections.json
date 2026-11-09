@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "elections": [
+    {
+      "electionId": "ehime-governor-2022-20",
+      "name": "令和4年（2022年）第20回愛媛県知事選挙",
+      "electionDate": "2022-11-20",
+      "status": "CURRENT",
+      "candidates": [
+        {
+          "candidateId": "nakamura-tokihiro",
+          "name": "中村時広",
+          "nameForms": [
+            "中村時広"
+          ]
+        },
+        {
+          "candidateId": "hayashi-noriko",
+          "name": "林紀子",
+          "nameForms": [
+            "林紀子",
+            "林のりこ"
+          ]
+        }
+      ]
+    }
+  ]
+}

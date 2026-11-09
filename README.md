@@ -56,6 +56,17 @@ Remove-Item Env:RUN_BEDROCK_SMOKE
 
 入力は2万文字以下、最大出力は2,000トークン、同時実行は1件、呼出しは毎分10回以下に制限し、自動再試行はしません。Bedrockを呼ぶHTTPの窓口は作りません。
 
+### 選挙レジストリ（ローカルCLI）
+
+選挙は`config/election/elections.json`にデータとして登録します（現在は2022年の選挙を登録済みです）。2026年の候補者は、公式資料で確認できるまで登録しません。
+
+```powershell
+npm run analysis -- election show
+npm run analysis -- election change <選挙ID>
+```
+
+`election change`は変更前後の選挙名と選挙IDを表示し、承認（`y`）した場合だけ保存します。保存に失敗しても元のファイルは変わりません。
+
 ## 必要環境
 
 - Windows 10またはWindows 11

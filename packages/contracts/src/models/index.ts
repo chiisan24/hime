@@ -1,6 +1,7 @@
 export * from "./approval.js";
 export * from "./artifacts.js";
 export * from "./election.js";
+export * from "./electionRegistry.js";
 export * from "./evaluation.js";
 export * from "./p0.js";
 export * from "./policy.js";

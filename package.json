@@ -27,7 +27,8 @@
     "preview": "npm run preview --workspace @ehime-vote-navigator/web",
     "preview:analyst": "npm run preview:analyst --workspace @ehime-vote-navigator/web",
     "check:build-boundary": "npm run check:build-boundary --workspace @ehime-vote-navigator/web",
-    "bedrock:smoke": "npm run bedrock:smoke --workspace @ehime-vote-navigator/api"
+    "bedrock:smoke": "npm run bedrock:smoke --workspace @ehime-vote-navigator/api",
+    "analysis": "npm run analysis --workspace @ehime-vote-navigator/api --"
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.3.4",

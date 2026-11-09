@@ -1,4 +1,5 @@
 export * from "./data-kind/validateDataBoundary.js";
+export * from "./election/registry.js";
 export * from "./provider/decodeProviderResult.js";
 export * from "./runs/foldRunEvents.js";
 export * from "./security/redact.js";
