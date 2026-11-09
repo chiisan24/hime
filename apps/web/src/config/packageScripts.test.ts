@@ -1,5 +1,7 @@
 import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 
+import { ESLint } from "eslint";
 import { describe, expect, it } from "vitest";
 
 const repositoryRoot = new URL("../../../../", import.meta.url);
@@ -76,6 +78,37 @@ describe("root and web mode command contracts", () => {
     expect(webManifest.scripts?.["check:build-boundary"]).toBe(
       "node ./scripts/check-build-boundary.mjs",
     );
+  });
+
+  it("keeps root quality gates finite and excludes both mode build outputs from lint and Git", async () => {
+    const rootManifest = await readManifest("package.json");
+    const scripts = rootManifest.scripts ?? {};
+
+    expect(scripts).toMatchObject({
+      lint: "eslint . --max-warnings=0",
+      typecheck: "tsc --noEmit -p tsconfig.typecheck.json",
+      test: "vitest run",
+    });
+    for (const gate of ["lint", "typecheck", "test", "build", "build:analyst"]) {
+      expect(scripts[gate]).toBeDefined();
+      expect(scripts[gate]).not.toMatch(/--watch|\bwatch\b/u);
+    }
+
+    const eslint = new ESLint({ cwd: fileURLToPath(repositoryRoot) });
+    await expect(
+      eslint.isPathIgnored("apps/web/dist/assets/index.js"),
+    ).resolves.toBe(true);
+    await expect(
+      eslint.isPathIgnored("apps/web/dist-analyst/assets/index.js"),
+    ).resolves.toBe(true);
+    await expect(eslint.isPathIgnored("apps/web/vite.config.ts")).resolves.toBe(
+      false,
+    );
+
+    const gitignoreLines = (
+      await readFile(new URL(".gitignore", repositoryRoot), "utf8")
+    ).split(/\r?\n/u);
+    expect(gitignoreLines).toContain("**/dist-analyst/");
   });
 
   it("routes preview commands through strict mode-specific preflight", async () => {

@@ -117,7 +117,7 @@ TypeScriptと既存Vite/React Router構成を使い、通常commandが必ずVisi
     - test commentへ`Feature: visitor-analyst-mode-separation, Property 7`を記載する。
     - **Validates: Requirements 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9**
 
-- [ ] 4. startup説明と自動検証を実装へ同期する
+- [x] 4. startup説明と自動検証を実装へ同期する
   - [x] 4.1 READMEへVisitor/Analyst startup・build・preview手順と公開sources廃止範囲を追加する
     - READMEの通常手順をVisitor Mode既定として`npm run dev`、`npm run build`、`npm run preview`で記載し、Analyst Modeを`npm run dev:analyst`、`npm run build:analyst`、`npm run preview:analyst`の別節に記載する。
     - 両modeが`127.0.0.1`限定であること、Analyst Modeは認証/authorizationではないこと、query string・Web Storage・browser toggle・暗黙fallbackでは変更できないこと、preview前に対応buildが必要なことを明記する。
@@ -127,7 +127,7 @@ TypeScriptと既存Vite/React Router構成を使い、通常commandが必ずVisi
     - README contract testでcommand名、output、local-only、非認証、runtime切替禁止、`/sources`廃止、`/analyst/sources`とEmbedded Source Evidence維持の記載を実route/package metadataと照合する。
     - _Requirements: 5.4, 5.5, 5.6, 5.7, 6.1, 6.2, 7.6, 7.7, 7.8, 8.11, 8.12_
 
-  - [ ] 4.2 mode分離と限定的な公開sources廃止の品質gate・変更範囲checkを結線する
+  - [x] 4.2 mode分離と限定的な公開sources廃止の品質gate・変更範囲checkを結線する
     - focused resolver/property/RTL/config/build marker/documentation testをrootの既存`npm test`へ含める。通常suiteからdev server、preview server、AWS、外部HTTPを起動しない。
     - `npm run lint`、`npm run typecheck`、`npm test`、`npm run build`、`npm run build:analyst`をwatchなしで終了させる検証手順を整える。
     - 既存API local boundary testとsource/citation/provenance contract testを単回実行し、Host、Origin、nonce、loopback、Embedded Source Evidence、Source Manifest domain contractが維持されることを確認する。API production fileとdomain/source data fileは変更しない。
@@ -135,7 +135,7 @@ TypeScriptと既存Vite/React Router構成を使い、通常commandが必ずVisi
     - 公開`SourcesPage`、exact `/sources` route、Home/navigation link以外のsource関連機能がdiffから削除されていないことを確認する。
     - _Requirements: 6.1, 6.2, 6.8, 7.1, 7.2, 7.3, 7.4, 7.5, 7.9, 7.10, 8.6, 8.7, 8.8, 8.9, 8.10, 8.12_
 
-- [ ] 5. Final checkpoint - mode分離の全自動検査を実行する
+- [x] 5. Final checkpoint - mode分離の全自動検査を実行する
   - Ensure all tests pass, ask the user if questions arise.
   - `npm run lint`、`npm run typecheck`、`npm test`、`npm run build`、`npm run build:analyst`をwatchなしで実行し、両build markerとbuild boundary checkerを確認する。
   - dev/preview commandは長時間processのため自動起動せず、config/script contractと有限preview preflightだけを自動検査する。
