@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const EnvironmentExampleSchema = z
   .object({
-    AWS_PROFILE: z.literal("default"),
+    AWS_BEARER_TOKEN_BEDROCK: z.literal(""),
     AWS_REGION: z.literal("ap-northeast-1"),
     BEDROCK_GENERATION_MODEL_ID: z.literal(""),
     BEDROCK_VERIFICATION_MODEL_ID: z.literal(""),

@@ -17,7 +17,8 @@
     "lint": "eslint src --max-warnings=0",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --root ../.. apps/api/src",
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "bedrock:smoke": "tsc -p tsconfig.json && node --env-file-if-exists=../../.env.local dist/aws/smoke.js"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock": "3.1162.0",

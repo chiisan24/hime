@@ -38,11 +38,23 @@
 ) | ForEach-Object { New-Item -ItemType Directory -Force -Path $_ | Out-Null }
 ```
 
-`.env.example`はAPI用の秘密を含まない設定例です。Git追跡対象外の`.env`へコピーし、必要時に生成、意味判定、embeddingのmodel IDだけを設定します。AWSのアクセスキー、シークレット、セッショントークン、bearer tokenは環境ファイルへ記載せず、AWS既定認証チェーンまたはSSOを使用します。
+`.env.example`はAPI用の秘密を含まない設定例です。Git追跡対象外の`.env.local`へコピーし、大学管理者から受け取ったBedrock APIキー（`AWS_BEARER_TOKEN_BEDROCK`）と、生成、意味判定のモデルIDを設定します。使えるモデルIDは`jp.anthropic.claude-haiku-5-5`（既定）と`jp.anthropic.claude-opus-5-5`（比較用）だけで、処理は日本国内に限定されます。埋め込みのモデルIDは最小構成では必須ではありません。APIキーは`apps/api`（サーバー側）だけが読み、ブラウザ、Git、ログ、チャットには出しません。AWS CLI、SSO、AWSプロファイル、IAM、STSは使いません。
 
 ```powershell
-Copy-Item .env.example .env
+Copy-Item .env.example .env.local
 ```
+
+### Bedrock接続の確認（任意）
+
+`.env.local`へ上記の設定を書いたあと、PowerShellで次を実行すると、短い入力を1回だけBedrockへ送ります。`RUN_BEDROCK_SMOKE=1`を指定しない限り、何も送りません。成功すると成否、HTTPステータス、モデルID、所要時間、応答の冒頭だけを表示します。
+
+```powershell
+$env:RUN_BEDROCK_SMOKE = "1"
+npm run bedrock:smoke
+Remove-Item Env:RUN_BEDROCK_SMOKE
+```
+
+入力は2万文字以下、最大出力は2,000トークン、同時実行は1件、呼出しは毎分10回以下に制限し、自動再試行はしません。Bedrockを呼ぶHTTPの窓口は作りません。
 
 ## 必要環境
 
