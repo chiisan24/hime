@@ -197,7 +197,7 @@ P1の当日投票所検索、期日前投票所検索、AI質問チャット、�
   - `npm run lint && npm run typecheck && npm test && npm run build && npm run bundle:check`をwatchなしで実行し、失敗した基盤コードだけを修正する。
 
 - [ ] 7. AWS設定、read-only診断、Bedrock port/adapterを実装する
-  - [ ] 7.1 AWS既定値、3用途model ID、cross-Region拒否を実装する
+  - [x] 7.1 AWS既定値、3用途model ID、cross-Region拒否を実装する
     - 主な変更領域: `apps/api/src/config/aws.ts`、`packages/contracts/src/aws-config.ts`、property test。
     - 実装: profile未設定を`default`、region未設定を`ap-northeast-1`、cross-Regionをfalseにする。生成・意味判定・埋め込みmodel IDのnon-emptyを全Bedrock call前に検査し、inference profile形式を拒否する。
     - **Property 32: AWS既定設定とmodel設定の事前検査**
@@ -221,7 +221,7 @@ P1の当日投票所検索、期日前投票所検索、AI質問チャット、�
     - 完了条件: AWS CLIやcredential fileを探索・読取・変更せず、診断結果をrun証跡の代わりにしない。
     - _Requirements: 14.9, 14.12, 14.13, 14.14, 14.15, 14.16, 14.22, 17.7, 17.8_
 
-  - [ ] 7.4 生成・意味判定・埋め込みportとBedrock/fake adapterを実装する
+  - [x] 7.4 生成・意味判定・埋め込みportとBedrock/fake adapterを実装する
     - 主な変更領域: `packages/domain/src/ports/bedrock.ts`、`apps/api/src/aws/adapters/`、fake adapter contract suite。
     - 実装: GenerationPort、SemanticVerificationPort、EmbeddingPortを分離し、生成/意味判定はnon-streaming Converse、埋め込みはmodel固有InvokeModel codecへ閉じ込める。AWS clientは`maxAttempts: 1`にする。
     - 実装: model ID、request ID、usage、dimensionを正規化し、raw model body、prompt、credentialをdomain error/logへ渡さない。generationとsemantic verificationは別adapter instance・別prompt・別request IDを要求する。

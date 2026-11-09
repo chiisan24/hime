@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export * from "./api/index.js";
+export * from "./aws-config.js";
 export * from "./data-kind.js";
 export * from "./models/index.js";
 export * from "./provider/index.js";
