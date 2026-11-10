@@ -1,3 +1,4 @@
+export * from "./analysis/passages.js";
 export * from "./data-kind/validateDataBoundary.js";
 export * from "./election/registry.js";
 export * from "./provider/decodeProviderResult.js";

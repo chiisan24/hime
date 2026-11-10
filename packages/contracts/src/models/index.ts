@@ -1,3 +1,4 @@
+export * from "./analysis.js";
 export * from "./approval.js";
 export * from "./artifacts.js";
 export * from "./election.js";
