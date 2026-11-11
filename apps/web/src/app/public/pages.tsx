@@ -9,11 +9,21 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { useId, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { useParams } from "react-router-dom";
 
+import type { PolicyTheme } from "../../data/visitorDisplayData.js";
+import { formatJapaneseDate } from "../../services/dateLabel.js";
+import { ELECTION_PHASE_LABELS, electionPhaseAt } from "../../services/electionPhase.js";
+import {
+  findCandidate,
+  getTargetElection,
+  listCandidates,
+  listPolicyThemes,
+} from "../../services/visitorData.js";
+import { AiContent, type AiContentState } from "../../shared/ui/AiContent.js";
 import { Badge } from "../../shared/ui/Badge.js";
-import { AiSummaryFrame, SourceFrame } from "../../shared/ui/EvidenceFrames.js";
+import { SourceFrame } from "../../shared/ui/EvidenceFrames.js";
 import { HomeTile } from "../../shared/ui/HomeTile.js";
 import { InfoList, type InfoListItem } from "../../shared/ui/InfoList.js";
 import { NoticeBar } from "../../shared/ui/NoticeBar.js";
@@ -22,28 +32,35 @@ import { SetouchiScene } from "../../shared/ui/SetouchiScene.js";
 import { AppLink } from "../navigation.js";
 import { projectVisitorPresentation } from "./visitorPresentation.js";
 
-const ELECTION_NAME = "令和4年（2022年）第20回愛媛県知事選挙";
-const ELECTION_DATE_LABEL = "2022年11月20日（日）";
+/** 表示する選挙（データは services/visitorData.ts から受け取る） */
+const ELECTION = getTargetElection();
+const ELECTION_NAME = ELECTION.name;
+const ELECTION_DATE_LABEL = formatJapaneseDate(ELECTION.electionDate);
 /** 分析者向け画面の未接続項目で使う表示（分析者側の表示は変えない） */
 const MISSING_VALUE = "no-data（今後の表示領域）";
 /** 候補者に関する未確認項目（Req 12.16） */
 const CANDIDATE_MISSING_VALUE = "資料で確認できません";
 /** 日程に関する未確認項目（Req 18.5） */
 const SCHEDULE_MISSING_VALUE = "一次情報未登録";
-const NO_APPROVED_AI_TEXT = "承認済みの情報がないため表示しません";
 const ORDER_NOTICE =
   "並び順について：公式届出順未確認。画面確認用の暫定の並びで、優劣を表すものではありません。";
 
-export const CANDIDATE_SKELETONS = [
-  {
-    candidateId: "nakamura-tokihiro",
-    name: "中村時広氏",
-  },
-  {
-    candidateId: "hayashi-noriko",
-    name: "林紀子氏",
-  },
-] as const;
+/**
+ * AI要約の表示状態。AIの処理は画面に接続していないため、今は全候補者で同じ「表示しない」状態。
+ * 接続後は services/ から候補者ごとの状態を受け取る。
+ */
+const AI_SUMMARY_STATE: AiContentState = {
+  status: "unavailable",
+  reason: "承認済みの情報がないため表示しません",
+};
+
+/** 対象候補者。分析者向け画面とテストもこの名前で参照するので、書き出し名は変えない */
+export const CANDIDATE_SKELETONS = listCandidates();
+
+/** 選挙の状態を表すラベル。表示するたびに、その時点の日本標準時で判定する */
+function ElectionPhaseBadge() {
+  return <Badge>{ELECTION_PHASE_LABELS[electionPhaseAt(ELECTION.electionDate, new Date())]}</Badge>;
+}
 
 const COMPARISON_FIELDS = [
   "対象",
@@ -66,15 +83,7 @@ const COMPARISON_FIELD_NOTES: Readonly<Partial<Record<(typeof COMPARISON_FIELDS)
   人間状態: "人による確認の結果",
 };
 
-const POLICY_THEMES = [
-  "子育て",
-  "教育",
-  "経済",
-  "福祉",
-  "防災",
-  "地域振興",
-  "交通",
-] as const;
+const POLICY_THEMES = listPolicyThemes();
 
 const PRIMARY_LINK_CLASS =
   "inline-flex min-h-11 min-w-11 w-full items-center justify-center gap-1 rounded-full bg-primary px-5 py-3 font-bold text-white transition hover:bg-primary-dark";
@@ -370,7 +379,7 @@ export function VisitorHomePage() {
       </section>
 
       {/* 選挙情報：今表示できる値だけ */}
-      <SectionCard aside={<Badge>終了済み</Badge>} icon={CalendarDays} title="選挙情報">
+      <SectionCard aside={<ElectionPhaseBadge />} icon={CalendarDays} title="選挙情報">
         <p className="font-bold text-ink">{ELECTION_NAME}</p>
         <div className="mt-3">
           <InfoList
@@ -399,7 +408,7 @@ export function SchedulePage() {
         title="選挙日程"
       />
 
-      <SectionCard aside={<Badge>終了済み</Badge>} icon={CalendarDays} title="この選挙">
+      <SectionCard aside={<ElectionPhaseBadge />} icon={CalendarDays} title="この選挙">
         <p className="font-bold text-ink">{ELECTION_NAME}</p>
         <p className="mt-2 text-2xl font-black text-primary-dark">{ELECTION_DATE_LABEL}</p>
         <p className="mt-1 text-sm text-ink-soft">投票日。現在の投票案内ではありません。</p>
@@ -500,7 +509,7 @@ export function CandidatesPage() {
                   <InfoList items={candidateListItems(candidate.name)} />
                 </div>
                 <div className="mt-5">
-                  <AiSummaryFrame>{NO_APPROVED_AI_TEXT}</AiSummaryFrame>
+                  <AiContent state={AI_SUMMARY_STATE} />
                 </div>
                 <div className="mt-auto pt-6">
                   <AppLink
@@ -536,9 +545,7 @@ function MaterialAmountList() {
 
 export function CandidateDetailPage() {
   const { candidateId } = useParams<{ candidateId: string }>();
-  const candidate = CANDIDATE_SKELETONS.find(
-    (item) => item.candidateId === candidateId,
-  );
+  const candidate = findCandidate(candidateId);
   const name = candidate?.name ?? CANDIDATE_MISSING_VALUE;
 
   return (
@@ -578,7 +585,7 @@ export function CandidateDetailPage() {
 
           <SectionCard icon={FileText} title="政策">
             <div className="flex flex-col gap-3">
-              <AiSummaryFrame>{NO_APPROVED_AI_TEXT}</AiSummaryFrame>
+              <AiContent state={AI_SUMMARY_STATE} />
               <SourceFrame>{CANDIDATE_MISSING_VALUE}</SourceFrame>
             </div>
           </SectionCard>
@@ -615,7 +622,46 @@ export function CandidateDetailPage() {
   );
 }
 
+/** 政策資料がない候補者の欠落理由（Req 13.9）。2人とも同じ文で表示する */
+const COMPARISON_MISSING_REASON = "2022年の政策資料が未入手のため、表示できる政策はありません。";
+
+type ThemeSelectorProps = Readonly<{
+  themes: readonly PolicyTheme[];
+  selected: PolicyTheme;
+  onSelect: (theme: PolicyTheme) => void;
+}>;
+
+/** 政策テーマの選択。選んでいるテーマは aria-pressed で伝える */
+function ThemeSelector({ themes, selected, onSelect }: ThemeSelectorProps) {
+  return (
+    <div aria-label="比べるテーマ" className="mt-3 flex flex-wrap gap-2" role="group">
+      {themes.map((theme) => {
+        const active = theme === selected;
+        return (
+          <button
+            aria-pressed={active}
+            className={`inline-flex min-h-11 min-w-11 items-center rounded-full border px-4 text-sm font-bold transition ${
+              active
+                ? "border-primary bg-primary text-white"
+                : "border-line bg-white text-ink-soft hover:border-primary/50 hover:text-primary"
+            }`}
+            key={theme}
+            onClick={() => {
+              onSelect(theme);
+            }}
+            type="button"
+          >
+            {theme}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function ComparisonPage() {
+  const [selectedTheme, setSelectedTheme] = useState<PolicyTheme>(POLICY_THEMES[0] ?? "子育て");
+
   return (
     <div className="flex flex-col gap-5">
       <PageIntro
@@ -631,24 +677,18 @@ export function ComparisonPage() {
 
       <section aria-labelledby="themes-heading">
         <h2 className="text-lg font-bold text-primary-dark sm:text-xl" id="themes-heading">
-          比べられるテーマ
+          比べるテーマ
         </h2>
-        <p className="mt-1 text-sm text-ink-soft">
-          資料がそろうと、テーマを選んで比べられるようになります。
-        </p>
-        {/* 押せないタグ。枠線と影を付けず、ボタンに見せない */}
-        <ul className="mt-3 flex flex-wrap gap-2" role="list">
-          {POLICY_THEMES.map((theme) => (
-            <li className="rounded-md bg-surface-2 px-3 py-1 text-sm text-ink-soft" key={theme}>
-              {theme}
-            </li>
-          ))}
-        </ul>
+        <ThemeSelector
+          onSelect={setSelectedTheme}
+          selected={selectedTheme}
+          themes={POLICY_THEMES}
+        />
       </section>
 
       <section aria-labelledby="comparison-frame-heading">
         <h2 className="text-lg font-bold text-primary-dark sm:text-xl" id="comparison-frame-heading">
-          候補者ごとの比較項目
+          「{selectedTheme}」の比較
         </h2>
         <NoticeBar className="mt-3">
           並び順について：公式届出順未確認。画面確認用の暫定の並びです。
@@ -667,6 +707,9 @@ export function ComparisonPage() {
                 <h3 className="text-xl font-black text-primary-dark" id={headingId}>
                   {candidate.name}
                 </h3>
+                <p className="mt-2 rounded-lg bg-surface px-3 py-2 text-sm text-ink">
+                  {selectedTheme}：{COMPARISON_MISSING_REASON}
+                </p>
                 <dl className="mt-3 divide-y divide-line">
                   {COMPARISON_FIELDS.map((field) => {
                     const note = COMPARISON_FIELD_NOTES[field];
