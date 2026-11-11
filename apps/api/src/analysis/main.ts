@@ -39,6 +39,16 @@ try {
         console.log(line);
       },
     },
+    // OCR_TRACE=1 writes step times, memory use and a heartbeat to stderr (no page text).
+    ...(process.env.OCR_TRACE === "1"
+      ? {
+          ocrTrace: {
+            write: (line: string) => {
+              console.error(line);
+            },
+          },
+        }
+      : {}),
   });
 } catch {
   // Never print the error: it could carry file paths or data.

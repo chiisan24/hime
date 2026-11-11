@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { sha256Hex } from "@ehime-vote-navigator/domain";
+import { sha256Hex, type Result } from "@ehime-vote-navigator/domain";
 
 import { createStoragePathConfig } from "../config/paths.js";
 import {
@@ -18,7 +18,14 @@ import { PDFJS_EXTRACTOR_ID, createPdfjsTextExtractor } from "../extract/pdfjsTe
 import type { PdfTextExtractor } from "../extract/pdfTextExtractor.js";
 import type { SupplyError } from "../ingest/sourceSupplier.js";
 import type { AtomicFileOperationOverrides } from "../store/atomicFiles.js";
+import { OCR_MODEL_RELATIVE_DIRECTORY } from "../ocr/modelManifest.js";
+import type { OcrSettings } from "../ocr/ocrConfig.js";
+import type { OcrError, OcrSession, PageRasterizer } from "../ocr/ocrTypes.js";
+import { createPaddleOcrEngine } from "../ocr/paddleOcrEngine.js";
+import { createPdfjsPageRasterizer } from "../ocr/pdfjsPageRasterizer.js";
+import { createTracer, type Tracer } from "../ocr/trace.js";
 import { inspectPdf, parseInspectArgs } from "./inspectCommand.js";
+import { runOcrCommand } from "./ocrCommand.js";
 import { createFileStageStore } from "./stageStore.js";
 
 /** Terminal boundary of the analysis CLI; tests replace it with a fake. */
@@ -29,6 +36,8 @@ export type CliIo = Readonly<{
 }>;
 
 export type CliOptions = Readonly<{
+  /** Test seam for the OCR engine; PaddleOCR with the downloaded models is used by default. */
+  createOcrSession?: (settings: OcrSettings, trace: Tracer) => Promise<Result<OcrSession, OcrError>>;
   /** Test seam for the PDF text extractor; pdfjs-dist is used by default. */
   extractor?: PdfTextExtractor;
   /** Test seam for the ingest writes; the real filesystem is the default. */
@@ -36,6 +45,10 @@ export type CliOptions = Readonly<{
   io: CliIo;
   /** Test seam for the retrieval time; defaults to the current time. */
   now?: () => Date;
+  /** Set to trace an OCR run (step times, memory, heartbeat). Lines hold no page text. */
+  ocrTrace?: Readonly<{ write: (line: string) => void }>;
+  /** Test seam for the page renderer; pdfjs-dist is used by default. */
+  rasterizer?: PageRasterizer;
   /** Test seams for the registry file; the real filesystem is the default. */
   registry?: Pick<RegistryFileOptions, "operations" | "readFile">;
   /** Test seam for the stage store and review file writes; the real filesystem is the default. */
@@ -54,6 +67,13 @@ const USAGE_LINES: readonly string[] = [
   "                                   Read the PDF text layer by page and save it (counts only)",
   "  inspect --file <file.pdf> [--write-review]",
   "                                   Check the text layer of a PDF in data/real/raw (counts only)",
+  "  ocr trial --file <file.pdf> --region <id>=<page>:<x0>,<y0>,<x1>,<y1> [--region ...]",
+  "            [--dpi <n>] [--strategy per-line|per-box]",
+  "                                   Run OCR on a few parts of a PDF and save images for checking (counts only)",
+  "  ocr truth --file <file.pdf> --region <id>",
+  "                                   Create the text file in which a person types the true text of a region",
+  "  ocr compare --file <file.pdf> [--min-f1 <0-1>] [--dpi <n>] [--strategy per-line|per-box]",
+  "                                   Score a trial against the text a person typed (counts only)",
 ];
 
 function registryOptions(options: CliOptions): RegistryFileOptions {
@@ -425,6 +445,36 @@ export async function runAnalysisCli(
 
   if (group === "extract") {
     return extractDocument(argv.slice(1), options);
+  }
+
+  if (group === "ocr") {
+    const storage = createStoragePathConfig(options.workspaceRoot);
+    const trace = createTracer({
+      enabled: options.ocrTrace !== undefined,
+      write: options.ocrTrace?.write ?? (() => undefined),
+    });
+    try {
+      const code = await runOcrCommand(argv.slice(1), {
+        createSession:
+          options.createOcrSession ??
+          ((settings, tracer) =>
+            createPaddleOcrEngine({
+              modelRoot: join(storage.realDataRoot, ...OCR_MODEL_RELATIVE_DIRECTORY.split("/")),
+              strategy: settings.strategy,
+              trace: tracer,
+            })),
+        io: options.io,
+        rasterizer: options.rasterizer ?? createPdfjsPageRasterizer(),
+        trace,
+        workspaceRoot: options.workspaceRoot,
+        ...(options.stageOperations === undefined ? {} : { operations: options.stageOperations }),
+      });
+      if (code !== undefined) {
+        return code;
+      }
+    } finally {
+      trace.stop();
+    }
   }
 
   if (group === "inspect") {

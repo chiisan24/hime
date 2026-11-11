@@ -41,7 +41,7 @@ export const PDFJS_EXTRACTOR_ID = "pdfjs-dist@6.5.438";
 
 const require = createRequire(import.meta.url);
 
-function packageDirectory(): string {
+export function packageDirectory(): string {
   return dirname(require.resolve("pdfjs-dist/package.json"));
 }
 
@@ -53,12 +53,30 @@ function resourceUrl(directory: string, name: string): string {
 let defaultModule: Promise<PdfjsModule> | undefined;
 
 /** Loads the legacy (Node-friendly) build of the installed pdfjs-dist once. */
-const loadInstalledPdfjs: PdfjsLoader = () => {
+export const loadInstalledPdfjs: PdfjsLoader = () => {
   defaultModule ??= import(
     /* @vite-ignore */ pathToFileURL(join(packageDirectory(), "legacy", "build", "pdf.mjs")).href
   ) as Promise<PdfjsModule>;
   return defaultModule;
 };
+
+/** The getDocument options shared by text extraction and page rendering. */
+export function pdfjsDocumentParameters(bytes: Uint8Array): Record<string, unknown> {
+  const directory = packageDirectory();
+  return {
+    data: new Uint8Array(bytes),
+    cMapUrl: resourceUrl(directory, "cmaps"),
+    cMapPacked: true,
+    standardFontDataUrl: resourceUrl(directory, "standard_fonts"),
+    iccUrl: resourceUrl(directory, "iccs"),
+    wasmUrl: resourceUrl(directory, "wasm"),
+    useWorkerFetch: false,
+    useSystemFonts: false,
+    disableFontFace: true,
+    enableXfa: false,
+    verbosity: 0,
+  };
+}
 
 function errorName(error: unknown): string {
   return typeof error === "object" && error !== null && "name" in error
@@ -109,20 +127,7 @@ export function createPdfjsTextExtractor(
       }
 
       const pdfjs = await loadPdfjs();
-      const directory = packageDirectory();
-      const task = pdfjs.getDocument({
-        data: new Uint8Array(bytes),
-        cMapUrl: resourceUrl(directory, "cmaps"),
-        cMapPacked: true,
-        standardFontDataUrl: resourceUrl(directory, "standard_fonts"),
-        iccUrl: resourceUrl(directory, "iccs"),
-        wasmUrl: resourceUrl(directory, "wasm"),
-        useWorkerFetch: false,
-        useSystemFonts: false,
-        disableFontFace: true,
-        enableXfa: false,
-        verbosity: 0,
-      });
+      const task = pdfjs.getDocument(pdfjsDocumentParameters(bytes));
 
       let document: PdfjsDocument;
       try {
