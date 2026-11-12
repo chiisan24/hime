@@ -1,0 +1,101 @@
+[
+  {
+    "themeId": "POPULATION_REVITALIZATION",
+    "scene": "ELECTION",
+    "text": "投票前に、地域活動についての情報を確かめますか？",
+    "linkSourceId": null,
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "themeId": "POPULATION_REVITALIZATION",
+    "scene": "MOVE_OR_JOB",
+    "text": "移住や就職を考えるとき、地域活動を調べますか？",
+    "linkSourceId": null,
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "themeId": "POPULATION_REVITALIZATION",
+    "scene": "DAILY_LIFE",
+    "text": "暮らしの中で、地域活動について話しますか？",
+    "linkSourceId": null,
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "themeId": "DISASTER_PREVENTION",
+    "scene": "ELECTION",
+    "text": "投票前に、防災の備えについての情報を確かめますか？",
+    "linkSourceId": null,
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "themeId": "DISASTER_PREVENTION",
+    "scene": "MOVE_OR_JOB",
+    "text": "移住や就職を考えるとき、防災の備えを調べますか？",
+    "linkSourceId": null,
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "themeId": "DISASTER_PREVENTION",
+    "scene": "DAILY_LIFE",
+    "text": "暮らしの中で、防災の備えについて話しますか？",
+    "linkSourceId": null,
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "themeId": "EDUCATION_CHILDCARE",
+    "scene": "ELECTION",
+    "text": "投票前に、教育・子育てについての情報を確かめますか？",
+    "linkSourceId": null,
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "themeId": "EDUCATION_CHILDCARE",
+    "scene": "MOVE_OR_JOB",
+    "text": "移住や就職を考えるとき、教育・子育てを調べますか？",
+    "linkSourceId": null,
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "themeId": "EDUCATION_CHILDCARE",
+    "scene": "DAILY_LIFE",
+    "text": "暮らしの中で、教育・子育てについて話しますか？",
+    "linkSourceId": null,
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  }
+]

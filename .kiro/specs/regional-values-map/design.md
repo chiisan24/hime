@@ -125,7 +125,7 @@
 | `FIXTURE` | `packages/fixtures/src/regional-values/`（既存の`FixtureStoragePathSchema`が`packages/fixtures`配下を要求） | 管理 |
 | 共通の設定 | `config/regional-values/` | 管理 |
 
-質問も`dataKind`を持つ（Req 3.1 j）。そのため、実データ用と架空データ用の質問バンクを別々に承認する。同じ文面でも別のレコードとする。実データ用の質問はGit管理外になる。【要確認5】
+質問も`dataKind`を持つ（Req 3.1 j）。そのため、実データ用と架空データ用の質問バンクを別々に承認する。同じ文面でも別のレコードとする。実データ用の質問、結果解説、固定文言は、架空データ用のレコードを複製して作り、版を1に戻し、偏り確認と承認を新たに通す。承認は引き継がない（複製の手順は13.16）。実データ用のレコードはGit管理外になる。【要確認5】は、この方針で解消した（Open Decisions (19)(e)）。
 
 ### ビルドパイプラインと`dataMode`の門
 
@@ -149,11 +149,11 @@ CLIは`npm run regional-values -- build --kind demo|public --data-mode REAL|FIXT
 | 条件 | 内容 | 要件 |
 | --- | --- | --- |
 | G1 データ種別 | 対象がすべて`REAL_AI`。1件でも`FIXTURE`が混じれば欠陥 | Req 10.15 i, 10.17 |
-| G2 利用条件 | 出典の`UsageReview.status`が`CONFIRMED`で、個別注記の確認記録がある | Req 10.15 ii |
+| G2 利用条件 | 出典の`UsageReview.status`が`CONFIRMED`で、個別注記の確認記録がある。公開と加工（集計、要約）の可否の確認を含み、AIの関与にかかわらずすべての実データの出典に要求する | Req 10.15 ii |
 | G3 ライセンス表示 | ライセンス名・URL、公開元、出典URLまたはデータセットURLがある | Req 10.15 iii |
 | G4 人による検証 | 事実項目は`VERIFIED`と検証記録、課題カードは元資料との再照合を経た承認記録 | Req 10.15 iv |
 | G5 承認 | 課題カードは`APPROVED`と承認記録。質問は現在の版の偏り確認と承認、結果解説は承認記録 | Req 10.15 v, 3.10 |
-| G6 外部サービス送信可否 | すべての出典で送信可否が`ALLOWED` | 指定により追加。Req 10.15の5条件には明記がない。【要確認1】 |
+| G6 外部サービス送信可否 | `aiInvolvement`が`AI_DRAFT`の課題カードの出典（AI下書き工程の入力にした出典を含む）で送信可否が`ALLOWED`。AIが関与していない出典には要求しない | Req 10.15 (c), 8.7。【要確認1】は、この範囲で要件に反映して解消した |
 
 Req 7.8、7.15、7.19は項目単位の除外を、Req 10.15と10.16はバンドル単位の失敗または切替を求める。本書は、条件を満たさない項目を除外してレポートに記録し、除外が1件でもあれば、`REAL`は失敗、`REAL_PREFERRED`は全体を切り替えると読む。一部の項目だけの実データのバンドルは作らない。【要確認2】
 
@@ -166,7 +166,7 @@ Req 7.8、7.15、7.19は項目単位の除外を、Req 10.15と10.16はバンド
 | SHORTAGE | `REAL_DATA_ABSENT` | 実データの課題カードが0件、または診断セット（`QUICK`）が未定義 | Req 10.16 |
 | SHORTAGE | `USAGE_NOT_CONFIRMED` | 出典の利用条件が`CONFIRMED`でない | Req 10.15 ii, 7.8 |
 | SHORTAGE | `NOTE_REVIEW_MISSING` | 個別注記の確認記録がない | Req 10.15 ii |
-| SHORTAGE | `TRANSMISSION_NOT_ALLOWED` | 送信可否が`ALLOWED`でない（`UNKNOWN`、`DENIED`、記録なし） | G6 |
+| SHORTAGE | `TRANSMISSION_NOT_ALLOWED` | AIが関与した課題カードの出典で、送信可否が`ALLOWED`でない（`UNKNOWN`、`DENIED`、記録なし） | G6 |
 | SHORTAGE | `LICENSE_INFO_MISSING` | ライセンス表示に必要な情報の欠落 | Req 10.15 iii |
 | SHORTAGE | `FACT_NOT_VERIFIED` | 事実項目が`PROVISIONAL`、または検証記録がない | Req 7.19 |
 | SHORTAGE | `CARD_NOT_APPROVED` | 課題カードが`PENDING`、または承認記録がない | Req 7.15 |
@@ -470,6 +470,8 @@ VERIFIED ──(原本のSHA-256が記録と異なる)──► PROVISIONAL（�
 
 Req 7.5・7.18の位置情報は、既存の`Locator`（`pdf-page`、`html-paragraph`、`text-lines`）をそのまま再利用するため、xlsxのシートと行を直接は指せない。xlsxは、シート順・行順・タブ区切り・UTF-8・LFに展開した決定的なテキストの行番号を`text-lines`で指す。展開手順の識別子（例: `xlsx-tsv-v1`）を算出方法の説明に記す。専用の位置情報の種別を足す案（既存の`Locator`との和集合を新契約側に持つ）は、Req 7.7に照らして人の判断を待つ。【要確認3】xlsxの読取りは新しい依存の追加になり、候補の比較と承認依頼を実装前に別途行う。
 
+最初に取り込む形式はCSVとする（新しい依存が不要で、既存の`text-lines`で位置を指せる）。CSVは、文字コード（UTF-8、BOM付きのUTF-8、Shift_JIS）を判定して、決定的にUTF-8・LFのテキストへ展開し、展開手順の識別子（`csv-lines-v1`）を算出方法の説明に記す。判定できない文字コードは取り込まない。実行環境の標準機能（`TextDecoder`）だけを使い、新しい依存を足さない。xlsxは、CSVで足りない場合に限り、依存の承認後に扱う。実データの取り込みは、データセットの棚卸し（形式、文字コード、利用条件、個別注記、送信可否、対応するテーマの確認。人の作業。13.14）の後に行い、棚卸しの結果でクイック版の3テーマを確定する。取り込む出典の記録には、公開データカタログのデータセットなら`catalog`（カタログ名とデータセットID。Req 7.5 j）を持たせる。
+
 最初の実データ候補は次のとおり。
 
 | 項目 | 値 |
@@ -687,7 +689,8 @@ RegionalSource =
       usage: UsageReview /* 既存。status: CONFIRMED | UNKNOWN | RESTRICTED */;               // (h)
       datasetNote: DatasetNoteReview | null /* null = 未確認 */;                              // (i)
       transmission: TransmissionReview;
-      license: { name: NonEmpty; url: url } }   // 設計追加: Req 10.15 iii をカード単位で判定するため
+      license: { name: NonEmpty; url: url };    // 設計追加: Req 10.15 iii をカード単位で判定するため
+      catalog?: { name: NonEmpty; datasetId: NonEmpty } }   // 公開データカタログのデータセットの出典だけが持つ（Req 7.5 j）
   | { dataKind: "FIXTURE"; sourceId: Id /* 架空の資料ID。URLと実在の公開者名を持たない（Req 7.17） */ }
 
 // 事実項目（Req 7.18）
@@ -984,7 +987,7 @@ guidance: GuidanceQuestion[];                            // 診断セットに�
 | 見出しと該当なし | `section.*`、`empty.*` | 各欄の見出し、該当するテーマがない旨 | なし |
 | 説明と注記 | `reason.<UNSURE、PICK_CONFLICT>`、`note.noThemeDifference`、`note.equalLevel`、`lead.tradeoff`、`priority.<NOT_ASKED、NONE_SELECTED>`、`explainer.*`、`scene.*`、`guidance.empty`、`diff.*`、`reflection.crossTheme` | 結果画面の説明文（Req 5.4, 5.7, 5.8, 6.1, 6.2, 6.12） | `{themeName}` |
 | 件数と設定値 | `counts.themes`、`counts.questions`、`about.thresholds` | 「n / m」、しきい値の表示 | `{n}`、`{m}`、`{t1}`、`{t2}` |
-| エラー | `error.<4コード>`、`action.<REVIEW_ANSWERS、RESTART>` | Req 5.14 | なし |
+| エラー | `error.<4コード>`、`error.UNEXPECTED`、`error.UNEXPECTED.restartNote`、`action.<REVIEW_ANSWERS、RESTART>` | Req 5.14, 5.19 | なし |
 | ライセンス | `license.ccby.<attribution、license、modified>`、`license.processed.<YES、NO>` | Req 7.21 | `{publisher}`、`{licenseName}` |
 | このアプリについて | `about.*` | Req 5.13 | `{totalQuestions}`、`{totalThemes}` |
 | 画面の操作 | `ui.*` | ボタン名、案内文（Req 2.8, 6.5 など） | なし |
@@ -1017,7 +1020,8 @@ type DiagnosticState =
   | { phase: "FACT_CARD"; session: Session; cardId: string; returnTo: DiagnosticState }
   | { phase: "RESULT"; session: Session; focusThemeId: ThemeId | null }
   | { phase: "ANSWER_EDIT"; session: Session; draft: Answers; editable: readonly QuestionId[]; hint: Hint }
-  | { phase: "ABOUT"; session: Session; returnTo: DiagnosticState };
+  | { phase: "ABOUT"; session: Session; returnTo: DiagnosticState }
+  | { phase: "UNEXPECTED_ERROR"; bundle: VerifiedBundle | null; setKind: SetKind | null };   // 想定外の内部エラー。回答、結果、例外の内容は持たない（Req 5.19）
 
 type DiagnosticEvent =
   | { type: "BUNDLE_LOADED"; bundle: VerifiedBundle } | { type: "BUNDLE_FAILED"; code: BundleLoadErrorCode }
@@ -1058,6 +1062,9 @@ type DiagnosticEvent =
 | `ANSWER_EDIT` | `CONFIRM_EDIT` | なし | `answers = draft`。`previous`は、`current`が成功ならそのマップ、失敗なら元の`previous`のまま。`current`を再生成して`RESULT`へ | 6.2, 6.11 |
 | `ANSWER_EDIT` | `CANCEL_EDIT` | なし | `RESULT`（`answers`、`current`、`previous`は不変） | 6.2 |
 | `QUESTION`、`RESULT`、`ANSWER_EDIT` | `RESTART` | `current`が`INVALID_CONFIG`でない | `QUESTION`（同じ診断セットの1問目）。`answers`、`current`、`previous`を破棄し、`bundle`は保持 | 6.5 |
+| `LOADING`、`INTRO`、`SET_SELECT`、`QUESTION`、`FACT_CARD`、`RESULT`、`ANSWER_EDIT`、`ABOUT` | 任意 | 遷移の計算中に、`MapError`以外の想定外の例外が起きた（実装の不具合） | `UNEXPECTED_ERROR`。`bundle`と`setKind`だけを引き継ぎ、`answers`、`current`、`previous`、例外の内容は捨てる | 5.19 |
+| `UNEXPECTED_ERROR` | `RESTART` | `bundle`がある | `setKind`があれば`QUESTION`（その診断セットの1問目）、なければ`INTRO`。`answers`、`current`、`previous`は空。`bundle`は保持 | 5.19, 6.5 |
+| `UNEXPECTED_ERROR` | 上記以外 | なし | 無視（同じオブジェクトを返す） | 5.19 |
 | 上記以外 | 任意 | なし | 無視（同じオブジェクトを返す） | なし |
 
 - `RESET`は独立の状態にしない。要件は確認ダイアログを求めていないため、`RESTART`は直接`QUESTION`の1問目へ移る。
@@ -1066,6 +1073,9 @@ type DiagnosticEvent =
 - 変更前の結果（`previous`）は、常に1件だけ持つ。`current`が失敗のまま次の確認が成功した場合は、失敗の前に表示していた成功のマップが`previous`として残るため、変更前後の差を出せる。
 - ページの再読み込みとタブを閉じる操作で、状態はすべて消える（Req 6.10）。
 - 診断セットを選び直す導線は、要件にない。`RESTART`は同じ診断セットに戻る。【要確認20】
+- 想定外の例外の境界（Req 5.19）: `diagnosticReducer`は遷移の計算全体を`try/catch`で囲む。`generateValuesMap`が返す`MapError`は通常の入力エラーで、`Result`で扱い、`UNEXPECTED_ERROR`にしない。`generateValuesMap`の出力検証の失敗や`RangeError`などの例外（実装の不具合）だけを捕捉し、呼出し元へ投げない。`LOAD_ERROR`と`UNEXPECTED_ERROR`では例外が起きないため、捕捉の対象外とする。
+- `UNEXPECTED_ERROR`は終端の状態である。持つのは`bundle`（公開データ）と`setKind`だけで、回答、直近の結果、変更前の結果、例外のメッセージ、スタックは持たない。画面は固定文言（`error.UNEXPECTED`）だけを表示し、エラーの内容、回答値、質問IDを画面にも状態にも出さない。ログが必要な呼出し側は、固定の符号だけを書き、値を書かない。
+- `UNEXPECTED_ERROR`の`RESTART`は、回答を破棄して診断を最初からやり直す。確認ダイアログは置かず、導線の近くに固定文言`error.UNEXPECTED.restartNote`（最初からやり直すと入力済みの回答が消える旨）を常に表示する。`bundle`がない場合は、再読み込みで復帰する。
 
 ### バンドルの読み込み（f）
 
@@ -1230,6 +1240,7 @@ URLに診断の状態を持たせない。回答由来の値をURLに出さな�
 
 | 用途（task） | 入力 | 出力（検証後に反映する先） | モデルの役割 | 要件 |
 | --- | --- | --- | --- | --- |
+| `ISSUE_CANDIDATE` 課題候補の提案 | テーマ、`VERIFIED`の事実項目（事実の文、数値と単位、調査年または基準日、対象地域、出典） | 課題候補（`IssueCandidateOutput`。`PENDING`で保存。事実ではなく、公式機関の見解でもない。人の承認後に課題カードの下書きの起点になるだけで、公開バンドルに含まれない） | `generation` | 8.1, 8.23〜8.25 |
 | `ISSUE_SUMMARY` 地域課題の要約 | テーマ、根拠単位（出典の位置情報つき引用） | 根拠つきの文（課題カードの`background`の前半） | `generation` | 8.1, 8.9 |
 | `BACKGROUND_DRAFT` 背景説明の下書き | テーマ、根拠単位 | 課題名と根拠つきの文（`title`、`background`の後半） | `generation` | 8.1, 8.9 |
 | `TERM_GLOSS` 政策用語の解説 | 用語の候補、根拠単位 | 用語ごとの根拠つきの文（`glossary`） | `generation` | 8.1, 8.9 |
@@ -1239,10 +1250,14 @@ URLに診断の状態を持たせない。回答由来の値をURLに出さな�
 
 結果解説と固定文言は、AIの用途に含まれない（Req 8.1）。人が書く。
 
+課題候補は、AIの提案であり、公式データに記載された事実ではない。事実項目（`FactItem`）は、決定的な集計と人の検証だけで作り、AIの出力から作らない。課題候補は、事実項目、課題カードの事実カード、公式機関の見解として保存も表示もしない。人が確認して承認するまで課題カードの下書きにも反映せず、公開バンドルは課題候補そのものを含まない（Req 8.25）。課題候補の入力は`VERIFIED`の事実項目に限る。集計直後の`PROVISIONAL`の値は、人が原本と照合して`VERIFIED`にするまで、AIに渡さない（Req 7.19, 8.23）。
+
 ```ts
 // contracts/.../regional/draft.ts（新規ファイル。Zod strict）
 EvidenceUnit = { evidenceId: string /* "E1" など。入力内で一意 */; sourceId: Id; locator: Locator; text: string /* 引用原文 */ }
 GroundedSentence = { text: Chars(1, 60); groundIds: EvidenceId[] /* 1件以上 */ }   // 60文字は設計の値。draft.jsonで変更可
+IssueCandidateOutput  = { themeId: ThemeId | "UNCLASSIFIED"; statement: Chars(1, 60) /* 1文 */;
+                          basisFactIds: FactId[] /* 1件以上。入力の VERIFIED の事実項目 */ }      // 順位・スコア・推奨・優劣の項目を持たない（strict）。保存時の disposition は PENDING
 IssueSummaryOutput    = { sentences: GroundedSentence[] /* 1〜4 */ }
 BackgroundDraftOutput = { title: Chars(1, 40); sentences: GroundedSentence[] /* 1〜6 */ }
 TermGlossOutput       = { items: { term: Chars(1, 40); sentences: GroundedSentence[] /* 1〜3 */ }[] /* 1〜10 */ }
@@ -1295,6 +1310,7 @@ DraftEvent = { eventId: Sha256; at: ISOInstant; dataKind: DataKind; task: DraftT
 | `REAL_AI` | 出典の`transmission.status`が`ALLOWED`（記録なしと`UNKNOWN`を含めて拒否） | `TRANSMISSION_NOT_ALLOWED` | 8.7 |
 | `REAL_AI` | 入力に含む事実項目がすべて`VERIFIED` | `FACT_NOT_VERIFIED` | 8.7, 7.19 |
 | 共通 | `system`と`text`の長さの合計が20,000以下。20,000ちょうどは許す。数え方は既存クライアントと同じUTF-16コード単位（要件の「文字」と、基本多言語面の外の文字で差が出る。【要確認24】） | `INPUT_TOO_LONG` | 8.5 |
+| `ISSUE_CANDIDATE` | 入力の事実項目がすべて`VERIFIED`（データ種別が`FIXTURE`の事実項目は検証状態を持たないため、架空の資料IDを持つ事実項目を入力にできる）。`PROVISIONAL`、未集計の本文、利用者の回答、最優先テーマ、価値観マップを含めない | `FACT_NOT_VERIFIED` | 8.23, 7.19 |
 | 共通 | 入力に区切り文字列がない | `INPUT_CONTAINS_DELIMITER` | 設計 |
 | 共通 | 入力の種別が1つ（`FIXTURE`と`REAL_AI`の混在を拒否） | `DATA_KIND_MIXED` | 10.17 |
 | 共通 | 入力資料のSHA-256が、既存の選挙公報の取り込み記録に登録されていない（`ingestStore.findSourceIdsBySha256`で照会。読取りのみ） | `INPUT_IS_ELECTION_BULLETIN` | 7.12 |
@@ -1314,6 +1330,7 @@ AIの出力は、次の検査をすべて通ったものだけを保存する。
 | `DR_SENTENCE_LENGTH` | 各文が60文字以内 | 11.7 |
 | `DR_THEME_RANGE` | テーマ分類が6テーマのIDまたは`UNCLASSIFIED`の1つ | 8.10 |
 | `DR_QUESTION_RULES` | 質問の下書きに、前半 Components 2 の質問ごとの検査を同じ条件で適用し、起案者区分を`AI_DRAFT`にする | 8.11, 3.11 |
+| `DR_CANDIDATE_FACTS` | 課題候補の`basisFactIds`がすべて入力の`VERIFIED`の事実項目に実在し、候補の文の数値表現と日付表現が、根拠の事実項目の値（数値と単位、調査年または基準日）と一致する。順位・推奨・優劣の項目は、契約（strict）が拒否する | 8.24 |
 
 `DR_FORBIDDEN_WORDS`の「優劣、推奨、投票を促す語」は、`neutrality.json`の`wordCategories`で3群に分けて持つ。`bannedWords`と`loadedWords`は、3群の和集合を含むことを、設定の読込みで検査する（欠けていれば`CONFIG_UNREADABLE`）。
 
@@ -1369,7 +1386,7 @@ AIの出力は、次の検査をすべて通ったものだけを保存する。
 
 | 役割 | 既定のモデル | 割り当てるtask | 理由 |
 | --- | --- | --- | --- |
-| `generation` | `jp.anthropic.claude-haiku-5-5` | `ISSUE_SUMMARY`、`BACKGROUND_DRAFT`、`TERM_GLOSS`、`QUESTION_DRAFT`、`THEME_CLASSIFY` | 呼出しが多く、事実の誤りは根拠の検査（`DR_GROUND_MATCH`）が機械的に落とす。コストと速度を優先する。質問の下書きは、検査と人の修正、`verification`の第二意見が後に続く |
+| `generation` | `jp.anthropic.claude-haiku-5-5` | `ISSUE_CANDIDATE`、`ISSUE_SUMMARY`、`BACKGROUND_DRAFT`、`TERM_GLOSS`、`QUESTION_DRAFT`、`THEME_CLASSIFY` | 呼出しが多く、事実の誤りは根拠の検査（`DR_GROUND_MATCH`）が機械的に落とす。コストと速度を優先する。質問の下書きは、検査と人の修正、`verification`の第二意見が後に続く |
 | `verification` | `jp.anthropic.claude-opus-5-5` | `NEUTRALITY_REVIEW` | 偏りの判断は微妙な言い回しに依存し、機械的な検査で代替できない。呼出しは質問数だけで少ない。品質を優先する |
 
 第二意見の独立性のため、`NEUTRALITY_REVIEW`のモデルは、同じ質問の起案に使ったモデルと別にする。同じなら`REVIEW_MODEL_SAME_AS_DRAFT`で拒否する。人が起案した質問は、`verification`で点検する。役割とモデルの組合せは`.env.local`で決め、記録は`modelId`で残す。コストの実額と品質は、このフェーズで実測しない。実呼出しを行う段階で、1回の呼出しあたりのトークン数と合否の率を記録して見直す。
@@ -1911,6 +1928,18 @@ interface StorageAdapter {                                                    //
 
 **Validates: Requirements 7.22, 12.2**
 
+### Property 56: [状態機械] 想定外の例外の捕捉
+
+*For any* 状態（`LOAD_ERROR`と`UNEXPECTED_ERROR`を除く）とイベントについて、遷移の計算中に例外が起きたとき、`diagnosticReducer`は例外を呼出し元へ投げず、`UNEXPECTED_ERROR`を返す。返す状態は`bundle`と`setKind`だけを持ち、回答、結果、例外の内容を含まない。`UNEXPECTED_ERROR`で`RESTART`すると、`setKind`があれば同じ診断セットの1問目、なければ`INTRO`になり、回答は空である。`RESTART`以外のイベントは同じオブジェクトを返す。
+
+**Validates: Requirements 5.19, 6.5**
+
+### Property 57: [AI下書き] 課題候補の根拠と区別
+
+*For any* 課題候補について、候補の`basisFactIds`が入力の`VERIFIED`の事実項目に実在し、候補の文の数値表現と日付表現が根拠の事実項目の値と一致するときに限り、保存される（承認状態は`PENDING`）。存在しない根拠の事実項目ID、根拠の値と異なる数値、推奨語、順位・スコアを表す項目、6テーマのIDと`UNCLASSIFIED`以外のテーマ分類のいずれか1つの混入で、必ず拒否される。入力に`PROVISIONAL`の事実項目、または送信可否が`ALLOWED`でない`REAL_AI`の出典があると、Bedrockのfakeの呼出しは0回で、保存は0件になる。保存された課題候補は、`assembleBundleBody`の出力にも、事実項目の一覧にも現れない。
+
+**Validates: Requirements 7.19, 8.7, 8.23, 8.24, 8.25, 12.17**
+
 ## Error Handling
 
 ### エラーの区分
@@ -1918,6 +1947,7 @@ interface StorageAdapter {                                                    //
 | 区分 | 発生場所 | 型・符号 | 扱い |
 | --- | --- | --- | --- |
 | マップ生成のエラー | `generateValuesMap` | `MapError`（`INVALID_CONFIG`、`UNKNOWN_QUESTION`、`INVALID_ANSWER`、`NO_OPINION_ANSWERS`） | 部分的な結果を返さない。画面に出す（下の表） |
+| 想定外の内部エラー | `generateValuesMap`の出力検証の失敗、`RangeError`など、実装の不具合による例外 | 例外（型を問わない） | `diagnosticReducer`が捕捉し、`UNEXPECTED_ERROR`へ遷移する。内容、回答値、質問IDを状態、画面、ログに出さない（Req 5.19） |
 | バンドル検証のエラー | `loadBundle`、`verifyBundleText` | `BundleLoadErrorCode`（前掲の12符号。`FETCH_FAILED`から`PUBLIC_CONDITION_FAILED`まで） | 内容を一切使わない。`LOAD_ERROR`へ |
 | ビルドの指摘 | `runBuild` | `GateFinding`（`SHORTAGE`、`DEFECT`） | レポートに記録し、`dataMode`の判定表に従う |
 | ビルドの終了コード | CLI | 0または1 | 前半の終了コードの表のとおり |
@@ -1935,6 +1965,19 @@ interface StorageAdapter {                                                    //
 | `UNKNOWN_QUESTION` | `error.UNKNOWN_QUESTION`（結果を表示できなかった旨） | 最初からやり直す（`RESTART`） | 質問IDの一覧は画面に出さない |
 | `INVALID_ANSWER` | `error.INVALID_ANSWER`（同上） | 最初からやり直す | 同上 |
 | `INVALID_CONFIG` | `error.INVALID_CONFIG`（設定の誤りにより結果を表示できなかった旨）だけ | なし。回答を見直す導線も、最初からやり直す導線も出さない（Req 5.14 c） | `diagnosticReducer`も`OPEN_EDIT`と`RESTART`を受け付けない。しきい値はバンドルの検証（`BundleMetaSchema`と`mapConfig`のrefine）で`0 < T1 < T2 ≤ 200`を確認済みのため、実行時に起きるのは検証をすり抜けた場合だけである。利用者は再読み込みで復帰する |
+
+### 想定外の内部エラーと画面表示（Req 5.19）
+
+`MapError`以外の想定外の例外は、`diagnosticReducer`が捕捉して`UNEXPECTED_ERROR`へ遷移する。画面には承認済みの固定文言だけを表示する。
+
+| 項目 | 内容 |
+| --- | --- |
+| 表示する文 | `error.UNEXPECTED`（想定外の問題により結果を表示できなかった旨） |
+| 導線 | 「最初からやり直す」（`RESTART`）だけ。回答を見直す導線は出さない |
+| 回答が消える旨の明示 | 導線の近くに`error.UNEXPECTED.restartNote`（最初からやり直すと入力済みの回答が消える旨）を常に表示する |
+| 表示しないもの | 例外の内容、回答値、質問ID、最優先テーマ、段階、分類、件数、回答の振り返り |
+| `RESTART`の効果 | 回答、直近の結果、変更前の結果を破棄し、同じ診断セットの1問目（診断セットが未選択なら`INTRO`）から始める |
+| ログ | `diagnosticReducer`は何も書き出さない。呼出し側が必要なら固定の符号だけを書く |
 
 ### バンドルの読み込みのエラーと画面表示（Req 10.4, 11.10）
 
@@ -2006,7 +2049,7 @@ interface StorageAdapter {                                                    //
 | マップ生成、丸め、水準、分類（Property 1〜17） | 適用 | 金テストベクタ18件（例示） |
 | 質問バンクの検査（Property 18〜23） | 適用 | 検査ごとの合格例と拒否例、境界値 |
 | 課題カードと事実項目の検査（Property 24〜26） | 適用 | 契約の合格例と拒否例 |
-| AI下書き工程（Property 27〜30）、承認者数（Property 31） | 適用（Bedrockのfakeと一時ディレクトリ） | 架空資料の流れの統合テスト |
+| AI下書き工程（Property 27〜30、57）、承認者数（Property 31） | 適用（Bedrockのfakeと一時ディレクトリ） | 架空資料の流れの統合テスト。下書き工程が`map/`、`session/`、`view/`を取り込まない静的検査（Req 12.18） |
 | `dataMode`の判定、ゲート、バンドルの組立てと検証（Property 32〜40） | 適用（純関数。ファイルは一時ディレクトリ） | `runBuild`の統合テスト1〜3例 |
 | 状態機械、表示モデル（Property 41〜51） | 適用 | 金テストベクタの表示モデル |
 | 依存閉包、保存形式、禁止対象の検出、事実項目からのマップの独立（Property 52〜55） | 適用（静的検査と純関数） | 実ビルドでの`check:build-boundary`の1〜2例 |
@@ -2077,9 +2120,9 @@ V15、V16、V18は、`ResultViewModel`の構造（欄の有無、並び、該当
 | 質問バンク | 各検査の合格例と拒否例。境界値は、文字数の差20と21、前提文60と61文字、入れ替える質問数の差1と2、方向Aの区分の数の差1と2、各テーマの質問数0、1、2、最優先テーマの選択の数0、1、2（Req 12.4）。診断セットの拒否例は`QUICK`に最優先を含む、2テーマと4テーマ、優先条件の欠落、`FULL`のテーマの欠落、最優先が0問と2問、重みが1以外（Req 12.12） |
 | 事実項目 | 契約の合格例と拒否例（欠落、`VERIFIED`で検証記録なし、`PROVISIONAL`で検証記録あり）。`PROVISIONAL`が、バンドル、画面、AI下書きの入力（Bedrockのfakeの呼出し0回）に現れない（Req 12.14） |
 | ビルド | `dataMode`の判定表のA〜E × 3モード。`REAL`の5条件を1つずつ欠いたfakeデータ。`FIXTURE`に`REAL_AI`が1件混じると失敗。`REAL_PREFERRED`の切替と理由の記録（Req 12.13）。公開版の4つの記録の欠落ごと |
-| AI下書き | 架空資料の流れ（Req 12.15）。`system`と`text`の長さの合計が20,000と20,001。11回目の呼出し、許可モデル以外、タイムアウト、認証、サービスエラーの写像 |
+| AI下書き | 課題候補の検査（Property 57。Req 12.17）。架空資料の流れ（Req 12.15）。`system`と`text`の長さの合計が20,000と20,001。11回目の呼出し、許可モデル以外、タイムアウト、認証、サービスエラーの写像 |
 | バンドルの検証 | 5項目の欠落、期待値の不一致、生成日時の不正、ハッシュの不一致（Req 11.10）。取得が1回のGETだけであること |
-| 状態機械 | 遷移表の全行。診断セットが1つと2つのときの`START`。`INVALID_CONFIG`での`OPEN_EDIT`と`RESTART`の無視 |
+| 状態機械 | 遷移表の全行。診断セットが1つと2つのときの`START`。`INVALID_CONFIG`での`OPEN_EDIT`と`RESTART`の無視。例外を投げる関数を注入した`UNEXPECTED_ERROR`への遷移、その状態に回答と例外の内容が残らないこと、`RESTART`での回答の破棄 |
 | 表示モデル | 金テストベクタのV15、V16、V18。4つの状態の別の文言と別の欄。専門用語の注釈が画面ごとの最初の出現箇所だけにつくこと（Req 11.11）。日付の整形（`YYYY年M月D日`、JSTの`YYYY年M月D日 HH:mm`） |
 | 成果物の検査 | 禁止対象を1種類ずつ混入させた成果物で、混入ごとに失敗し、記号が一致する（Req 12.8）。実ビルドでの`check:build-boundary`（合成した`REAL_AI`のバンドルを使う） |
 | 保全 | 実装の前後の`npm test`の実行数、成功数、失敗数、スキップ数の比較。既存ファイルの差分が新規exportの追加行だけであること（Req 10.6〜10.8, 10.11） |
@@ -2118,8 +2161,8 @@ tasks.mdは作らない。依存関係の順を示す。各段階の終わりに
 | 7 | 架空データのバンドル | `packages/fixtures/src/regional-values/`のJSON（質問バンク、診断セット、課題カード、結果解説30件、固定文言、活かし方の問い9件、架空資料の本文）。デモ版のビルド | 6 | `npm run regional-values -- build --kind demo --data-mode FIXTURE`が成功し、自己検査に合格 |
 | 8 | 状態機械と表示モデル | `session/`（`diagnosticReducer`、`presentQuestion`、`toMapInput`）、`view/`、`storage/`の形式、`browser.ts`、`./regional-values`のexports。Property 41〜51、53、55、Property 52のbrowser側 | 3, 6, 7 | 金テストの表示モデル。依存閉包の検査 |
 | 9 | 共同開発者のUI | `apps/web`の画面、リリース用のVite設定、`check:build-boundary`の拡張、Property 54。**共同開発者の承認の記録が前提**（Req 10.9）。本specのタスクには含めず、別に記載する | 8 | 画面のテスト（UI担当）。拡張した`check:build-boundary`が合格 |
-| 10 | AI下書き（fake） | `draft/`。入力の門、決定的検査、冪等性、記録、承認台帳、CLI。Property 27〜30。実Bedrockは呼ばない | 5（`checkGrounding`）。6〜8とは並行できる | 架空資料の流れのテスト。fetchが0回 |
-| 11 | 実データの取り込みと検証 | `intake/`。`shelters.xlsx`の取り込みとSHA-256の再照合、集計、人による検証、`release.json`。xlsxの読取りは新規依存の承認が先（【要確認3】）。**利用条件、個別注記、送信可否の人による確認が前提** | 5。利用条件の確認 | `VERIFIED`の事実項目が1件以上。`REAL_PREFERRED`で`REAL_AI`のバンドルが出るか、不足の理由が出る |
+| 10 | AI下書き（fake） | `draft/`。入力の門、決定的検査（課題候補を含む）、冪等性、記録、承認台帳、CLI。Property 27〜30、57。実Bedrockは呼ばない | 5（`checkGrounding`）。6〜8とは並行できる | 架空資料の流れのテスト。fetchが0回 |
+| 11 | 実データの取り込みと検証 | `intake/`。データセットの棚卸し（人）の後に、CSVを先に取り込む（`csv-lines-v1`）。`shelters.xlsx`の取り込みとSHA-256の再照合は、xlsxの読取りの新規依存の承認が先（【要確認3】）。集計、人による検証、`release.json`。**利用条件、個別注記、送信可否の人による確認が前提** | 5。利用条件の確認 | `VERIFIED`の事実項目が1件以上。`REAL_PREFERRED`で`REAL_AI`のバンドルが出るか、不足の理由が出る |
 | 12 | 完了時の記録 | `npm test`を再実行し、開始前と比べる（失敗数が開始前以下、成功済みのテストがすべて成功、実行数が開始前以上、スキップ数が開始前以下）。既存ファイルの差分を確認する（Req 10.6〜10.8, 10.11） | すべて | 条件を満たす |
 
 - 段階3、4、5は、段階1と2の後で並行できる。段階10は段階5の後ならいつでも着手できる。段階9は、段階8の型の契約が安定すれば、段階8の完了前から共同開発者が着手できる。
@@ -2159,7 +2202,7 @@ tasks.mdは作らない。依存関係の順を示す。各段階の終わりに
 | 固有名詞の検査用一覧と実在名の設定一覧 | 設計で決定（内容は残る） | 設定値（`build.json`）。内容は実装時に人の承認で定める |
 | 架空課題の出典 | 決定済み | 架空の資料IDだけ |
 | デモ版のバンドルのSHA-256の検証 | 決定済み | 全ビルド種別で検証する。期待値の持ち場所は【要確認15】の決定 |
-| (1) クイック版の3つ目のテーマ | 残る | 診断セット定義のデータで差し替えられる。教育・子育てを第一候補とし、利用条件の確認後に決める |
+| (1) クイック版の3つ目のテーマ | 残る | 診断セット定義のデータで差し替えられる。教育・子育てを第一候補とし、公式データの棚卸し（13.14）の結果をもとに3テーマを確定する |
 | (2) `shelters.xlsx` | 解消 | 所在（`data/real/open-data/ehime-catalog/pref-2/shelters.xlsx`）、サイズ、SHA-256を確認済み。取り込み時に再照合する。暫定集計値は`VERIFIED`まで使わない |
 | (3) 利用条件が未確認の公式データ | 残る | 採用しない。確認できた出典から追加する |
 | (4) `dataMode`の既定 | 決定済み | デモ版は`REAL_PREFERRED`、公開版は`REAL` |
@@ -2175,6 +2218,21 @@ tasks.mdは作らない。依存関係の順を示す。各段階の終わりに
 | (16) 事実項目の架空データ版 | 決定済み | 前半の`FactItem`の`FIXTURE`型 |
 | (17) AIの貢献を示す数 | 決定済み | `events/`の記録から数える。不変条件を`aiContribution`のrefineに加える |
 
+### 公式データ優先の運用に関する決定（本改訂）
+
+利用者が承認した次の決定を、要件と設計とタスクに反映した。
+
+| 番号 | 決定 | 反映先 |
+| --- | --- | --- |
+| D1 | 課題候補（`ISSUE_CANDIDATE`）の入力は`VERIFIED`の事実項目に限る。課題候補は事実と区別し、`PENDING`で保存し、順位・推奨の項目を持たせず、人が確認するまで公開バンドルに含めない。AIの提案を公式機関の見解として扱わない | Req 8.1, 8.23〜8.25、AI下書き工程の節、Property 57、タスク11.1〜11.4、11.7〜11.9 |
+| D2 | 外部AIへの送信可否（G6）はAIが関与する出典に要求する。公開と加工に関する利用条件の確認は、すべての実データに要求する | Req 10.15 (ii)(c)、G2とG6、タスク13.12 |
+| D3 | `ResultText.dataKind`を追加する | 契約（`content.ts`）、タスク5.11、6.3、7.1 |
+| D4 | 最初の取り込み形式はCSVを優先する | 実データの取り込み手順、タスク13.15（xlsxの13.9は後回し） |
+| D5 | 実データ用の質問バンク、結果解説、固定文言は、複製して再承認する | ビルドの節、タスク13.16 |
+| D6 | クイック版の3テーマは、公式データの棚卸しの結果をもとに確定する | Open Decisions (1)、タスク13.14 |
+
+`RegionalSource.catalog`（カタログ名とデータセットID。Req 7.5 j）は、公式データのデータセットを追跡するために追加した（タスク5.12）。
+
 ### 【要確認N】の分類
 
 前半の【要確認1】〜【要確認17】と、後半で新しく見つけた【要確認18】〜【要確認24】を、次の3つに分ける。
@@ -2189,7 +2247,7 @@ tasks.mdは作らない。依存関係の順を示す。各段階の終わりに
 
 | 番号 | 内容 | 提案 |
 | --- | --- | --- |
-| 1 | 外部サービスへの送信可否を、`REAL`の条件（G6）に加えた。Req 10.15の5条件には明記がない | Req 10.15に条件(vi)として加える |
+| 1 | 【解消】外部サービスへの送信可否（G6）は、AI関与の区分が`AI_DRAFT`の課題カードの出典に要求する。公開と加工の可否は、すべての実データの出典に要求する | Req 10.15の(ii)と(c)に反映済み |
 | 2 | 項目単位の除外（Req 7.8, 7.15, 7.19）と、バンドル単位の失敗または切替（Req 10.15, 10.16）の関係を、「除外が1件でもあれば`REAL`は失敗、`REAL_PREFERRED`は全体を切り替える」と読んだ | 同じ読みを両方の基準に明記する |
 | 4 | 「MVPでは結果に影響しない」は、`T1 ≤ 100 < T2`の場合に限る | 未決事項の記述を直す |
 | 6 | 診断セット種別が質問バンクにない場合の誤りを、`INVALID_CONFIG`に含めた | Req 4.20に加える |
@@ -2204,8 +2262,8 @@ tasks.mdは作らない。依存関係の順を示す。各段階の終わりに
 
 | 番号 | 内容 | 設計の既定 |
 | --- | --- | --- |
-| 3 | xlsxの位置情報（既存の`Locator`に新しい種別を足すか）と、xlsxの読取りの新規依存 | `text-lines`への決定的な展開で代替。依存は候補の比較と承認依頼の後 |
-| 5 | 実データ用の質問バンクが`data/real`に置かれ、Git管理外になる | 実データ用と架空データ用を別のレコードにする |
+| 3 | xlsxの位置情報（既存の`Locator`に新しい種別を足すか）と、xlsxの読取りの新規依存 | 当面はCSVを先に取り込む（`csv-lines-v1`。依存なし）。xlsxは`text-lines`への決定的な展開で代替し、依存は候補の比較と承認依頼の後。xlsxを扱う時点まで保留 |
+| 5 | 実データ用の質問バンクが`data/real`に置かれ、Git管理外になる | 【解消】実データ用と架空データ用を別のレコードにし、架空データ用を複製して再承認する（13.16） |
 | 9 | 確認済みの文字起こしの保存形式（PDF出典が出たとき） | 実データでPDF出典が出る時点で、別に設計を足す |
 | 12 | 旧マッチング機能のコードが現在0件。他のブランチ等に存在しないかの確認 | 削除も変更もしない（対象が0件） |
 | 14 | 課題カードの用語解説を1件以上10件以下とする契約（Req 7.1 e）の扱い。前半 Data Modelsの注記のとおり、下限と上限の妥当性の確認が要る | 要件どおりの範囲（1〜10件）で契約に反映 |

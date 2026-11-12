@@ -1,6 +1,6 @@
 # 例外境界に関する仕様変更点の記録（3.6・4.3 向け）
 
-状態: 記録のみ。design.md、tasks.md、requirements.md には未反映（反映は承認後）。
+状態: 反映済み（requirements.md の Req 5.19、design.md の画面状態と遷移・エラー処理・Property 56、tasks.md の 3.6・4.3・4.4・4.5・5.1・5.6）。
 
 ## 決定した方針（ユーザー承認済み）
 

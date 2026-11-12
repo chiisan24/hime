@@ -1,0 +1,362 @@
+[
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "POPULATION_REVITALIZATION",
+    "axis": "IMPORTANCE",
+    "level": 2,
+    "text": "地域活動をとても大切と回答したことを表します。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "POPULATION_REVITALIZATION",
+    "axis": "IMPORTANCE",
+    "level": 1,
+    "text": "地域活動を大切と回答したことを表します。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "POPULATION_REVITALIZATION",
+    "axis": "IMPORTANCE",
+    "level": 0,
+    "text": "地域活動をどちらでもないと回答したことを表します。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "POPULATION_REVITALIZATION",
+    "axis": "IMPORTANCE",
+    "level": -1,
+    "text": "地域活動をあまり大切でないと回答したことを表します。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "POPULATION_REVITALIZATION",
+    "axis": "IMPORTANCE",
+    "level": -2,
+    "text": "地域活動を大切でないと回答したことを表します。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "POPULATION_REVITALIZATION",
+    "axis": "TRADEOFF",
+    "level": 2,
+    "text": "どちらかを選ぶなら、地域活動では地域の外とのつながりを強く先に進めたい考えに近い。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "POPULATION_REVITALIZATION",
+    "axis": "TRADEOFF",
+    "level": 1,
+    "text": "どちらかを選ぶなら、地域活動では地域の外とのつながりをやや先に進めたい考えに近い。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "POPULATION_REVITALIZATION",
+    "axis": "TRADEOFF",
+    "level": 0,
+    "text": "地域活動では、二つの取り組みを同じくらい先に進めたい考えに近い。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "POPULATION_REVITALIZATION",
+    "axis": "TRADEOFF",
+    "level": -1,
+    "text": "どちらかを選ぶなら、地域活動では地域の中の暮らしを支える取り組みをやや先に進めたい考えに近い。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "POPULATION_REVITALIZATION",
+    "axis": "TRADEOFF",
+    "level": -2,
+    "text": "どちらかを選ぶなら、地域活動では地域の中の暮らしを支える取り組みを強く先に進めたい考えに近い。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "DISASTER_PREVENTION",
+    "axis": "IMPORTANCE",
+    "level": 2,
+    "text": "防災の備えをとても大切と回答したことを表します。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "DISASTER_PREVENTION",
+    "axis": "IMPORTANCE",
+    "level": 1,
+    "text": "防災の備えを大切と回答したことを表します。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "DISASTER_PREVENTION",
+    "axis": "IMPORTANCE",
+    "level": 0,
+    "text": "防災の備えをどちらでもないと回答したことを表します。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "DISASTER_PREVENTION",
+    "axis": "IMPORTANCE",
+    "level": -1,
+    "text": "防災の備えをあまり大切でないと回答したことを表します。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "DISASTER_PREVENTION",
+    "axis": "IMPORTANCE",
+    "level": -2,
+    "text": "防災の備えを大切でないと回答したことを表します。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "DISASTER_PREVENTION",
+    "axis": "TRADEOFF",
+    "level": 2,
+    "text": "どちらかを選ぶなら、防災の備えでは避難に必要な情報を届ける取り組みを強く先に進めたい考えに近い。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "DISASTER_PREVENTION",
+    "axis": "TRADEOFF",
+    "level": 1,
+    "text": "どちらかを選ぶなら、防災の備えでは避難に必要な情報を届ける取り組みをやや先に進めたい考えに近い。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "DISASTER_PREVENTION",
+    "axis": "TRADEOFF",
+    "level": 0,
+    "text": "防災の備えでは、二つの取り組みを同じくらい先に進めたい考えに近い。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "DISASTER_PREVENTION",
+    "axis": "TRADEOFF",
+    "level": -1,
+    "text": "どちらかを選ぶなら、防災の備えでは避難する場所を整える取り組みをやや先に進めたい考えに近い。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "DISASTER_PREVENTION",
+    "axis": "TRADEOFF",
+    "level": -2,
+    "text": "どちらかを選ぶなら、防災の備えでは避難する場所を整える取り組みを強く先に進めたい考えに近い。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "EDUCATION_CHILDCARE",
+    "axis": "IMPORTANCE",
+    "level": 2,
+    "text": "教育・子育てをとても大切と回答したことを表します。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "EDUCATION_CHILDCARE",
+    "axis": "IMPORTANCE",
+    "level": 1,
+    "text": "教育・子育てを大切と回答したことを表します。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "EDUCATION_CHILDCARE",
+    "axis": "IMPORTANCE",
+    "level": 0,
+    "text": "教育・子育てをどちらでもないと回答したことを表します。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "EDUCATION_CHILDCARE",
+    "axis": "IMPORTANCE",
+    "level": -1,
+    "text": "教育・子育てをあまり大切でないと回答したことを表します。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "EDUCATION_CHILDCARE",
+    "axis": "IMPORTANCE",
+    "level": -2,
+    "text": "教育・子育てを大切でないと回答したことを表します。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "EDUCATION_CHILDCARE",
+    "axis": "TRADEOFF",
+    "level": 2,
+    "text": "どちらかを選ぶなら、教育・子育てでは子育ての相談を受ける取り組みを強く先に進めたい考えに近い。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "EDUCATION_CHILDCARE",
+    "axis": "TRADEOFF",
+    "level": 1,
+    "text": "どちらかを選ぶなら、教育・子育てでは子育ての相談を受ける取り組みをやや先に進めたい考えに近い。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "EDUCATION_CHILDCARE",
+    "axis": "TRADEOFF",
+    "level": 0,
+    "text": "教育・子育てでは、二つの取り組みを同じくらい先に進めたい考えに近い。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "EDUCATION_CHILDCARE",
+    "axis": "TRADEOFF",
+    "level": -1,
+    "text": "どちらかを選ぶなら、教育・子育てでは子どもの学びを支える取り組みをやや先に進めたい考えに近い。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  },
+  {
+    "dataKind": "FIXTURE",
+    "themeId": "EDUCATION_CHILDCARE",
+    "axis": "TRADEOFF",
+    "level": -2,
+    "text": "どちらかを選ぶなら、教育・子育てでは子どもの学びを支える取り組みを強く先に進めたい考えに近い。",
+    "approval": {
+      "status": "APPROVED",
+      "approverId": "fixture-text-approver-v1",
+      "approvedAt": "2026-01-03T09:00:00Z"
+    }
+  }
+]

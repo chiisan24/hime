@@ -1,0 +1,932 @@
+{
+  "dataKind": "FIXTURE",
+  "items": [
+    {
+      "key": "notice",
+      "text": "この結果は自己理解を整理するための参考です。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "banner.FIXTURE",
+      "text": "これはデモ用の架空データです。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "label.dataKind.FIXTURE",
+      "text": "デモ用の架空の課題",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "label.ai",
+      "text": "AIの下書きを人が確認",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "level.importance.+2",
+      "text": "とても大切",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "level.importance.+1",
+      "text": "大切",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "level.importance.0",
+      "text": "どちらでもない",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "level.importance.-1",
+      "text": "あまり大切でない",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "level.importance.-2",
+      "text": "大切でない",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "state.NOT_ASKED",
+      "text": "この診断では出題していません。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "state.UNSURE",
+      "text": "わからない",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "state.DECLINE",
+      "text": "回答しない",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "state.UNANSWERED",
+      "text": "未回答",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "state.UNDETERMINED",
+      "text": "判定できません。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "section.explainer",
+      "text": "結果の見方",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "section.priority",
+      "text": "最優先テーマ",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "section.importance",
+      "text": "大切さ",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "section.chart",
+      "text": "大切さの段階",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "section.tradeoff",
+      "text": "優先条件",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "section.hesitant",
+      "text": "判断に迷ったテーマ",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "section.declined",
+      "text": "回答しなかったテーマ",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "section.declined.DECLINE",
+      "text": "回答しない",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "section.declined.UNANSWERED",
+      "text": "未回答",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "section.undetermined",
+      "text": "判定できない軸",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "section.notAsked",
+      "text": "未出題のテーマ",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "section.counts",
+      "text": "回答の件数",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "section.reflection",
+      "text": "回答の振り返り",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "section.diff",
+      "text": "変更前後の違い",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "section.guidance",
+      "text": "暮らしへの活かし方",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "chart.undetermined",
+      "text": "判定できないテーマ",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "chart.notAsked",
+      "text": "出題していないテーマ",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "badge.priority",
+      "text": "最優先",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "badge.hesitant",
+      "text": "迷いあり",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "empty.group",
+      "text": "この段階に当てはまるテーマはありません。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "empty.tradeoff",
+      "text": "優先条件を示せるテーマはありません。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "empty.hesitant",
+      "text": "判断に迷ったテーマはありません。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "empty.declined.DECLINE",
+      "text": "回答しないテーマはありません。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "empty.declined.UNANSWERED",
+      "text": "未回答のテーマはありません。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "empty.notAsked",
+      "text": "未出題のテーマはありません。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "reason.UNSURE",
+      "text": "わからない回答がありました。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "reason.PICK_CONFLICT",
+      "text": "最優先の選択と大切さの段階が異なります。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "note.noThemeDifference",
+      "text": "回答からテーマ間の差は読み取れません。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "note.equalLevel",
+      "text": "同じ段階のテーマがあります。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "lead.tradeoff",
+      "text": "両立が難しい場面で、どちらを先に進めたいかを示します。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "priority.NOT_ASKED",
+      "text": "この診断では最優先テーマを聞いていません。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "priority.NONE_SELECTED",
+      "text": "最優先テーマは選ばれていません。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "priority.SELECTED",
+      "text": "選んだ最優先テーマです。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "explainer.STAGE_MEANING.heading",
+      "text": "段階の意味",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "explainer.STAGE_MEANING.body",
+      "text": "段階は、各テーマへの回答の傾向を五つに整理した表示です。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "explainer.GROUP_READING.heading",
+      "text": "グループの見方",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "explainer.GROUP_READING.body",
+      "text": "同じ段階のテーマは、優先度の順番を示しません。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "explainer.HESITANT_MEANING.heading",
+      "text": "迷いの意味",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "explainer.HESITANT_MEANING.body",
+      "text": "わからない回答や最優先との違いがあるテーマを示します。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "scene.ELECTION",
+      "text": "選挙",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "scene.MOVE_OR_JOB",
+      "text": "移住や就職",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "scene.DAILY_LIFE",
+      "text": "日常生活",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "guidance.empty",
+      "text": "最優先テーマと大切さが高いテーマがないため、案内を表示しません。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "diff.changed",
+      "text": "変わりました。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "diff.unchanged",
+      "text": "変わっていません。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "reflection.crossTheme",
+      "text": "六つのテーマを横断する質問",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "counts.themes",
+      "text": "出題テーマは{n}件、全テーマは{m}件です。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "counts.questions",
+      "text": "意見回答は{n}件、出題質問は{m}件です。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "error.NO_OPINION_ANSWERS",
+      "text": "意見回答がないため、結果を作れませんでした。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "error.UNKNOWN_QUESTION",
+      "text": "結果を表示できませんでした。最初からやり直してください。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "error.INVALID_ANSWER",
+      "text": "結果を表示できませんでした。最初からやり直してください。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "error.INVALID_CONFIG",
+      "text": "設定の誤りにより、結果を表示できませんでした。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "error.UNEXPECTED",
+      "text": "予期しない問題が起きました。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "error.UNEXPECTED.restartNote",
+      "text": "最初からやり直すと、入力した回答は消えます。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "action.REVIEW_ANSWERS",
+      "text": "回答を見直す",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "action.RESTART",
+      "text": "最初からやり直す",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.heading",
+      "text": "このアプリについて",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.questions.heading",
+      "text": "質問の作り方",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.author.HUMAN",
+      "text": "人間の起案",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.author.AI_DRAFT",
+      "text": "AIの提案",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.rules.heading",
+      "text": "生成ルール",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.rules.MAPPING.heading",
+      "text": "質問と価値観の対応",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.rules.MAPPING.body",
+      "text": "質問の回答をテーマごとに整理します。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.rules.WEIGHT.heading",
+      "text": "質問の重み",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.rules.WEIGHT.body",
+      "text": "質問ごとの重みを使って回答を整理します。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.rules.NON_OPINION.heading",
+      "text": "回答しない場合",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.rules.NON_OPINION.body",
+      "text": "わからない、回答しない、未回答は段階に使いません。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.rules.GROUPING.heading",
+      "text": "段階のグループ",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.rules.GROUPING.body",
+      "text": "段階は順位を付けず、同じ段階ごとに表示します。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.thresholds",
+      "text": "段階のしきい値は{t1}と{t2}です。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.dataKind.FIXTURE",
+      "text": "このデータはデモ用の架空の課題です。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.aiScope",
+      "text": "AIは公開前の下書きだけに使い、計算と回答には使いません。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.coverage.totalQuestions",
+      "text": "質問は{totalQuestions}問です。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.coverage.totalThemes",
+      "text": "テーマは{totalThemes}件です。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.coverage.limitNote",
+      "text": "結果は{totalQuestions}問と{totalThemes}件のテーマに基づきます。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.aiContribution.DRAFTED",
+      "text": "AIが下書きした件数",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.aiContribution.REJECTED_BY_CHECKS",
+      "text": "検査で不合格になった件数",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.aiContribution.HUMAN_EDITED",
+      "text": "人が修正した件数",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "about.aiContribution.HUMAN_REJECTED",
+      "text": "人が却下した件数",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "ui.appName",
+      "text": "地域の価値観マップ",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "ui.about",
+      "text": "このアプリについて",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "ui.next",
+      "text": "次へ",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "ui.back",
+      "text": "戻る",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "ui.showResult",
+      "text": "結果を見る",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "ui.changeAnswer",
+      "text": "回答を変更する",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "ui.hint.SELECT_REQUIRED",
+      "text": "一つ選んでから次へ進んでください。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "ui.hint.PICK_LIMIT",
+      "text": "最優先テーマは二つまで選べます。",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "ui.option.UNSURE",
+      "text": "わからない",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "key": "ui.option.DECLINE",
+      "text": "回答しない",
+      "approval": {
+        "status": "APPROVED",
+        "approverId": "fixture-text-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    }
+  ]
+}
