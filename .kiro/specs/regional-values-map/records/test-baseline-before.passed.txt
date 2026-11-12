@@ -1,0 +1,1344 @@
+apps/api/src/analysis/cli.test.ts > analysis CLI: election change does not save when the change is declined
+apps/api/src/analysis/cli.test.ts > analysis CLI: election change keeps the original file when saving fails and does not leak paths
+apps/api/src/analysis/cli.test.ts > analysis CLI: election change refuses an unknown election without asking or saving
+apps/api/src/analysis/cli.test.ts > analysis CLI: election change refuses the election that is already current without asking or saving
+apps/api/src/analysis/cli.test.ts > analysis CLI: election change shows before and after, asks once, and saves only after approval
+apps/api/src/analysis/cli.test.ts > analysis CLI: election show lists every registered election and exits 0
+apps/api/src/analysis/cli.test.ts > analysis CLI: election show names every violation of an invalid registry
+apps/api/src/analysis/cli.test.ts > analysis CLI: election show reports a missing registry and exits 1
+apps/api/src/analysis/cli.test.ts > analysis CLI: usage prints the usage and exits 1 for ["election","change","a","b"]
+apps/api/src/analysis/cli.test.ts > analysis CLI: usage prints the usage and exits 1 for ["election","change"]
+apps/api/src/analysis/cli.test.ts > analysis CLI: usage prints the usage and exits 1 for ["election","show","extra"]
+apps/api/src/analysis/cli.test.ts > analysis CLI: usage prints the usage and exits 1 for ["election"]
+apps/api/src/analysis/cli.test.ts > analysis CLI: usage prints the usage and exits 1 for ["unknown"]
+apps/api/src/analysis/cli.test.ts > analysis CLI: usage prints the usage and exits 1 for []
+apps/api/src/analysis/extractCli.test.ts > analysis CLI: extract prints the usage and exits 1 for ["extract","--revision","r1"]
+apps/api/src/analysis/extractCli.test.ts > analysis CLI: extract prints the usage and exits 1 for ["extract","--source","bulletin-a","--unknown","x"]
+apps/api/src/analysis/extractCli.test.ts > analysis CLI: extract prints the usage and exits 1 for ["extract","--source","bulletin-a","extra"]
+apps/api/src/analysis/extractCli.test.ts > analysis CLI: extract prints the usage and exits 1 for ["extract","--source"]
+apps/api/src/analysis/extractCli.test.ts > analysis CLI: extract prints the usage and exits 1 for ["extract"]
+apps/api/src/analysis/extractCli.test.ts > analysis CLI: extract refuses to extract when the stored body no longer matches its SHA-256
+apps/api/src/analysis/extractCli.test.ts > analysis CLI: extract rejects an unknown revision without calling the extractor
+apps/api/src/analysis/extractCli.test.ts > analysis CLI: extract rejects an unknown source without calling the extractor
+apps/api/src/analysis/extractCli.test.ts > analysis CLI: extract reports NOT_READY with exit code 1 and says OCR is not run
+apps/api/src/analysis/extractCli.test.ts > analysis CLI: extract reports counts only and never the page text
+apps/api/src/analysis/extractCli.test.ts > analysis CLI: extract uses the latest revision when none is given
+apps/api/src/analysis/extractCliStore.test.ts > analysis CLI: extract keeps its result saves the EXTRACT run under the SHA-256 and revision of the ingest record
+apps/api/src/analysis/extractCliStore.test.ts > analysis CLI: extract keeps its result serves a second extract from the store and keeps the original PDF unchanged
+apps/api/src/analysis/extractCliStore.test.ts > analysis CLI: extract keeps its result stops with STORE_WRITE_FAILED and keeps nothing when the save fails
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest names the missing item for a missing URL
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest never prints the document contents or file paths
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest prints the usage and exits 1 for ["ingest","a.pdf","b.pdf","--election","test-election-a","--source","bulletin-a"]
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest prints the usage and exits 1 for ["ingest","bulletin.pdf","--election","test-election-a","--source","bulletin-a","--candidate","candidate-a","--shared"]
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest prints the usage and exits 1 for ["ingest","bulletin.pdf","--election","test-election-a","--source","bulletin-a","--unknown","x"]
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest prints the usage and exits 1 for ["ingest","bulletin.pdf","--election","test-election-a","--source","bulletin-a","--url"]
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest prints the usage and exits 1 for ["ingest","bulletin.pdf","--election","test-election-a"]
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest prints the usage and exits 1 for ["ingest","bulletin.pdf"]
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest prints the usage and exits 1 for ["ingest"]
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest records an explicit candidate or a shared document
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest registers a PDF and then reports it as unchanged
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest rejects a bad source ID and saves nothing
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest rejects a missing URL and saves nothing
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest rejects a missing file and saves nothing
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest rejects a path in the file name and saves nothing
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest rejects an unknown candidate and saves nothing
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest rejects an unknown election and saves nothing
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest reports a failed save without leaving a record or leaking paths
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest stops on a missing registry
+apps/api/src/analysis/ingestCli.test.ts > analysis CLI: ingest uses the injected clock when no retrieval time is given
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect flags pages without text and recommends review or OCR
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect prints per-page counts and a verdict, never the text, and writes nothing
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect prints the usage and exits 1 for ["inspect","--file","a.pdf","--file","b.pdf"]
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect prints the usage and exits 1 for ["inspect","--file","a.pdf","--unknown"]
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect prints the usage and exits 1 for ["inspect","--file","a.pdf","--write-review","--write-review"]
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect prints the usage and exits 1 for ["inspect","--file"]
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect prints the usage and exits 1 for ["inspect","--write-review"]
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect prints the usage and exits 1 for ["inspect","bulletin.pdf"]
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect prints the usage and exits 1 for ["inspect"]
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect rejects the file name ../bulletin.pdf without reading or extracting
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect rejects the file name .pdf without reading or extracting
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect rejects the file name a..pdf without reading or extracting
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect rejects the file name bulletin.txt without reading or extracting
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect rejects the file name sub/bulletin.pdf without reading or extracting
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect rejects the file name sub\bulletin.pdf without reading or extracting
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect reports a failed review write without leaving a file
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect reports a missing file and an unreadable PDF by code
+apps/api/src/analysis/inspectCommand.test.ts > analysis CLI: inspect writes a local review copy only on request and leaves the PDF unchanged
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr compare fails a region that is not accurate enough and says the full document must not be analysed
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr compare honours --min-f1 and flags a different reading order
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr compare passes a region whose text matches and scores only the regions with typed text
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr compare stops when there is nothing to compare
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial closes the engine and reports TRIAL_WRITE_FAILED when the files cannot be written
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial never overwrites a ground-truth file that already exists
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial prints counts only and saves images, results and an empty ground-truth template
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial prints the usage and exits 1 for a bad dpi
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial prints the usage and exits 1 for a duplicate id
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial prints the usage and exits 1 for a region larger than half a page
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial prints the usage and exits 1 for a region outside the page
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial prints the usage and exits 1 for an inverted region
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial prints the usage and exits 1 for an unknown action
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial prints the usage and exits 1 for an unknown flag
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial prints the usage and exits 1 for compare with a bad minimum
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial prints the usage and exits 1 for compare without a file
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial prints the usage and exits 1 for no action
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial prints the usage and exits 1 for no file
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial prints the usage and exits 1 for no region
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial prints the usage and exits 1 for page 0
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial prints the usage and exits 1 for six regions
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial rejects an unsafe or missing file without rendering
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial saves nothing when the engine cannot start
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial saves nothing when the page cannot be rendered
+apps/api/src/analysis/ocrCommand.test.ts > analysis CLI: ocr trial saves nothing when the recognition fails
+apps/api/src/analysis/ocrCommandConfig.test.ts > OCR_TRACE traces every step with times and memory, and never writes page text or paths
+apps/api/src/analysis/ocrCommandConfig.test.ts > OCR_TRACE writes no trace line when tracing is off
+apps/api/src/analysis/ocrCommandConfig.test.ts > ocr trial settings keeps the results of other settings in their own directory and leaves the default results alone
+apps/api/src/analysis/ocrCommandConfig.test.ts > ocr trial settings prints the usage for a repeated strategy
+apps/api/src/analysis/ocrCommandConfig.test.ts > ocr trial settings prints the usage for an unknown strategy
+apps/api/src/analysis/ocrCommandConfig.test.ts > ocr trial settings prints the usage for compare with a bad dpi
+apps/api/src/analysis/ocrCommandConfig.test.ts > ocr trial settings prints the usage for compare with an unknown strategy
+apps/api/src/analysis/ocrCommandConfig.test.ts > ocr truth and compare compares the results of another setting with the same typed text, separately from the default
+apps/api/src/analysis/ocrCommandConfig.test.ts > ocr truth and compare creates a text template that holds only instructions, and never overwrites it
+apps/api/src/analysis/ocrCommandConfig.test.ts > ocr truth and compare falls back to the JSON entry when the text file holds only # lines
+apps/api/src/analysis/ocrCommandConfig.test.ts > ocr truth and compare refuses results whose recorded settings differ from the directory
+apps/api/src/analysis/ocrCommandConfig.test.ts > ocr truth and compare rejects an unknown region, missing results and a bad region id
+apps/api/src/analysis/ocrCommandConfig.test.ts > ocr truth and compare scores a region typed in the text file, ignoring # lines, and prefers it to the JSON entry
+apps/api/src/analysis/ocrCommandConfig.test.ts > ocr truth and compare scores results saved before the strategy was recorded as per-line
+apps/api/src/analysis/ocrCommandConfig.test.ts > ocr truth and compare stops with NO_GROUND_TRUTH when nothing was typed
+apps/api/src/analysis/pacer.test.ts > createPacer does not block later callers when one wait fails
+apps/api/src/analysis/pacer.test.ts > createPacer lets the first request start at once
+apps/api/src/analysis/pacer.test.ts > createPacer refuses an interval below 6.1 seconds
+apps/api/src/analysis/pacer.test.ts > createPacer serves concurrent callers one at a time, 6.1 seconds apart
+apps/api/src/analysis/pacer.test.ts > createPacer waits only for the time that is left, and not at all after the interval
+apps/api/src/analysis/pacer.test.ts > createPacer waits the full interval when the next request comes right away
+apps/api/src/analysis/stageRunner.test.ts > computeStageRunId changes when the key element {"inputHash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"} changes
+apps/api/src/analysis/stageRunner.test.ts > computeStageRunId changes when the key element {"modelId":null} changes
+apps/api/src/analysis/stageRunner.test.ts > computeStageRunId changes when the key element {"revision":"r2"} changes
+apps/api/src/analysis/stageRunner.test.ts > computeStageRunId changes when the key element {"sourceSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"} changes
+apps/api/src/analysis/stageRunner.test.ts > computeStageRunId changes when the key element {"stage":"SUMMARISE"} changes
+apps/api/src/analysis/stageRunner.test.ts > computeStageRunId hashes a stage input in canonical JSON
+apps/api/src/analysis/stageRunner.test.ts > computeStageRunId is the SHA-256 of the canonical key and does not depend on property order
+apps/api/src/analysis/stageRunner.test.ts > runStage does not use a stored run when the key element {"inputHash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"} differs
+apps/api/src/analysis/stageRunner.test.ts > runStage does not use a stored run when the key element {"modelId":"jp.anthropic.claude-opus-5-5"} differs
+apps/api/src/analysis/stageRunner.test.ts > runStage does not use a stored run when the key element {"revision":"r2"} differs
+apps/api/src/analysis/stageRunner.test.ts > runStage does not use a stored run when the key element {"sourceSha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"} differs
+apps/api/src/analysis/stageRunner.test.ts > runStage does not use a stored run when the key element {"stage":"SUMMARISE"} differs
+apps/api/src/analysis/stageRunner.test.ts > runStage executes once, stores the SUCCEEDED run and then serves it from the store
+apps/api/src/analysis/stageRunner.test.ts > runStage records a failure as a separate FAILED run that is never a cache hit
+apps/api/src/analysis/stageRunner.test.ts > runStage records an output that fails validation as FAILED and stores no SUCCEEDED run
+apps/api/src/analysis/stageRunner.test.ts > runStage reports a write failure and does not keep an unsaved result
+apps/api/src/analysis/stageRunner.test.ts > runStage returns a stored SUCCEEDED run without executing, so a failing stage cannot overwrite it
+apps/api/src/analysis/stageRunner.test.ts > runStage stops without executing when a stored output is no longer valid
+apps/api/src/analysis/stageRunner.test.ts > runStage stops without executing when the store cannot be read or the key is invalid
+apps/api/src/analysis/stageRunner.test.ts > runStage stores only a fixed error code, never a message
+apps/api/src/analysis/stageStore.test.ts > createFileStageStore accepts the same run twice but refuses a different SUCCEEDED run for the same key
+apps/api/src/analysis/stageStore.test.ts > createFileStageStore does not treat a FAILED run alone as a hit
+apps/api/src/analysis/stageStore.test.ts > createFileStageStore fails closed on a corrupt or mismatched run file
+apps/api/src/analysis/stageStore.test.ts > createFileStageStore finds nothing when any one of the five key elements differs
+apps/api/src/analysis/stageStore.test.ts > createFileStageStore ignores files that are not run files
+apps/api/src/analysis/stageStore.test.ts > createFileStageStore keeps a FAILED run in its own file and never lets it replace or become a SUCCEEDED run
+apps/api/src/analysis/stageStore.test.ts > createFileStageStore leaves existing files untouched and creates no new file when the commit fails
+apps/api/src/analysis/stageStore.test.ts > createFileStageStore lists every run of a stage, oldest first
+apps/api/src/analysis/stageStore.test.ts > createFileStageStore rejects an unsafe key or an inconsistent run without touching the disk
+apps/api/src/analysis/stageStore.test.ts > createFileStageStore saves a SUCCEEDED run once under stages/<sha256>/<revision>/<stage> and finds it by key
+apps/api/src/analysis/themes.test.ts > parseThemeList accepts a list of unique theme names
+apps/api/src/analysis/themes.test.ts > parseThemeList does not echo the file text in an error
+apps/api/src/analysis/themes.test.ts > parseThemeList reports a different schema version as THEME_LIST_UNREADABLE
+apps/api/src/analysis/themes.test.ts > parseThemeList reports a duplicated name as THEME_LIST_UNREADABLE
+apps/api/src/analysis/themes.test.ts > parseThemeList reports a missing list as THEME_LIST_UNREADABLE
+apps/api/src/analysis/themes.test.ts > parseThemeList reports a name that duplicates after NFKC normalisation as THEME_LIST_UNREADABLE
+apps/api/src/analysis/themes.test.ts > parseThemeList reports a name that is too long as THEME_LIST_UNREADABLE
+apps/api/src/analysis/themes.test.ts > parseThemeList reports a name with a control character as THEME_LIST_UNREADABLE
+apps/api/src/analysis/themes.test.ts > parseThemeList reports a name with surrounding space as THEME_LIST_UNREADABLE
+apps/api/src/analysis/themes.test.ts > parseThemeList reports a non-string name as THEME_LIST_UNREADABLE
+apps/api/src/analysis/themes.test.ts > parseThemeList reports an empty list as THEME_LIST_EMPTY
+apps/api/src/analysis/themes.test.ts > parseThemeList reports an empty name as THEME_LIST_UNREADABLE
+apps/api/src/analysis/themes.test.ts > parseThemeList reports an unknown property as THEME_LIST_UNREADABLE
+apps/api/src/analysis/themes.test.ts > parseThemeList reports invalid JSON as THEME_LIST_UNREADABLE
+apps/api/src/analysis/themes.test.ts > parseThemeList reports the reserved name as THEME_LIST_UNREADABLE
+apps/api/src/analysis/themes.test.ts > readThemeList accepts the committed config/themes.json
+apps/api/src/analysis/themes.test.ts > readThemeList reads config/themes.json below the workspace root
+apps/api/src/analysis/themes.test.ts > readThemeList stops with THEME_LIST_UNREADABLE when the file is missing
+apps/api/src/app.test.ts > local API application allows the configured Vite Origin http://127.0.0.1:4173
+apps/api/src/app.test.ts > local API application allows the configured Vite Origin http://127.0.0.1:5173
+apps/api/src/app.test.ts > local API application allows the configured Vite Origin http://localhost:4173
+apps/api/src/app.test.ts > local API application allows the configured Vite Origin http://localhost:5173
+apps/api/src/app.test.ts > local API application permits an originless in-process health request only in explicit test mode
+apps/api/src/app.test.ts > local API application returns one memory-only nonce from the guarded localhost session route
+apps/api/src/app.test.ts > local API application returns schema-valid NOT_READY health at /api/v1/health without a nonce
+apps/api/src/app.test.ts > local API application returns schema-valid NOT_READY health at /health without a nonce
+apps/api/src/app.test.ts > local API application rotates the session nonce when a new application process composition is created
+apps/api/src/aws/bedrockConverse.property.test.ts > Bedrock Converse input cap never lets text longer than 20000 characters reach fetch
+apps/api/src/aws/bedrockConverse.test.ts > input and model limits accepts input of exactly 20000 characters in total
+apps/api/src/aws/bedrockConverse.test.ts > input and model limits allows only the two admin-issued jp. models
+apps/api/src/aws/bedrockConverse.test.ts > input and model limits rejects invalid input before any fetch ({"modelId":"jp.anthropic.claude-haiku-5-5","system":" ","text":"こんにちは"})
+apps/api/src/aws/bedrockConverse.test.ts > input and model limits rejects invalid input before any fetch ({"modelId":"jp.anthropic.claude-haiku-5-5","system":"短く答えてください。","text":"  \n"})
+apps/api/src/aws/bedrockConverse.test.ts > input and model limits rejects invalid input before any fetch ({"modelId":"jp.anthropic.claude-haiku-5-5","system":"短く答えてください。","text":""})
+apps/api/src/aws/bedrockConverse.test.ts > input and model limits rejects invalid input before any fetch ({"modelId":"jp.anthropic.claude-haiku-5-5","system":"短く答えてください。","text":42})
+apps/api/src/aws/bedrockConverse.test.ts > input and model limits rejects invalid input before any fetch ({"modelId":"jp.anthropic.claude-haiku-5-5"})
+apps/api/src/aws/bedrockConverse.test.ts > input and model limits rejects over-length input before any fetch
+apps/api/src/aws/bedrockConverse.test.ts > readiness gate and key makes zero fetch calls when the configuration is not ready
+apps/api/src/aws/bedrockConverse.test.ts > readiness gate and key names only the key setting when the key is absent from the environment
+apps/api/src/aws/bedrockConverse.test.ts > readiness gate and key reads the key at call time and rejects an unusable key before fetch
+apps/api/src/aws/bedrockConverse.test.ts > request shape posts the exact Converse request with the Bearer key
+apps/api/src/aws/bedrockConverse.test.ts > request shape reports a response with no output without echoing it
+apps/api/src/aws/bedrockConverse.test.ts > request shape reports a response with no text element without echoing it
+apps/api/src/aws/bedrockConverse.test.ts > request shape reports a response with not JSON without echoing it
+apps/api/src/aws/bedrockConverse.test.ts > request shape returns the first content element that has text
+apps/api/src/aws/bedrockConverse.test.ts > request shape sets the 30 second timeout and can only shorten it
+apps/api/src/aws/bedrockConverse.test.ts > secret-free failures never returns or prints the key, prompt, or reply across every outcome
+apps/api/src/aws/bedrockConverse.test.ts > secret-free failures returns only the status for a non-2xx response
+apps/api/src/aws/bedrockConverse.test.ts > single attempt, concurrency, and rate cap calls fetch exactly once after a network failure
+apps/api/src/aws/bedrockConverse.test.ts > single attempt, concurrency, and rate cap calls fetch exactly once after an HTTP 429
+apps/api/src/aws/bedrockConverse.test.ts > single attempt, concurrency, and rate cap calls fetch exactly once after an HTTP 500
+apps/api/src/aws/bedrockConverse.test.ts > single attempt, concurrency, and rate cap rejects a second concurrent call instead of queueing it
+apps/api/src/aws/bedrockConverse.test.ts > single attempt, concurrency, and rate cap rejects the 11th call within a minute before fetch and recovers after the window
+apps/api/src/aws/bedrockConverse.test.ts > single attempt, concurrency, and rate cap reports a timeout once, without retrying, and then accepts a new call
+apps/api/src/aws/bedrockSmoke.test.ts > smoke command run exits non-zero and prints only the status and model on an HTTP failure
+apps/api/src/aws/bedrockSmoke.test.ts > smoke command run prints only the names of missing settings and sends nothing
+apps/api/src/aws/bedrockSmoke.test.ts > smoke command run refuses to send anything unless RUN_BEDROCK_SMOKE=1
+apps/api/src/aws/bedrockSmoke.test.ts > smoke command run sends one greeting through the global fetch and prints a short summary
+apps/api/src/aws/bedrockSmoke.test.ts > smoke command wiring loads the repo-root .env.local through Node and is reachable from the root
+apps/api/src/composition/realRun.test.ts > REAL_AI run composition boundary keeps the fixture package out of the real-run composition root
+apps/api/src/composition/realRun.test.ts > REAL_AI run composition boundary rejects a runtime-forged FIXTURE success token without operation targets
+apps/api/src/config/aws.property.test.ts > Property 32: AWS defaults and model pre-check allows Bedrock calls only when the API key, both required model IDs, any given embedding ID, and the fixed settings pass
+apps/api/src/config/aws.property.test.ts > Property 32: AWS defaults and model pre-check applies the documented defaults whenever the optional settings are unset
+apps/api/src/config/aws.property.test.ts > Property 32: AWS defaults and model pre-check makes zero adapter calls and names every absent required setting
+apps/api/src/config/aws.test.ts > AWS defaults accepts the two Japan-domestic jp. model IDs for generation and verification
+apps/api/src/config/aws.test.ts > AWS defaults applies the profile, Region, and cross-Region defaults
+apps/api/src/config/aws.test.ts > AWS defaults matches the not-ready state of the checked-in example file
+apps/api/src/config/aws.test.ts > AWS defaults names only the API key setting when the key is absent or blank ("   ")
+apps/api/src/config/aws.test.ts > AWS defaults names only the API key setting when the key is absent or blank ("")
+apps/api/src/config/aws.test.ts > AWS defaults names only the API key setting when the key is absent or blank ("\t\n")
+apps/api/src/config/aws.test.ts > AWS defaults names only the API key setting when the key is absent or blank (undefined)
+apps/api/src/config/aws.test.ts > AWS defaults reports every missing required setting by name, in a fixed order
+apps/api/src/config/aws.test.ts > AWS defaults reports only the missing purpose when one model setting is blank
+apps/api/src/config/aws.test.ts > AWS defaults still rejects a present but invalid embedding model ID
+apps/api/src/config/aws.test.ts > AWS defaults treats blank settings as unset and trims accepted values
+apps/api/src/config/aws.test.ts > AWS defaults treats the embedding model as optional and reports it as unavailable
+apps/api/src/config/aws.test.ts > AWS defaults uses an explicit profile and accepts explicit safe values
+apps/api/src/config/aws.test.ts > credential isolation reads only the seven documented settings and never returns credentials or the API key
+apps/api/src/config/aws.test.ts > credential isolation runs the callback once when ready and never when not ready
+apps/api/src/config/aws.test.ts > fail-closed rejection does not accept the non-Tokyo Region AP-NORTHEAST-1 as ready
+apps/api/src/config/aws.test.ts > fail-closed rejection does not accept the non-Tokyo Region ap-northeast-3 as ready
+apps/api/src/config/aws.test.ts > fail-closed rejection does not accept the non-Tokyo Region us-east-1 as ready
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects a profile name with control characters or excess length
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects enabled or unrecognized cross-Region inference (1)
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects enabled or unrecognized cross-Region inference (False)
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects enabled or unrecognized cross-Region inference (TRUE)
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects enabled or unrecognized cross-Region inference (enabled)
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects enabled or unrecognized cross-Region inference (true)
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects enabled or unrecognized cross-Region inference (yes)
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the inference profile form APAC.anthropic.example-v1:0 without echoing it
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the inference profile form apac.anthropic.example-v1:0 without echoing it
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the inference profile form arn:aws:bedrock:ap-northeast-1:123456789012:application-inference-profile/abc123 without echoing it
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the inference profile form arn:aws:bedrock:ap-northeast-1:123456789012:inference-profile/apac.x.y-v1:0 without echoing it
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the inference profile form au.anthropic.example-v1:0 without echoing it
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the inference profile form ca.anthropic.example-v1:0 without echoing it
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the inference profile form eu.anthropic.example-v1:0 without echoing it
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the inference profile form global.anthropic.claude-haiku-5-5 without echoing it
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the inference profile form global.anthropic.example-v1:0 without echoing it
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the inference profile form in.anthropic.example-v1:0 without echoing it
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the inference profile form us-gov.anthropic.example-v1:0 without echoing it
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the inference profile form us.anthropic.claude-haiku-5-5 without echoing it
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the inference profile form us.anthropic.example-v1:0 without echoing it
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the malformed model ID .nova
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the malformed model ID a/b.c
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the malformed model ID abcdef123456
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the malformed model ID amazon.
+apps/api/src/config/aws.test.ts > fail-closed rejection rejects the malformed model ID no spaces.allowed
+apps/api/src/config/aws.test.ts > fail-closed rejection reports missing and rejected settings together
+apps/api/src/config/aws.test.ts > web build isolation keeps AWS settings, credentials, and the config module out of web sources
+apps/api/src/config/environment-example.test.ts > secret-free environment example contains only the documented defaults and empty key and model identifiers
+apps/api/src/config/environment-example.test.ts > secret-free environment example names the two allowed model IDs in a comment
+apps/api/src/config/environment-example.test.ts > secret-free environment example rejects extra settings, a filled key, and enabled cross-Region inference
+apps/api/src/config/environment-example.test.ts > secret-free environment example rejects malformed and duplicate entries without returning their values
+apps/api/src/config/paths.test.ts > storage path configuration creates separate real-data and fixture roots inside the workspace
+apps/api/src/config/paths.test.ts > storage path configuration rejects equal and mutually contained storage roots
+apps/api/src/config/paths.test.ts > storage path configuration rejects real-data and fixture roots outside the workspace
+apps/api/src/config/paths.test.ts > storage path configuration rejects relative paths and unknown configuration fields
+apps/api/src/config/repository-boundaries.test.ts > repository data boundaries has no real-data entry in the existing Git index
+apps/api/src/config/repository-boundaries.test.ts > repository data boundaries ignores every real-data artifact class without accessing those paths
+apps/api/src/config/repository-boundaries.test.ts > repository data boundaries ignores local environment files but not the checked-in example
+apps/api/src/config/repository-boundaries.test.ts > repository data boundaries keeps fixtures and the secret-free example eligible for tracking
+apps/api/src/election/registryChange.property.test.ts > Feature: multi-election-ai-analysis, Property 2: election change keeps the saved registry intact saves only approved valid changes and never damages the file when saving fails
+apps/api/src/election/registryFile.test.ts > applyElectionChange does not create a registry file when none exists
+apps/api/src/election/registryFile.test.ts > applyElectionChange does not save when the change is not approved
+apps/api/src/election/registryFile.test.ts > applyElectionChange does nothing when the registry on disk is invalid
+apps/api/src/election/registryFile.test.ts > applyElectionChange rejects an unregistered election without asking for approval or writing
+apps/api/src/election/registryFile.test.ts > applyElectionChange rejects the election that is already current without asking for approval or writing
+apps/api/src/election/registryFile.test.ts > applyElectionChange reports UPDATE_FAILED and leaves the original registry intact when saving fails
+apps/api/src/election/registryFile.test.ts > applyElectionChange saves the change only after approval and changes nothing but the two statuses
+apps/api/src/election/registryFile.test.ts > applyElectionChange treats a failing confirmation as not approved
+apps/api/src/election/registryFile.test.ts > readRegistryFile accepts a UTF-8 byte order mark
+apps/api/src/election/registryFile.test.ts > readRegistryFile reads a registry that adds a placeholder 2026 PLANNED election
+apps/api/src/election/registryFile.test.ts > readRegistryFile reads the tracked registry and keeps the existing 2022 election values
+apps/api/src/election/registryFile.test.ts > readRegistryFile reports a missing file
+apps/api/src/election/registryFile.test.ts > readRegistryFile reports an unreadable file without exposing the path
+apps/api/src/election/registryFile.test.ts > readRegistryFile reports invalid JSON
+apps/api/src/election/registryFile.test.ts > readRegistryFile validates with the registry contract and returns every violation kind
+apps/api/src/election/registryFile.test.ts > serializeRegistry and writeRegistryFile creates the registry file when none exists and replaces it afterwards
+apps/api/src/election/registryFile.test.ts > serializeRegistry and writeRegistryFile reports UPDATE_FAILED and keeps the original file when the save fails
+apps/api/src/election/registryFile.test.ts > serializeRegistry and writeRegistryFile round-trips through the registry contract with a trailing newline
+apps/api/src/extract/extractStage.test.ts > runExtractStage does not call the extractor for an oversized document
+apps/api/src/extract/extractStage.test.ts > runExtractStage is NOT_READY with no pages or passages when every page is an image
+apps/api/src/extract/extractStage.test.ts > runExtractStage is deterministic and never logs
+apps/api/src/extract/extractStage.test.ts > runExtractStage records pages without a text layer as image pages and analyses only the rest
+apps/api/src/extract/extractStage.test.ts > runExtractStage rejects a document with no pages and one with too many pages
+apps/api/src/extract/extractStage.test.ts > runExtractStage returns page texts with 1-based numbers, passages with locators and candidate evidence
+apps/api/src/extract/extractStage.test.ts > runExtractStage treats a throwing extractor as a corrupt document
+apps/api/src/extract/extractStage.test.ts > runExtractStage turns the extractor error PDF_CORRUPT into NOT_READY without content
+apps/api/src/extract/extractStage.test.ts > runExtractStage turns the extractor error PDF_ENCRYPTED into NOT_READY without content
+apps/api/src/extract/extractStage.test.ts > runExtractStage turns the extractor error PDF_NO_PAGES into NOT_READY without content
+apps/api/src/extract/extractStage.test.ts > runExtractStage turns the extractor error PDF_TOO_LARGE into NOT_READY without content
+apps/api/src/extract/extractStage.test.ts > runExtractStage turns the extractor error PDF_TOO_MANY_PAGES into NOT_READY without content
+apps/api/src/extract/pdfjsTextExtractor.test.ts > createPdfjsTextExtractor error classification joins text items and honours end-of-line markers
+apps/api/src/extract/pdfjsTextExtractor.test.ts > createPdfjsTextExtractor error classification maps FormatError to PDF_CORRUPT
+apps/api/src/extract/pdfjsTextExtractor.test.ts > createPdfjsTextExtractor error classification maps InvalidPDFException to PDF_CORRUPT
+apps/api/src/extract/pdfjsTextExtractor.test.ts > createPdfjsTextExtractor error classification maps MissingPDFException to PDF_CORRUPT
+apps/api/src/extract/pdfjsTextExtractor.test.ts > createPdfjsTextExtractor error classification maps SomethingElse to PDF_CORRUPT
+apps/api/src/extract/pdfjsTextExtractor.test.ts > createPdfjsTextExtractor error classification maps a document without pages to PDF_NO_PAGES and still releases it
+apps/api/src/extract/pdfjsTextExtractor.test.ts > createPdfjsTextExtractor error classification maps a page failure to PDF_CORRUPT and still releases the document
+apps/api/src/extract/pdfjsTextExtractor.test.ts > createPdfjsTextExtractor error classification maps a password request to PDF_ENCRYPTED
+apps/api/src/extract/pdfjsTextExtractor.test.ts > createPdfjsTextExtractor with the installed pdfjs-dist applies the size and page limits
+apps/api/src/extract/pdfjsTextExtractor.test.ts > createPdfjsTextExtractor with the installed pdfjs-dist copies the input so the caller's buffer stays intact
+apps/api/src/extract/pdfjsTextExtractor.test.ts > createPdfjsTextExtractor with the installed pdfjs-dist does not log anything
+apps/api/src/extract/pdfjsTextExtractor.test.ts > createPdfjsTextExtractor with the installed pdfjs-dist reports corrupt or empty data as PDF_CORRUPT
+apps/api/src/extract/pdfjsTextExtractor.test.ts > createPdfjsTextExtractor with the installed pdfjs-dist returns an empty text for a page without a text layer
+apps/api/src/extract/pdfjsTextExtractor.test.ts > createPdfjsTextExtractor with the installed pdfjs-dist returns the text layer page by page, in order
+apps/api/src/extract/storedExtraction.test.ts > extractAndStore keeps the page numbers, the SHA-256 and the revision, and saves no PDF bytes
+apps/api/src/extract/storedExtraction.test.ts > extractAndStore loads the newest stored extraction of a revision, or null when there is none
+apps/api/src/extract/storedExtraction.test.ts > extractAndStore makes a new run when the registered candidates or the engine change
+apps/api/src/extract/storedExtraction.test.ts > extractAndStore refuses bytes that do not match the SHA-256 or an invalid revision, and extracts nothing
+apps/api/src/extract/storedExtraction.test.ts > extractAndStore reports a failed save and leaves no partial file
+apps/api/src/extract/storedExtraction.test.ts > extractAndStore serves the same key from the store without extracting again
+apps/api/src/extract/storedExtraction.test.ts > extractAndStore stores a document that cannot be read as a completed NOT_READY run
+apps/api/src/extract/textQuality.test.ts > assessTextQuality calls a page set without flags plausible
+apps/api/src/extract/textQuality.test.ts > assessTextQuality holds counts only, never the page text
+apps/api/src/extract/textQuality.test.ts > assessTextQuality recommends review or OCR and names the suspect pages
+apps/api/src/extract/textQuality.test.ts > assessTextQuality reports no text layer when every page is empty or there is no page
+apps/api/src/extract/textQuality.test.ts > filler lines and text shared by every page counts a row of one repeated character as filler, not as the page's own text
+apps/api/src/extract/textQuality.test.ts > filler lines and text shared by every page does not take a line of one page alone as shared
+apps/api/src/extract/textQuality.test.ts > filler lines and text shared by every page flags pages whose text is mostly filler and a template repeated on every page
+apps/api/src/extract/textQuality.test.ts > filler lines and text shared by every page separates a header that repeats on every page from the text of each page
+apps/api/src/extract/textQuality.test.ts > flagPage flags Japanese text with kanji but no hiragana
+apps/api/src/extract/textQuality.test.ts > flagPage flags a page where Latin letters outweigh Japanese text
+apps/api/src/extract/textQuality.test.ts > flagPage flags a page without text
+apps/api/src/extract/textQuality.test.ts > flagPage flags a sparse page
+apps/api/src/extract/textQuality.test.ts > flagPage flags a very long run of Latin letters
+apps/api/src/extract/textQuality.test.ts > flagPage flags replacement, private-use and control characters
+apps/api/src/extract/textQuality.test.ts > flagPage raises no flag for an ordinary Japanese page
+apps/api/src/extract/textQuality.test.ts > measurePage counts characters by script without counting whitespace
+apps/api/src/extract/textQuality.test.ts > measurePage measures the longest run of Latin letters, which whitespace breaks
+apps/api/src/extract/textQuality.test.ts > scanPdfStructure counts building blocks in the raw bytes
+apps/api/src/http/responseProjection.test.ts > API response projection audits schema transform output before allowing serialization
+apps/api/src/http/responseProjection.test.ts > API response projection fails closed for unknown keys and unsafe object graphs
+apps/api/src/http/responseProjection.test.ts > API response projection redacts first and returns only a value that the strict schema re-decodes
+apps/api/src/http/responseProjection.test.ts > API response projection sends the fixed safe body with status 500 after projection failure
+apps/api/src/http/responseProjection.test.ts > API response projection uses the fixed safe error when redaction makes the DTO invalid
+apps/api/src/http/responseProjection.test.ts > Property 2: Preservation - generic response projection continues to fail closed when strict nonce and request ID together fields cannot accept the marker
+apps/api/src/http/responseProjection.test.ts > Property 2: Preservation - generic response projection continues to fail closed when strict nonce only fields cannot accept the marker
+apps/api/src/http/responseProjection.test.ts > Property 2: Preservation - generic response projection continues to fail closed when strict request ID only fields cannot accept the marker
+apps/api/src/http/responseProjection.test.ts > Property 2: Preservation - generic response projection continues to redact nonce and request ID together outside the session schema
+apps/api/src/http/responseProjection.test.ts > Property 2: Preservation - generic response projection continues to redact nonce only outside the session schema
+apps/api/src/http/responseProjection.test.ts > Property 2: Preservation - generic response projection continues to redact request ID only outside the session schema
+apps/api/src/ingest/deriveStatus.test.ts > deriveAnalysisStatus is COMPLETED only when every passage has a succeeded JUDGE
+apps/api/src/ingest/deriveStatus.test.ts > deriveAnalysisStatus is FAILED when the latest run of a stage and passage failed
+apps/api/src/ingest/deriveStatus.test.ts > deriveAnalysisStatus is IN_PROGRESS after extraction or a partial pilot
+apps/api/src/ingest/deriveStatus.test.ts > deriveAnalysisStatus is NOT_ANALYZED without any run
+apps/api/src/ingest/deriveStatus.test.ts > deriveAnalysisStatus is NOT_READY whenever extraction is not ready, even with runs
+apps/api/src/ingest/deriveStatus.test.ts > deriveAnalysisStatus never reports COMPLETED for a revision without passages
+apps/api/src/ingest/deriveStatus.test.ts > deriveAnalysisStatus recovers when a later run of the same stage and passage succeeds
+apps/api/src/ingest/deriveStatus.test.ts > deriveAnalysisStatus resolves equal times by list order
+apps/api/src/ingest/deriveStatus.test.ts > deriveApprovalStatus is APPROVED only when every result meets the publish gate
+apps/api/src/ingest/deriveStatus.test.ts > deriveApprovalStatus is PENDING without results
+apps/api/src/ingest/deriveStatus.test.ts > deriveApprovalStatus is REJECTED only when every result was rejected
+apps/api/src/ingest/ingest.test.ts > decideIngest creates the next revision for a different SHA-256, including a return to older content
+apps/api/src/ingest/ingest.test.ts > decideIngest leaves the same SHA-256 unchanged
+apps/api/src/ingest/ingest.test.ts > decideIngest starts at r1 when nothing is registered
+apps/api/src/ingest/ingest.test.ts > ingest adds revision r2 for changed bytes and keeps r1 byte for byte
+apps/api/src/ingest/ingest.test.ts > ingest failures fails closed on an unreadable or inconsistent store
+apps/api/src/ingest/ingest.test.ts > ingest failures leaves no record when only the record write fails, and a retry succeeds
+apps/api/src/ingest/ingest.test.ts > ingest failures never logs or returns the document body
+apps/api/src/ingest/ingest.test.ts > ingest failures records nothing when every write fails
+apps/api/src/ingest/ingest.test.ts > ingest leaves everything unchanged when the same bytes arrive again
+apps/api/src/ingest/ingest.test.ts > ingest produces the same record whichever supplier delivered the document
+apps/api/src/ingest/ingest.test.ts > ingest records an explicit candidate, a shared document, and never guesses
+apps/api/src/ingest/ingest.test.ts > ingest rejects a URL with credentials as SUPPLY_INCOMPLETE and names the items
+apps/api/src/ingest/ingest.test.ts > ingest rejects a date instead of a time as SUPPLY_INCOMPLETE and names the items
+apps/api/src/ingest/ingest.test.ts > ingest rejects a source ID that already belongs to another election
+apps/api/src/ingest/ingest.test.ts > ingest rejects a time without a timezone as SUPPLY_INCOMPLETE and names the items
+apps/api/src/ingest/ingest.test.ts > ingest rejects an empty URL as SUPPLY_INCOMPLETE and names the items
+apps/api/src/ingest/ingest.test.ts > ingest rejects an empty body as SUPPLY_INCOMPLETE and names the items
+apps/api/src/ingest/ingest.test.ts > ingest rejects an http URL as SUPPLY_INCOMPLETE and names the items
+apps/api/src/ingest/ingest.test.ts > ingest rejects an unknown candidate or election without writing anything
+apps/api/src/ingest/ingest.test.ts > ingest rejects nothing at all as SUPPLY_INCOMPLETE and names the items
+apps/api/src/ingest/ingest.test.ts > ingest rejects null as SUPPLY_INCOMPLETE and names the items
+apps/api/src/ingest/ingest.test.ts > ingest rejects the same document registered under another source ID
+apps/api/src/ingest/ingest.test.ts > ingest rejects the source ID "" without writing
+apps/api/src/ingest/ingest.test.ts > ingest rejects the source ID "../x" without writing
+apps/api/src/ingest/ingest.test.ts > ingest rejects the source ID "Bulletin" without writing
+apps/api/src/ingest/ingest.test.ts > ingest rejects the source ID "a b" without writing
+apps/api/src/ingest/ingest.test.ts > ingest rejects the source ID "a.b" without writing
+apps/api/src/ingest/ingest.test.ts > ingest rejects the source ID "a_b" without writing
+apps/api/src/ingest/ingest.test.ts > ingest rejects the source ID "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" without writing
+apps/api/src/ingest/ingest.test.ts > ingest rejects the source ID "con" without writing
+apps/api/src/ingest/ingest.test.ts > ingest rejects the source ID "nul" without writing
+apps/api/src/ingest/ingest.test.ts > ingest stores the body once and an immutable record for revision r1
+apps/api/src/ingest/ingest.test.ts > ingest treats a return to older content as a new revision without storing the body twice
+apps/api/src/ingest/ingest.test.ts > manual placement supplier accepts only PDF names
+apps/api/src/ingest/ingest.test.ts > manual placement supplier rejects the unsafe file name " a.pdf"
+apps/api/src/ingest/ingest.test.ts > manual placement supplier rejects the unsafe file name ""
+apps/api/src/ingest/ingest.test.ts > manual placement supplier rejects the unsafe file name "../x.pdf"
+apps/api/src/ingest/ingest.test.ts > manual placement supplier rejects the unsafe file name ".hidden.pdf"
+apps/api/src/ingest/ingest.test.ts > manual placement supplier rejects the unsafe file name "C:x.pdf"
+apps/api/src/ingest/ingest.test.ts > manual placement supplier rejects the unsafe file name "a*.pdf"
+apps/api/src/ingest/ingest.test.ts > manual placement supplier rejects the unsafe file name "a..b.pdf"
+apps/api/src/ingest/ingest.test.ts > manual placement supplier rejects the unsafe file name "a/b.pdf"
+apps/api/src/ingest/ingest.test.ts > manual placement supplier rejects the unsafe file name "a\\b.pdf"
+apps/api/src/ingest/ingest.test.ts > manual placement supplier rejects the unsafe file name "aux.PDF"
+apps/api/src/ingest/ingest.test.ts > manual placement supplier rejects the unsafe file name "con.pdf"
+apps/api/src/ingest/ingest.test.ts > manual placement supplier rejects the unsafe file name "nul.pdf"
+apps/api/src/ingest/ingest.test.ts > manual placement supplier reports a missing file and a directory named like a PDF
+apps/api/src/ingest/ingest.test.ts > manual placement supplier requires a valid official URL and retrieval time before reading anything
+apps/api/src/ingest/ingest.test.ts > manual placement supplier returns the body with the stated URL and time
+apps/api/src/ingest/ingest.test.ts > manual placement supplier uses the injected clock when no retrieval time is given
+apps/api/src/ingest/ingest.test.ts > toManifestDraft builds a Source Manifest record from the ingest record and the developer's items
+apps/api/src/ingest/ingest.test.ts > toManifestDraft never fills in missing items and names them without their values
+apps/api/src/ingest/ingest.test.ts > toManifestDraft rejects an unknown source type
+apps/api/src/ingest/ingest.test.ts > toManifestDraft uses a null candidate for shared or unassigned documents and the Japan date for the retrieval day
+apps/api/src/logging/safeLogger.property.test.ts > Property 2: Preservation - safe logger keeps nonce and request ID together redacted in a non-session event without mutating input
+apps/api/src/logging/safeLogger.property.test.ts > Property 2: Preservation - safe logger keeps nonce only redacted in a non-session event without mutating input
+apps/api/src/logging/safeLogger.property.test.ts > Property 2: Preservation - safe logger keeps request ID only redacted in a non-session event without mutating input
+apps/api/src/logging/safeLogger.property.test.ts > Property 34: protected input non-disclosure removes every inserted fictional forbidden value from every serialized sink
+apps/api/src/logging/safeLogger.test.ts > safe logger passes only serialized redacted clones to its writer
+apps/api/src/logging/safeLogger.test.ts > safe logger provides fixed-level convenience methods
+apps/api/src/logging/safeLogger.test.ts > safe logger writes a fixed rejection event for unsafe input without invoking getters
+apps/api/src/middleware/localBoundary.test.ts > Property 2: Preservation - session local boundary rejects a disallowed Host before revealing the session nonce
+apps/api/src/middleware/localBoundary.test.ts > Property 2: Preservation - session local boundary rejects a disallowed Origin before revealing the session nonce
+apps/api/src/middleware/localBoundary.test.ts > local API request boundary allows a JSON POST only after every boundary condition passes
+apps/api/src/middleware/localBoundary.test.ts > local API request boundary allows originless requests only when the in-process test mode is explicit
+apps/api/src/middleware/localBoundary.test.ts > local API request boundary does not require a nonce for a read-only route
+apps/api/src/middleware/localBoundary.test.ts > local API request boundary rejects a Host outside the loopback host/port allowlist before the use case
+apps/api/src/middleware/localBoundary.test.ts > local API request boundary rejects a JSON body larger than 1 MiB before the use case
+apps/api/src/middleware/localBoundary.test.ts > local API request boundary rejects a method outside the allowlist before the use case
+apps/api/src/middleware/localBoundary.test.ts > local API request boundary rejects a missing Origin before the use case
+apps/api/src/middleware/localBoundary.test.ts > local API request boundary rejects a missing mutation nonce before the use case
+apps/api/src/middleware/localBoundary.test.ts > local API request boundary rejects a non-JSON Content-Type before the use case
+apps/api/src/middleware/localBoundary.test.ts > local API request boundary returns a bounded CORS preflight only for the local mutation contract
+apps/api/src/middleware/localBoundary.test.ts > local mutation nonce uses a fresh 256-bit value that is not serialized with its capability
+apps/api/src/ocr/cer.test.ts > editDistance counts substitutions, insertions and deletions
+apps/api/src/ocr/cer.test.ts > normaliseForScoring applies NFKC and removes whitespace
+apps/api/src/ocr/cer.test.ts > scoreText counts a misread character in both the CER and the order-free F1
+apps/api/src/ocr/cer.test.ts > scoreText handles empty text on either side
+apps/api/src/ocr/cer.test.ts > scoreText scores identical text as perfect, ignoring spacing and width
+apps/api/src/ocr/cer.test.ts > scoreText separates a different reading order from misread characters
+apps/api/src/ocr/modelDictionary.test.ts > characterDictionaryFromYaml accepts CRLF line endings
+apps/api/src/ocr/modelDictionary.test.ts > characterDictionaryFromYaml reads plain, single-quoted and double-quoted entries
+apps/api/src/ocr/modelDictionary.test.ts > characterDictionaryFromYaml returns undefined without the key, without entries or with an undecodable entry
+apps/api/src/ocr/ocrConfig.test.ts > OCR settings adds the resolution to the extractor name of a cache key
+apps/api/src/ocr/ocrConfig.test.ts > OCR settings defaults to per-line at 300 dpi and keeps the original directory name
+apps/api/src/ocr/ocrConfig.test.ts > OCR settings gives every other combination its own key and directory
+apps/api/src/ocr/ocrConfig.test.ts > OCR settings recognises only the known strategies
+apps/api/src/ocr/paddleOcrEngine.test.ts > createPaddleOcrEngine blocks and counts network access while the service runs, then restores fetch
+apps/api/src/ocr/paddleOcrEngine.test.ts > createPaddleOcrEngine maps boxes into page coordinates and detects vertical lines
+apps/api/src/ocr/paddleOcrEngine.test.ts > createPaddleOcrEngine refuses a missing, altered or mismatching model
+apps/api/src/ocr/paddleOcrEngine.test.ts > createPaddleOcrEngine reports a failing service as OCR_FAILED and a failing start as OCR_ENGINE_UNAVAILABLE
+apps/api/src/ocr/paddleOcrEngine.test.ts > createPaddleOcrEngine strategy and tracing passes the strategy to the service and names it in the engine id
+apps/api/src/ocr/paddleOcrEngine.test.ts > createPaddleOcrEngine strategy and tracing times detection and recognition inference when tracing, with counts only
+apps/api/src/ocr/paddleOcrEngine.test.ts > createPaddleOcrEngine verifies the model files and gives the service verified bytes and a dictionary from inference.yml
+apps/api/src/ocr/paddleOcrEngine.test.ts > pinned model set names official PaddlePaddle repositories with hashes and a commit in every address
+apps/api/src/ocr/pdfjsPageRasterizer.test.ts > createPdfjsPageRasterizer refuses a rendering that would be too large
+apps/api/src/ocr/pdfjsPageRasterizer.test.ts > createPdfjsPageRasterizer rejects a fractional page
+apps/api/src/ocr/pdfjsPageRasterizer.test.ts > createPdfjsPageRasterizer rejects a page past the end
+apps/api/src/ocr/pdfjsPageRasterizer.test.ts > createPdfjsPageRasterizer rejects a region outside the page
+apps/api/src/ocr/pdfjsPageRasterizer.test.ts > createPdfjsPageRasterizer rejects an inverted region
+apps/api/src/ocr/pdfjsPageRasterizer.test.ts > createPdfjsPageRasterizer rejects dpi above the maximum
+apps/api/src/ocr/pdfjsPageRasterizer.test.ts > createPdfjsPageRasterizer rejects dpi below the minimum
+apps/api/src/ocr/pdfjsPageRasterizer.test.ts > createPdfjsPageRasterizer rejects page 0
+apps/api/src/ocr/pdfjsPageRasterizer.test.ts > createPdfjsPageRasterizer renders a whole page at the requested resolution on an opaque white background
+apps/api/src/ocr/pdfjsPageRasterizer.test.ts > createPdfjsPageRasterizer renders only the requested part and reports it in page coordinates
+apps/api/src/ocr/pdfjsPageRasterizer.test.ts > createPdfjsPageRasterizer reports data that is not a PDF as PDF_CORRUPT
+apps/api/src/ocr/pdfjsPageRasterizer.test.ts > createPdfjsPageRasterizer returns one image per request, in order, and never changes the input
+apps/api/src/ocr/readingOrder.test.ts > orderLines does not change its input and joins text with newlines
+apps/api/src/ocr/readingOrder.test.ts > orderLines orders horizontal lines top to bottom and left to right on the same row
+apps/api/src/ocr/readingOrder.test.ts > orderLines puts vertical lines after horizontal ones, right to left
+apps/api/src/ocr/trace.test.ts > createTracer does nothing when tracing is off
+apps/api/src/ocr/trace.test.ts > createTracer never prints a field that is not a short safe token or a number
+apps/api/src/ocr/trace.test.ts > createTracer records a failing step and rethrows the error
+apps/api/src/ocr/trace.test.ts > createTracer records the start, end, duration and memory of a step
+apps/api/src/ocr/trace.test.ts > createTracer reports the resources that keep the process alive when it stops
+apps/api/src/ocr/trace.test.ts > createTracer writes a heartbeat every few seconds with the CPU time and the active step
+apps/api/src/routes/session.property.test.ts > Property 1: Expected Behavior - Explicit Session Nonce and Request ID Projection confirms the synthetic POSTAL_ADDRESS_PATTERN nonce reaches generic fail-closed projection
+apps/api/src/routes/session.property.test.ts > Property 1: Expected Behavior - Explicit Session Nonce and Request ID Projection expects the allowed route to return the original directed nonce as HTTP 200
+apps/api/src/routes/session.property.test.ts > Property 1: Expected Behavior - Explicit Session Nonce and Request ID Projection replays recorded nonce-only, requestId-only, and combined collisions
+apps/api/src/routes/session.property.test.ts > Property 1: Expected Behavior - Explicit Session Nonce and Request ID Projection runs fixed-seed directed, broad, and field-isolation exploration
+apps/api/src/routes/session.property.test.ts > Property 2: Preservation - Non-Bug Session Inputs and Non-Session Sinks preserves generic F as a strict HTTP 200 response for non-collision candidates
+apps/api/src/routes/session.property.test.ts > Property 2: Preservation - Non-Bug Session Inputs and Non-Session Sinks preserves one nonce per route instance, fresh request IDs, and nonce rotation
+apps/api/src/routes/session.property.test.ts > Property 2: Preservation - Non-Bug Session Inputs and Non-Session Sinks strictly rejects unknown fields and invalid values with the fixed safe failure
+apps/api/src/server/localServerConfig.test.ts > local API listener configuration accepts only the exact configured host and port
+apps/api/src/server/localServerConfig.test.ts > local API listener configuration defaults to one IPv4 loopback listener and zero public endpoints
+apps/api/src/server/localServerConfig.test.ts > local API listener configuration rejects a port other than 8787: 0
+apps/api/src/server/localServerConfig.test.ts > local API listener configuration rejects a port other than 8787: 4173
+apps/api/src/server/localServerConfig.test.ts > local API listener configuration rejects a port other than 8787: 5173
+apps/api/src/server/localServerConfig.test.ts > local API listener configuration rejects a port other than 8787: 65536
+apps/api/src/server/localServerConfig.test.ts > local API listener configuration rejects a port other than 8787: 8787 
+apps/api/src/server/localServerConfig.test.ts > local API listener configuration rejects unsafe or non-bindable host configuration 0.0.0.0
+apps/api/src/server/localServerConfig.test.ts > local API listener configuration rejects unsafe or non-bindable host configuration 0:0:0:0:0:0:0:0
+apps/api/src/server/localServerConfig.test.ts > local API listener configuration rejects unsafe or non-bindable host configuration 10.0.0.8
+apps/api/src/server/localServerConfig.test.ts > local API listener configuration rejects unsafe or non-bindable host configuration 192.168.1.20
+apps/api/src/server/localServerConfig.test.ts > local API listener configuration rejects unsafe or non-bindable host configuration ::
+apps/api/src/server/localServerConfig.test.ts > local API listener configuration rejects unsafe or non-bindable host configuration ::1
+apps/api/src/server/localServerConfig.test.ts > local API listener configuration rejects unsafe or non-bindable host configuration [::]
+apps/api/src/server/localServerConfig.test.ts > local API listener configuration rejects unsafe or non-bindable host configuration hime.ngrok.example
+apps/api/src/server/localServerConfig.test.ts > local API listener configuration rejects unsafe or non-bindable host configuration localhost
+apps/api/src/store/atomicFiles.test.ts > atomic immutable files leaves no final or marker after an injected rename failure
+apps/api/src/store/atomicFiles.test.ts > atomic immutable files leaves no final or marker after an injected temporary close failure
+apps/api/src/store/atomicFiles.test.ts > atomic immutable files leaves no final or marker after an injected temporary sync failure
+apps/api/src/store/atomicFiles.test.ts > atomic immutable files leaves no final or marker after an injected temporary write failure
+apps/api/src/store/atomicFiles.test.ts > atomic immutable files preserves an identical pre-existing final file when marker creation fails
+apps/api/src/store/atomicFiles.test.ts > atomic immutable files rejects a mismatched expected hash before creating a file
+apps/api/src/store/atomicFiles.test.ts > atomic immutable files rejects a symbolic-link directory that escapes the allowed root
+apps/api/src/store/atomicFiles.test.ts > atomic immutable files rejects absolute destination paths
+apps/api/src/store/atomicFiles.test.ts > atomic immutable files rejects different bytes at an existing immutable path without changing them
+apps/api/src/store/atomicFiles.test.ts > atomic immutable files rejects traversal path ../outside.json without writing outside the root
+apps/api/src/store/atomicFiles.test.ts > atomic immutable files rejects traversal path nested/../../outside.json without writing outside the root
+apps/api/src/store/atomicFiles.test.ts > atomic immutable files rolls back a newly-created final file when marker creation fails
+apps/api/src/store/atomicFiles.test.ts > atomic immutable files treats byte-identical existing content and marker as idempotent
+apps/api/src/store/atomicFiles.test.ts > atomic immutable files uses a unique sibling temporary file for each rename
+apps/api/src/store/atomicFiles.test.ts > atomic immutable files writes content-addressed bytes to their derived path
+apps/api/src/store/atomicFiles.test.ts > atomic immutable files writes, synchronizes, closes, renames, verifies, then creates the marker
+apps/api/src/store/atomicFiles.test.ts > content-addressed paths derives a stable, sharded relative path from lowercase SHA-256
+apps/api/src/store/atomicFiles.test.ts > content-addressed paths rejects an invalid content hash
+apps/api/src/store/atomicFiles.test.ts > content-addressed paths rejects an invalid content hash
+apps/api/src/store/atomicFiles.test.ts > content-addressed paths rejects an invalid content hash
+apps/api/src/store/atomicFiles.test.ts > content-addressed paths rejects unsafe directory and extension options
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile creates a missing file together with its directories
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile leaves the original bytes after an injected temporary sync failure
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile leaves the original bytes after an injected temporary write failure
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile leaves the original bytes and no temporary file after a rename failure
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile refuses to replace a directory that sits at the target path
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile rejects a missing or relative allowed root
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile rejects a temporary file whose read-back bytes differ and keeps the original
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile rejects the unsafe relative path " leading.json" without writing
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile rejects the unsafe relative path "" without writing
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile rejects the unsafe relative path "../outside.json" without writing
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile rejects the unsafe relative path "/absolute.json" without writing
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile rejects the unsafe relative path "C:\\absolute.json" without writing
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile rejects the unsafe relative path "con.json" without writing
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile rejects the unsafe relative path "config/../../outside.json" without writing
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile rejects the unsafe relative path "config/nul" without writing
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile rejects the unsafe relative path "has space.json" without writing
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile rejects the unsafe relative path "trailing-dot." without writing
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile replaces an existing file with exactly the new bytes
+apps/api/src/store/atomicReplaceFile.test.ts > atomicReplaceFile uses fixed messages that do not expose filesystem paths
+apps/api/src/store/runEventStore.test.ts > Property 2: Preservation - run event store redacts nonce-and-request-id diagnostic before append without mutating input
+apps/api/src/store/runEventStore.test.ts > Property 2: Preservation - run event store redacts nonce-only diagnostic before append without mutating input
+apps/api/src/store/runEventStore.test.ts > Property 2: Preservation - run event store redacts request-id-only diagnostic before append without mutating input
+apps/api/src/store/runEventStore.test.ts > immutable index commit marker ignores a markerless interrupted index and returns it for quarantine without deletion
+apps/api/src/store/runEventStore.test.ts > immutable index commit marker quarantines a changed file in a committed index and never returns partial data
+apps/api/src/store/runEventStore.test.ts > immutable index commit marker rejects a bad expected hash before creating an index directory
+apps/api/src/store/runEventStore.test.ts > immutable index commit marker validates every index file before creating COMMITTED.json last
+apps/api/src/store/runEventStore.test.ts > immutable run event store allows only one of two simultaneous appends to reserve a sequence
+apps/api/src/store/runEventStore.test.ts > immutable run event store atomically appends numbered events and rebuilds the run from committed files
+apps/api/src/store/runEventStore.test.ts > immutable run event store detects gaps, duplicate sequences, and invalid hashes without repairing files
+apps/api/src/store/runEventStore.test.ts > immutable run event store redacts protected diagnostics before committing run history
+apps/api/src/store/runEventStore.test.ts > immutable run event store refuses to append when committed event data is already quarantined
+apps/api/src/store/runEventStore.test.ts > immutable run event store reports interrupted temporary files and append locks as quarantine targets
+apps/web/src/App.test.tsx > App with the normally selected route entry renders Visitor Home inside the local-only shell
+apps/web/src/App.test.tsx > App with the normally selected route entry routes the direct entry /analyst/readiness to the shell-preserving 404
+apps/web/src/App.test.tsx > App with the normally selected route entry routes the direct entry /analyst/sources to the shell-preserving 404
+apps/web/src/App.test.tsx > App with the normally selected route entry routes the direct entry /sources to the shell-preserving 404
+apps/web/src/App.test.tsx > App with the normally selected route entry selects the Visitor route entry through #app-routes
+apps/web/src/app/analyst/analystRoutes.property.test.tsx > Analyst page module preservation keeps every existing analyst page component and wires each into exactly one Analyst Router route
+apps/web/src/app/analyst/analystRoutes.property.test.tsx > Property 4: Analyst Router preserves existing route contracts resolves every analyst and remaining public route instance, Home link, and navigation destination to its existing page and heading
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router adds no login, account, authorization, or mode toggle controls
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router passes the path parameter through at /analyst/review/artifact-review
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router passes the path parameter through at /analyst/runs/run-123
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router passes the path parameter through at /analyst/verification/artifact-verify
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router reaches AWS診断 from the Analyst Home link AWS診断画面を見る
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router reaches P0完成判定 from the Analyst Home link P0完成判定を見る
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router reaches Source Manifest from the Analyst Home link Source Manifest画面を見る
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router reaches the analyst entry from shared navigation and marks it current
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router reaches 政策解析準備状態 from the Analyst Home link 解析準備状態を見る
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router reaches 解析実行と履歴 from the Analyst Home link 解析実行と履歴を見る
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router reaches 評価 from the Analyst Home link 評価画面を見る
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router registration registers exactly the contract matrix inside the ANALYST AppShell
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router renders / with the existing えひめ投票ナビ page inside the analyst shell
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router renders /analyst/aws with the existing AWS診断 page inside the analyst shell
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router renders /analyst/evaluation with the existing 評価 page inside the analyst shell
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router renders /analyst/p0 with the existing P0完成判定 page inside the analyst shell
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router renders /analyst/readiness with the existing 政策解析準備状態 page inside the analyst shell
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router renders /analyst/review/:artifactId with the existing 人間確認 page inside the analyst shell
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router renders /analyst/runs with the existing 解析実行と履歴 page inside the analyst shell
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router renders /analyst/runs/:runId with the existing 解析run詳細 page inside the analyst shell
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router renders /analyst/sources with the existing Source Manifest page inside the analyst shell
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router renders /analyst/verification/:artifactId with the existing 根拠検証 page inside the analyst shell
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router renders /candidates with the existing 候補者一覧 page inside the analyst shell
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router renders /candidates/:candidateId with the existing 候補者詳細 page inside the analyst shell
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router renders /comparison with the existing 政策比較 page inside the analyst shell
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router renders /schedule with the existing 選挙日程 page inside the analyst shell
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router renders /venue with the existing 会場閲覧 page inside the analyst shell
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router renders Analyst Home at the index with analyst links and no public /sources link
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router routes the direct entry /analyst/not-defined to the shared shell-preserving 404
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router routes the direct entry /analyst/sources/extra to the shared shell-preserving 404
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router routes the direct entry /chat to the shared shell-preserving 404
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router routes the direct entry /login to the shared shell-preserving 404
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router routes the direct entry /not-a-p0-route to the shared shell-preserving 404
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router routes the direct entry /polling-place/election-day to the shared shell-preserving 404
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router routes the direct entry /sources to the shared shell-preserving 404
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router routes the direct entry /sources/ to the shared shell-preserving 404
+apps/web/src/app/analyst/routes.test.tsx > Analyst Router shows Source Manifest management at /analyst/sources
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix keeps the same remaining public contracts as the Visitor matrix
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix lists the remaining public routes, every Existing Analyst Route, and the wildcard
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves /analyst/not-defined to the wildcard contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves /analyst/sources/extra to the wildcard contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves /chat to the wildcard contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves /login to the wildcard contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves /not-a-p0-route to the wildcard contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves /polling-place/election-day to the wildcard contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves /sources to the wildcard contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves /sources/ to the wildcard contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves a concrete / entry to its own contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves a concrete /analyst/aws entry to its own contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves a concrete /analyst/evaluation entry to its own contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves a concrete /analyst/p0 entry to its own contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves a concrete /analyst/readiness entry to its own contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves a concrete /analyst/review/:artifactId entry to its own contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves a concrete /analyst/runs entry to its own contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves a concrete /analyst/runs/:runId entry to its own contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves a concrete /analyst/sources entry to its own contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves a concrete /analyst/verification/:artifactId entry to its own contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves a concrete /candidates entry to its own contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves a concrete /candidates/:candidateId entry to its own contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves a concrete /comparison entry to its own contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves a concrete /schedule entry to its own contract
+apps/web/src/app/analyst/routes.test.tsx > Analyst route contract matrix resolves a concrete /venue entry to its own contract
+apps/web/src/app/pages.test.tsx > split public and analyst page modules composes Analyst Home from public content and internal analyst links
+apps/web/src/app/pages.test.tsx > split public and analyst page modules keeps Visitor Home limited to remaining visitor destinations
+apps/web/src/app/pages.test.tsx > split public and analyst page modules preserves analyst path parameter displays
+apps/web/src/app/pages.test.tsx > split public and analyst page modules preserves the AWS診断 analyst page contract
+apps/web/src/app/pages.test.tsx > split public and analyst page modules preserves the P0完成判定 analyst page contract
+apps/web/src/app/pages.test.tsx > split public and analyst page modules preserves the Source Manifest analyst page contract
+apps/web/src/app/pages.test.tsx > split public and analyst page modules preserves the artifactId at /analyst/review/artifact-review
+apps/web/src/app/pages.test.tsx > split public and analyst page modules preserves the artifactId at /analyst/verification/artifact-verify
+apps/web/src/app/pages.test.tsx > split public and analyst page modules preserves the 政策解析準備状態 analyst page contract
+apps/web/src/app/pages.test.tsx > split public and analyst page modules preserves the 解析実行と履歴 analyst page contract
+apps/web/src/app/pages.test.tsx > split public and analyst page modules preserves the 評価 analyst page contract
+apps/web/src/app/pages.test.tsx > split public and analyst page modules retains embedded source and evidence fields in public pages
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression falls back to the same mode's Home when an analyst URL was entered directly
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression keeps /candidates in NOT_READY without simulated AI progress
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression keeps /candidates/hayashi-noriko in NOT_READY without simulated AI progress
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression keeps /candidates/nakamura-tokihiro in NOT_READY without simulated AI progress
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression keeps /comparison in NOT_READY without simulated AI progress
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression keeps the P1/P2 route /calendar unregistered
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression keeps the P1/P2 route /chat unregistered
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression keeps the P1/P2 route /notifications unregistered
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression keeps the P1/P2 route /polling-place/early unregistered
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression keeps the P1/P2 route /polling-place/election-day unregistered
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression keeps the P1/P2 route /speech unregistered
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression keeps the P1/P2 route /three-dimensional-policy unregistered
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression keeps the P1/P2 route /voting-guide unregistered
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression keeps the mobile-first 360, md 768, and lg 1280 layout class contracts
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression moves back exactly once to the immediately previous in-app route
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression provides the skip link, landmarks, and aria-current while navigating
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression reaches 会場閲覧 from the Home link 会場閲覧画面を見る
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression reaches 候補者一覧 from the Home link 候補者一覧を見る
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression reaches 候補者詳細 from the Home link 中村時広氏の詳細を見る
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression reaches 候補者詳細 from the Home link 林紀子氏の詳細を見る
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression reaches 政策比較 from the Home link 政策比較を見る
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression reaches 選挙日程 from the Home link 選挙日程を見る
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression renders the remaining public route / with one h1 inside the shell
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression renders the remaining public route /candidates with one h1 inside the shell
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression renders the remaining public route /candidates/nakamura-tokihiro with one h1 inside the shell
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression renders the remaining public route /comparison with one h1 inside the shell
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression renders the remaining public route /schedule with one h1 inside the shell
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression renders the remaining public route /venue with one h1 inside the shell
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression routes the retired /sources direct entry to the shell-preserving 404
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression routes the unknown path /analyst/not-defined to the shell-preserving 404
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression routes the unknown path /analyst/runs/run-example/extra to the shell-preserving 404
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression routes the unknown path /not-a-p0-route to the shell-preserving 404
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression shows only equal future comparison fields while the table is NOT_READY
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression shows the mode's Home links and Shared Navigation without /sources or a mode toggle
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression uses equal candidate cards and neutral common photo placeholders
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression uses the candidateId segment and the same detail route structure
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression uses the complete common detail field order at /candidates/hayashi-noriko
+apps/web/src/app/routes.test.tsx > ANALYST Mode shared route regression uses the complete common detail field order at /candidates/nakamura-tokihiro
+apps/web/src/app/routes.test.tsx > Analyst Mode route regression reaches Source Manifest from the Analyst Home link, not a public /sources link
+apps/web/src/app/routes.test.tsx > Analyst Mode route regression renders the direct entry /analyst/aws with the existing AWS診断 page
+apps/web/src/app/routes.test.tsx > Analyst Mode route regression renders the direct entry /analyst/evaluation with the existing 評価 page
+apps/web/src/app/routes.test.tsx > Analyst Mode route regression renders the direct entry /analyst/p0 with the existing P0完成判定 page
+apps/web/src/app/routes.test.tsx > Analyst Mode route regression renders the direct entry /analyst/readiness with the existing 政策解析準備状態 page
+apps/web/src/app/routes.test.tsx > Analyst Mode route regression renders the direct entry /analyst/review/artifact-example with the existing 人間確認 page
+apps/web/src/app/routes.test.tsx > Analyst Mode route regression renders the direct entry /analyst/runs with the existing 解析実行と履歴 page
+apps/web/src/app/routes.test.tsx > Analyst Mode route regression renders the direct entry /analyst/runs/run-example with the existing 解析run詳細 page
+apps/web/src/app/routes.test.tsx > Analyst Mode route regression renders the direct entry /analyst/sources with the existing Source Manifest page
+apps/web/src/app/routes.test.tsx > Analyst Mode route regression renders the direct entry /analyst/verification/artifact-example with the existing 根拠検証 page
+apps/web/src/app/routes.test.tsx > Analyst Mode route regression shows Source Manifest at /analyst/sources and keeps /sources a separate 404
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression falls back to the same mode's Home when an analyst URL was entered directly
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression keeps /candidates in NOT_READY without simulated AI progress
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression keeps /candidates/hayashi-noriko in NOT_READY without simulated AI progress
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression keeps /candidates/nakamura-tokihiro in NOT_READY without simulated AI progress
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression keeps /comparison in NOT_READY without simulated AI progress
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression keeps the P1/P2 route /calendar unregistered
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression keeps the P1/P2 route /chat unregistered
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression keeps the P1/P2 route /notifications unregistered
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression keeps the P1/P2 route /polling-place/early unregistered
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression keeps the P1/P2 route /polling-place/election-day unregistered
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression keeps the P1/P2 route /speech unregistered
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression keeps the P1/P2 route /three-dimensional-policy unregistered
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression keeps the P1/P2 route /voting-guide unregistered
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression keeps the mobile-first 360, md 768, and lg 1280 layout class contracts
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression moves back exactly once to the immediately previous in-app route
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression provides the skip link, landmarks, and aria-current while navigating
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression reaches 会場閲覧 from the Home link 会場閲覧画面を見る
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression reaches 候補者一覧 from the Home link 候補者一覧を見る
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression reaches 候補者詳細 from the Home link 中村時広氏の詳細を見る
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression reaches 候補者詳細 from the Home link 林紀子氏の詳細を見る
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression reaches 政策比較 from the Home link 政策比較を見る
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression reaches 選挙日程 from the Home link 選挙日程を見る
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression renders the remaining public route / with one h1 inside the shell
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression renders the remaining public route /candidates with one h1 inside the shell
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression renders the remaining public route /candidates/nakamura-tokihiro with one h1 inside the shell
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression renders the remaining public route /comparison with one h1 inside the shell
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression renders the remaining public route /schedule with one h1 inside the shell
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression renders the remaining public route /venue with one h1 inside the shell
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression routes the retired /sources direct entry to the shell-preserving 404
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression routes the unknown path /analyst/not-defined to the shell-preserving 404
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression routes the unknown path /analyst/runs/run-example/extra to the shell-preserving 404
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression routes the unknown path /not-a-p0-route to the shell-preserving 404
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression shows only equal future comparison fields while the table is NOT_READY
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression shows the mode's Home links and Shared Navigation without /sources or a mode toggle
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression uses equal candidate cards and neutral common photo placeholders
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression uses the candidateId segment and the same detail route structure
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression uses the complete common detail field order at /candidates/hayashi-noriko
+apps/web/src/app/routes.test.tsx > VISITOR Mode shared route regression uses the complete common detail field order at /candidates/nakamura-tokihiro
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression routes the direct entry /analyst/aws to the 404 without rendering AWS診断
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression routes the direct entry /analyst/evaluation to the 404 without rendering 評価
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression routes the direct entry /analyst/p0 to the 404 without rendering P0完成判定
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression routes the direct entry /analyst/readiness to the 404 without rendering 政策解析準備状態
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression routes the direct entry /analyst/review/artifact-example to the 404 without rendering 人間確認
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression routes the direct entry /analyst/runs to the 404 without rendering 解析実行と履歴
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression routes the direct entry /analyst/runs/run-example to the 404 without rendering 解析run詳細
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression routes the direct entry /analyst/sources to the 404 without rendering Source Manifest
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression routes the direct entry /analyst/verification/artifact-example to the 404 without rendering 根拠検証
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression with analyst-like query, hash, cookie, and Web Storage values keeps /analyst/not-defined unavailable with #analyst
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression with analyst-like query, hash, cookie, and Web Storage values keeps /analyst/not-defined unavailable with ?applicationMode=ANALYST#mode=analyst
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression with analyst-like query, hash, cookie, and Web Storage values keeps /analyst/not-defined unavailable with ?mode=analyst
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression with analyst-like query, hash, cookie, and Web Storage values keeps /analyst/readiness unavailable with #analyst
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression with analyst-like query, hash, cookie, and Web Storage values keeps /analyst/readiness unavailable with ?applicationMode=ANALYST#mode=analyst
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression with analyst-like query, hash, cookie, and Web Storage values keeps /analyst/readiness unavailable with ?mode=analyst
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression with analyst-like query, hash, cookie, and Web Storage values keeps /analyst/runs/run-example unavailable with #analyst
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression with analyst-like query, hash, cookie, and Web Storage values keeps /analyst/runs/run-example unavailable with ?applicationMode=ANALYST#mode=analyst
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression with analyst-like query, hash, cookie, and Web Storage values keeps /analyst/runs/run-example unavailable with ?mode=analyst
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression with analyst-like query, hash, cookie, and Web Storage values keeps /analyst/sources unavailable with #analyst
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression with analyst-like query, hash, cookie, and Web Storage values keeps /analyst/sources unavailable with ?applicationMode=ANALYST#mode=analyst
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression with analyst-like query, hash, cookie, and Web Storage values keeps /analyst/sources unavailable with ?mode=analyst
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression with analyst-like query, hash, cookie, and Web Storage values keeps /sources unavailable with #analyst
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression with analyst-like query, hash, cookie, and Web Storage values keeps /sources unavailable with ?applicationMode=ANALYST#mode=analyst
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression with analyst-like query, hash, cookie, and Web Storage values keeps /sources unavailable with ?mode=analyst
+apps/web/src/app/routes.test.tsx > Visitor Mode route regression with analyst-like query, hash, cookie, and Web Storage values keeps Visitor Home free of analyst content and mode toggles
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST ANALYST /analyst/aws
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST ANALYST /analyst/evaluation
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST ANALYST /analyst/p0
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST ANALYST /analyst/readiness
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST ANALYST /analyst/review/artifact-example
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST ANALYST /analyst/runs
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST ANALYST /analyst/runs/run-example
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST ANALYST /analyst/sources
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST ANALYST /analyst/verification/artifact-example
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST P1 /chat
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST P1 /polling-place/early
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST P1 /polling-place/election-day
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST P1 /voting-guide
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST P2 /calendar
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST P2 /notifications
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST P2 /speech
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST P2 /three-dimensional-policy
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST PUBLIC /
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST PUBLIC /candidates
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST PUBLIC /candidates/nakamura-tokihiro
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST PUBLIC /comparison
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST PUBLIC /schedule
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST PUBLIC /venue
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST RETIRED_SOURCES /sources
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST UNKNOWN /analyst/not-defined
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for ANALYST UNKNOWN /not-a-p0-route
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR ANALYST /analyst/aws
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR ANALYST /analyst/evaluation
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR ANALYST /analyst/p0
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR ANALYST /analyst/readiness
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR ANALYST /analyst/review/artifact-example
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR ANALYST /analyst/runs
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR ANALYST /analyst/runs/run-example
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR ANALYST /analyst/sources
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR ANALYST /analyst/verification/artifact-example
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR P1 /chat
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR P1 /polling-place/early
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR P1 /polling-place/election-day
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR P1 /voting-guide
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR P2 /calendar
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR P2 /notifications
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR P2 /speech
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR P2 /three-dimensional-policy
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR PUBLIC /
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR PUBLIC /candidates
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR PUBLIC /candidates/nakamura-tokihiro
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR PUBLIC /comparison
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR PUBLIC /schedule
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR PUBLIC /venue
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR RETIRED_SOURCES /sources
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR UNKNOWN /analyst/not-defined
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) keeps the shell, safety displays, and back fallback for VISITOR UNKNOWN /not-a-p0-route
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) moves back exactly once to the previous in-app route in ANALYST mode
+apps/web/src/app/shellSafety.property.test.tsx > Property 6 mounted shell contracts (bounded matrix) moves back exactly once to the previous in-app route in VISITOR mode
+apps/web/src/app/shellSafety.property.test.tsx > Property 6: preserved shell and route safety contracts resolves every mode and route category inside the mode's shell to the right page or the 404
+apps/web/src/app/sourceBoundary.property.test.tsx > Property 7: standalone public sources removal preserves source evidence boundaries routes every /sources variant to the shared 404 while keeping embedded evidence and /analyst/sources
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router renders the public route / inside the visitor shell
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router renders the public route /candidates inside the visitor shell
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router renders the public route /candidates/nakamura-tokihiro inside the visitor shell
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router renders the public route /comparison inside the visitor shell
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router renders the public route /schedule inside the visitor shell
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router renders the public route /venue inside the visitor shell
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router routes the direct entry /analyst/aws to the same shell-preserving 404
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router routes the direct entry /analyst/evaluation to the same shell-preserving 404
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router routes the direct entry /analyst/not-defined to the same shell-preserving 404
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router routes the direct entry /analyst/p0 to the same shell-preserving 404
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router routes the direct entry /analyst/readiness to the same shell-preserving 404
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router routes the direct entry /analyst/review/artifact-example to the same shell-preserving 404
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router routes the direct entry /analyst/runs to the same shell-preserving 404
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router routes the direct entry /analyst/runs/run-example to the same shell-preserving 404
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router routes the direct entry /analyst/sources to the same shell-preserving 404
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router routes the direct entry /analyst/verification/artifact-example to the same shell-preserving 404
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router routes the direct entry /chat to the same shell-preserving 404
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router routes the direct entry /not-a-p0-route to the same shell-preserving 404
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router routes the direct entry /polling-place/election-day to the same shell-preserving 404
+apps/web/src/app/visitor/routes.test.tsx > Visitor Router routes the direct entry /sources to the same shell-preserving 404
+apps/web/src/app/visitor/routes.test.tsx > Visitor route contract matrix contains only the remaining public routes and wildcard
+apps/web/src/app/visitor/visitorPresentation.property.test.tsx > Property 2: Visitor presentation omits analyst and retired standalone-source content renders zero analyst or /sources destinations and keeps every remaining visitor destination
+apps/web/src/app/visitor/visitorPresentation.property.test.tsx > Visitor Home and navigation fixed examples omit the current analyst link labels, descriptions, and the retired sources link
+apps/web/src/app/visitor/visitorRoutes.property.test.tsx > Property 3: Visitor Router excludes every analyst path selects the shell-preserving wildcard 404 for every analyst route instance and /analyst/ suffix
+apps/web/src/app/visitor/visitorRoutes.property.test.tsx > Visitor Router direct entry into analyst URLs renders the shell-preserving 404 instead of the analyst page for /analyst/aws
+apps/web/src/app/visitor/visitorRoutes.property.test.tsx > Visitor Router direct entry into analyst URLs renders the shell-preserving 404 instead of the analyst page for /analyst/evaluation
+apps/web/src/app/visitor/visitorRoutes.property.test.tsx > Visitor Router direct entry into analyst URLs renders the shell-preserving 404 instead of the analyst page for /analyst/not-defined/visitor-direct-ent…
+apps/web/src/app/visitor/visitorRoutes.property.test.tsx > Visitor Router direct entry into analyst URLs renders the shell-preserving 404 instead of the analyst page for /analyst/p0
+apps/web/src/app/visitor/visitorRoutes.property.test.tsx > Visitor Router direct entry into analyst URLs renders the shell-preserving 404 instead of the analyst page for /analyst/readiness
+apps/web/src/app/visitor/visitorRoutes.property.test.tsx > Visitor Router direct entry into analyst URLs renders the shell-preserving 404 instead of the analyst page for /analyst/review/visitor-direct-entry-pa…
+apps/web/src/app/visitor/visitorRoutes.property.test.tsx > Visitor Router direct entry into analyst URLs renders the shell-preserving 404 instead of the analyst page for /analyst/runs
+apps/web/src/app/visitor/visitorRoutes.property.test.tsx > Visitor Router direct entry into analyst URLs renders the shell-preserving 404 instead of the analyst page for /analyst/runs/visitor-direct-entry-param
+apps/web/src/app/visitor/visitorRoutes.property.test.tsx > Visitor Router direct entry into analyst URLs renders the shell-preserving 404 instead of the analyst page for /analyst/sources
+apps/web/src/app/visitor/visitorRoutes.property.test.tsx > Visitor Router direct entry into analyst URLs renders the shell-preserving 404 instead of the analyst page for /analyst/verification/visitor-direct-en…
+apps/web/src/app/visitor/visitorRoutes.property.test.tsx > Visitor Router route registration is declared through Routes and registers exactly the visitor contract descriptors
+apps/web/src/app/visitor/visitorRoutes.property.test.tsx > Visitor Router route registration registers zero analyst route descriptors and zero analyst page elements
+apps/web/src/config/applicationMode.property.test.ts > Property 1: fail-closed mode resolution selects ANALYST only for the exact token regardless of unrelated runtime-like values
+apps/web/src/config/applicationMode.test.ts > resolveApplicationMode fails closed to VISITOR for invalid input 0
+apps/web/src/config/applicationMode.test.ts > resolveApplicationMode fails closed to VISITOR for invalid input 1
+apps/web/src/config/applicationMode.test.ts > resolveApplicationMode fails closed to VISITOR for invalid input 10
+apps/web/src/config/applicationMode.test.ts > resolveApplicationMode fails closed to VISITOR for invalid input 11
+apps/web/src/config/applicationMode.test.ts > resolveApplicationMode fails closed to VISITOR for invalid input 12
+apps/web/src/config/applicationMode.test.ts > resolveApplicationMode fails closed to VISITOR for invalid input 13
+apps/web/src/config/applicationMode.test.ts > resolveApplicationMode fails closed to VISITOR for invalid input 2
+apps/web/src/config/applicationMode.test.ts > resolveApplicationMode fails closed to VISITOR for invalid input 3
+apps/web/src/config/applicationMode.test.ts > resolveApplicationMode fails closed to VISITOR for invalid input 4
+apps/web/src/config/applicationMode.test.ts > resolveApplicationMode fails closed to VISITOR for invalid input 5
+apps/web/src/config/applicationMode.test.ts > resolveApplicationMode fails closed to VISITOR for invalid input 6
+apps/web/src/config/applicationMode.test.ts > resolveApplicationMode fails closed to VISITOR for invalid input 7
+apps/web/src/config/applicationMode.test.ts > resolveApplicationMode fails closed to VISITOR for invalid input 8
+apps/web/src/config/applicationMode.test.ts > resolveApplicationMode fails closed to VISITOR for invalid input 9
+apps/web/src/config/applicationMode.test.ts > resolveApplicationMode selects ANALYST only for the exact analyst token
+apps/web/src/config/applicationMode.test.ts > resolveBuildTarget selects the isolated analyst route entry and output directory
+apps/web/src/config/applicationMode.test.ts > resolveBuildTarget selects the visitor route entry and output directory by default
+apps/web/src/config/applicationMode.test.ts > web build marker accepts only the exact marker for the expected build target
+apps/web/src/config/applicationMode.test.ts > web build marker contains only the schema version, resolved mode, and output directory
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker emits Visitor JavaScript without analyst route strings or the analyst navigation label
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker extracts normalized route descriptors that match both route contract matrices
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker fails closed for a missing marker, a cross-mode marker, a missing output, or a missing module manifest
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker keeps the source evidence and provenance contract modules
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker matches analyst literals exactly and never reports /analyst/sources as the retired /sources
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker passes against fresh visitor and analyst builds in an isolated output root
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker records real module metadata: visitor excludes app/analyst, analyst bundles it via the explicit entry
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker refuses output roots that would overwrite repository build outputs
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker rejects Shared Navigation items toggled from th…
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker rejects a Visitor Build composed from the analy…
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker rejects a Visitor Build that bundles the analys…
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker rejects a Visitor route entry that passes the a…
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker rejects a Visitor route entry whose navigationI…
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker rejects a analyst Shared Navigation item that l…
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker rejects a analyst route entry that registers th…
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker rejects a runtime mode source in a bundled shar…
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker rejects a visitor Shared Navigation item that l…
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker rejects a visitor route entry that registers th…
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker rejects an Analyst Build without the /analyst/s…
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker rejects an auth dependency in the bundle
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker rejects an evidence-bearing page that dropped i…
+apps/web/src/config/buildBoundary.test.ts > Visitor/Analyst build boundary checker rejects the analyst navigation item put back in…
+apps/web/src/config/buildTarget.property.test.ts > Property 5: mode-to-build-target isolation maps every mode to exactly one isolated route, output, and preview target without mutating input
+apps/web/src/config/buildTarget.property.test.ts > Property 5: mode-to-build-target isolation strictly validates markers for only the requested preview target without mutating candidates
+apps/web/src/config/packageScripts.test.ts > root and web mode command contracts builds shared workspaces before the isolated analyst web output
+apps/web/src/config/packageScripts.test.ts > root and web mode command contracts delegates normal and analyst startup commands to the web workspace
+apps/web/src/config/packageScripts.test.ts > root and web mode command contracts exposes the finite build boundary checker from root and web
+apps/web/src/config/packageScripts.test.ts > root and web mode command contracts keeps root quality gates finite and excludes both mode build outputs from lint and Git
+apps/web/src/config/packageScripts.test.ts > root and web mode command contracts keeps the root normal build as the all-workspace build
+apps/web/src/config/packageScripts.test.ts > root and web mode command contracts routes preview commands through strict mode-specific preflight
+apps/web/src/config/packageScripts.test.ts > root and web mode command contracts uses the analyst Vite mode only for explicit analyst dev and build
+apps/web/src/config/previewPreflight.test.ts > preview build preflight accepts a strict ANALYST marker in dist-analyst
+apps/web/src/config/previewPreflight.test.ts > preview build preflight accepts a strict VISITOR marker in dist
+apps/web/src/config/previewPreflight.test.ts > preview build preflight fails when the expected directory is absent without using the opposite build
+apps/web/src/config/previewPreflight.test.ts > preview build preflight launches analyst preview only against dist-analyst on loopback
+apps/web/src/config/previewPreflight.test.ts > preview build preflight launches visitor preview only against dist on loopback
+apps/web/src/config/previewPreflight.test.ts > preview build preflight rejects a invalid JSON
+apps/web/src/config/previewPreflight.test.ts > preview build preflight rejects a missing marker
+apps/web/src/config/previewPreflight.test.ts > preview build preflight rejects a opposite mode marker
+apps/web/src/config/previewPreflight.test.ts > preview build preflight rejects a unknown marker field
+apps/web/src/config/previewPreflight.test.ts > preview build preflight rejects unknown preview modes
+apps/web/src/config/readmeContract.test.ts > README preserved project statements keeps the NOT_READY, past-election, P1/P2, API startup, and Ctrl+C statements
+apps/web/src/config/readmeContract.test.ts > README standalone public sources retirement contract documents /sources as a shell-preserving 404 in both route contracts
+apps/web/src/config/readmeContract.test.ts > README standalone public sources retirement contract keeps /analyst/sources Source Manifest management and embedded source evidence
+apps/web/src/config/readmeContract.test.ts > README standalone public sources retirement contract limits the ehime-vote-navigator supersession to the Home link and keeps the spec documents unedited
+apps/web/src/config/readmeContract.test.ts > README startup, build, and preview contract documents analyst-path exclusion that matches the real Visitor route contracts
+apps/web/src/config/readmeContract.test.ts > README startup, build, and preview contract documents loopback-only servers that match the Vite config of both modes
+apps/web/src/config/readmeContract.test.ts > README startup, build, and preview contract documents only npm commands that exist in the real package scripts
+apps/web/src/config/readmeContract.test.ts > README startup, build, and preview contract documents the build boundary checker that both manifests define
+apps/web/src/config/readmeContract.test.ts > README startup, build, and preview contract documents the isolated output directory and strict preview preflight of each mode
+apps/web/src/config/readmeContract.test.ts > README startup, build, and preview contract documents the visitor and analyst commands in separate sections
+apps/web/src/config/readmeContract.test.ts > README startup, build, and preview contract states that Visitor Mode is the default and Analyst Mode is not authentication
+apps/web/src/config/readmeContract.test.ts > README startup, build, and preview contract states that runtime inputs and implicit fallback cannot switch the mode
+apps/web/src/config/viteConfig.test.ts > createWebViteConfig emits the ANALYST build marker into dist-analyst
+apps/web/src/config/viteConfig.test.ts > createWebViteConfig emits the VISITOR build marker into dist
+apps/web/src/config/viteConfig.test.ts > createWebViteConfig uses the analyst entry and isolated dist-analyst output only for analyst
+apps/web/src/config/viteConfig.test.ts > createWebViteConfig uses the visitor entry and dist for mode development
+apps/web/src/config/viteConfig.test.ts > createWebViteConfig uses the visitor entry and dist for mode production
+apps/web/src/config/viteConfig.test.ts > createWebViteConfig uses the visitor entry and dist for mode test
+apps/web/src/config/viteConfig.test.ts > createWebViteConfig uses the visitor entry and dist for mode undefined
+apps/web/src/config/viteConfig.test.ts > createWebViteConfig uses the visitor entry and dist for mode unknown
+apps/web/src/shared/ui/AppShell.test.tsx > AppShell navigation items adds explicit analyst access without adding the retired public sources destination
+apps/web/src/shared/ui/AppShell.test.tsx > AppShell navigation items keeps visitor navigation fixed when URL and browser storage contain analyst-like values
+apps/web/src/shared/ui/AppShell.test.tsx > AppShell navigation items preserves internal Source Manifest access from the analyst home composition
+apps/web/src/shared/ui/AppShell.test.tsx > AppShell navigation items preserves shell safety, accessibility, data-kind, footer, and back-control contracts
+apps/web/src/shared/ui/AppShell.test.tsx > AppShell navigation items renders only the five visitor navigation destinations
+packages/contracts/src/contracts.test.ts > API envelope contracts accepts success and error envelopes through one shared decoder
+packages/contracts/src/contracts.test.ts > API envelope contracts rejects mixed and unknown envelope fields
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a null candidateId but rejects a missing candidateId
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid AiArtifact and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid AnalysisRun and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid ApiError and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid ApiErrorDetail and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid ApiRetry and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid ApiSuccess and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid ApprovalRecord and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid ApprovalSnapshot and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid Candidate and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid CandidateMaterialSummary and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid CandidateNameEvidence and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid CandidatePhoto and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid CandidateResult and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid Citation and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid DeterministicCheck and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid Election and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid EstimatedCost and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid EvaluationConfiguration and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid EvaluationDataset and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid EvaluationExample and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid EvaluationExpectation and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid EvaluationResult and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid EvaluationReviewerResult and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid ExcludedEvaluationExample and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid ExtractedSegment and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid HtmlParagraphLocator and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid MaterialVolume and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid ModelIds and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid ModelRequestCost and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid ModelUsage and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid Negation and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid OcrHumanReview and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid P0CheckItem and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid P0CheckResult and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid PdfPageLocator and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid PolicyUnit and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid PreReleaseCheck and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid PromptVersions and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid Provenance and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid PublicationDecision and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid RateMetric and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid ReadinessIssue and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid ReadinessMaterial and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid ReadinessReport and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid RejectionRecord and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid RetrievalConfig and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid RetrievalFilter and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid RetrievalHit and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid RunStage and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid SemanticCheck and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid SourceManifestRecord and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid SourceReference and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid StructuredPolicy and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid TextLinesLocator and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid UsageReview and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts a valid VerificationRecord and rejects every missing required field
+packages/contracts/src/contracts.test.ts > P0 contract schemas accepts explicit nulls but rejects missing nullable StructuredPolicy fields
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on AiArtifact
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on AnalysisRun
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on ApiError
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on ApiErrorDetail
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on ApiRetry
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on ApiSuccess
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on ApprovalRecord
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on ApprovalSnapshot
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on Candidate
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on CandidateMaterialSummary
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on CandidateNameEvidence
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on CandidatePhoto
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on CandidateResult
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on Citation
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on DeterministicCheck
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on Election
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on EstimatedCost
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on EvaluationConfiguration
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on EvaluationDataset
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on EvaluationExample
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on EvaluationExpectation
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on EvaluationResult
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on EvaluationReviewerResult
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on ExcludedEvaluationExample
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on ExtractedSegment
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on HtmlParagraphLocator
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on MaterialVolume
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on ModelIds
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on ModelRequestCost
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on ModelUsage
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on Negation
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on OcrHumanReview
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on P0CheckItem
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on P0CheckResult
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on PdfPageLocator
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on PolicyUnit
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on PreReleaseCheck
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on PromptVersions
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on Provenance
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on PublicationDecision
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on RateMetric
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on ReadinessIssue
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on ReadinessMaterial
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on ReadinessReport
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on RejectionRecord
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on RetrievalConfig
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on RetrievalFilter
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on RetrievalHit
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on RunStage
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on SemanticCheck
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on SourceManifestRecord
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on SourceReference
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on StructuredPolicy
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on TextLinesLocator
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on UsageReview
+packages/contracts/src/contracts.test.ts > P0 contract schemas rejects an unknown field on VerificationRecord
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects an out-of-contract enum value
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects invalid ISO date 0000-01-01
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects invalid ISO date 2023-02-29
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects invalid ISO date 2024-02-30
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects invalid ISO date 2026-1-01
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects invalid ISO date 2026-13-01
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects invalid ISO instant 2023-02-29T00:00:00Z
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects invalid ISO instant 2026-01-01T00:00:00
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects invalid ISO instant 2026-01-01T00:00:60Z
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects invalid ISO instant 2026-01-01T00:60:00Z
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects invalid ISO instant 2026-01-01T24:00:00Z
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects invalid lowercase SHA-256 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects invalid lowercase SHA-256 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+packages/contracts/src/contracts.test.ts > primitive and fixed-enum schemas rejects invalid lowercase SHA-256 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaag
+packages/contracts/src/contracts.test.ts > seven-stage run contract accepts exactly the seven stages in their fixed order
+packages/contracts/src/contracts.test.ts > seven-stage run contract rejects a missing, reordered, or ordinal-mismatched stage
+packages/contracts/src/contracts.test.ts > seven-stage run contract rejects more than one running stage
+packages/contracts/src/contracts.test.ts > seven-stage run contract requires all stages after a failed stage to be skipped
+packages/contracts/src/data-kind.test.ts > data-kind contracts decodes REAL_AI and FIXTURE records with separate strict schemas
+packages/contracts/src/data-kind.test.ts > data-kind contracts rejects missing, unknown, multiple, or additional tags
+packages/contracts/src/data-kind.test.ts > data-kind contracts rejects missing, unknown, multiple, or additional tags
+packages/contracts/src/data-kind.test.ts > data-kind contracts rejects missing, unknown, multiple, or additional tags
+packages/contracts/src/data-kind.test.ts > data-kind contracts rejects missing, unknown, multiple, or additional tags
+packages/contracts/src/data-kind.test.ts > data-kind contracts rejects unsafe or non-descendant storage path /data/real/example.json
+packages/contracts/src/data-kind.test.ts > data-kind contracts rejects unsafe or non-descendant storage path C:\data\real\example.json
+packages/contracts/src/data-kind.test.ts > data-kind contracts rejects unsafe or non-descendant storage path data/real
+packages/contracts/src/data-kind.test.ts > data-kind contracts rejects unsafe or non-descendant storage path data/real/../packages/fixtures/example.json
+packages/contracts/src/data-kind.test.ts > data-kind contracts requires the matching storage root and record kind for each run
+packages/contracts/src/index.test.ts > contracts package entry rejects additional fields
+packages/contracts/src/index.test.ts > contracts package entry returns a schema-valid health value
+packages/contracts/src/models/analysis.test.ts > AssignmentSchema accepts the three states and rejects stray keys
+packages/contracts/src/models/analysis.test.ts > ExtractionOutputSchema accepts a normal extraction and a not-ready extraction without content
+packages/contracts/src/models/analysis.test.ts > ExtractionOutputSchema rejects a not-ready extraction that keeps passages
+packages/contracts/src/models/analysis.test.ts > ExtractionOutputSchema rejects a passage beyond the page count
+packages/contracts/src/models/analysis.test.ts > ExtractionOutputSchema rejects an image page beyond the page count
+packages/contracts/src/models/analysis.test.ts > ExtractionOutputSchema rejects an unknown not-ready reason
+packages/contracts/src/models/analysis.test.ts > ExtractionOutputSchema rejects more pages than the page count
+packages/contracts/src/models/analysis.test.ts > IngestRecordSchema accepts a valid record for each assignment
+packages/contracts/src/models/analysis.test.ts > IngestRecordSchema accepts an offset timezone
+packages/contracts/src/models/analysis.test.ts > IngestRecordSchema rejects a URL with credentials
+packages/contracts/src/models/analysis.test.ts > IngestRecordSchema rejects a bad SHA-256
+packages/contracts/src/models/analysis.test.ts > IngestRecordSchema rejects a date instead of an instant
+packages/contracts/src/models/analysis.test.ts > IngestRecordSchema rejects a raw path outside objects
+packages/contracts/src/models/analysis.test.ts > IngestRecordSchema rejects a raw path that does not match the hash
+packages/contracts/src/models/analysis.test.ts > IngestRecordSchema rejects a retrieval time without a timezone
+packages/contracts/src/models/analysis.test.ts > IngestRecordSchema rejects a revision without the r prefix
+packages/contracts/src/models/analysis.test.ts > IngestRecordSchema rejects a zero byte length
+packages/contracts/src/models/analysis.test.ts > IngestRecordSchema rejects an analysis status other than NOT_ANALYZED
+packages/contracts/src/models/analysis.test.ts > IngestRecordSchema rejects an approval status other than PENDING
+packages/contracts/src/models/analysis.test.ts > IngestRecordSchema rejects an extra key
+packages/contracts/src/models/analysis.test.ts > IngestRecordSchema rejects an http URL
+packages/contracts/src/models/analysis.test.ts > IngestRecordSchema rejects an uppercase SHA-256
+packages/contracts/src/models/analysis.test.ts > IngestRecordSchema rejects an uppercase source ID
+packages/contracts/src/models/analysis.test.ts > IngestRecordSchema rejects revision r0
+packages/contracts/src/models/analysis.test.ts > PassageSchema accepts an unassigned passage and an assigned passage with evidence
+packages/contracts/src/models/analysis.test.ts > PassageSchema rejects a SHARED passage
+packages/contracts/src/models/analysis.test.ts > PassageSchema rejects an assigned passage without evidence
+packages/contracts/src/models/analysis.test.ts > PassageSchema rejects an empty range
+packages/contracts/src/models/analysis.test.ts > PassageSchema rejects an unassigned passage with evidence
+packages/contracts/src/models/analysis.test.ts > PassageSchema rejects blank text
+packages/contracts/src/models/analysis.test.ts > PassageSchema rejects evidence from another page
+packages/contracts/src/models/analysis.test.ts > PassageSchema rejects page zero
+packages/contracts/src/models/analysis.test.ts > StageRunSchema accepts a succeeded run, a failed run and a model-free stage
+packages/contracts/src/models/analysis.test.ts > StageRunSchema rejects a bad run ID hash
+packages/contracts/src/models/analysis.test.ts > StageRunSchema rejects a failed run with output
+packages/contracts/src/models/analysis.test.ts > StageRunSchema rejects a failed run without an error class
+packages/contracts/src/models/analysis.test.ts > StageRunSchema rejects a succeeded run with an error class
+packages/contracts/src/models/analysis.test.ts > StageRunSchema rejects a succeeded run without output
+packages/contracts/src/models/analysis.test.ts > StageRunSchema rejects an extra key
+packages/contracts/src/models/analysis.test.ts > StageRunSchema rejects an unknown scope
+packages/contracts/src/models/analysis.test.ts > StageRunSchema rejects an unknown stage
+packages/contracts/src/models/analysis.test.ts > constants and helpers accepts only https URLs without credentials
+packages/contracts/src/models/analysis.test.ts > constants and helpers accepts the source ID 0abc
+packages/contracts/src/models/analysis.test.ts > constants and helpers accepts the source ID a
+packages/contracts/src/models/analysis.test.ts > constants and helpers accepts the source ID a-b-c
+packages/contracts/src/models/analysis.test.ts > constants and helpers accepts the source ID aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+packages/contracts/src/models/analysis.test.ts > constants and helpers accepts the source ID bulletin-a
+packages/contracts/src/models/analysis.test.ts > constants and helpers derives the raw object path from the SHA-256
+packages/contracts/src/models/analysis.test.ts > constants and helpers is exported from the package entry
+packages/contracts/src/models/analysis.test.ts > constants and helpers lists the documented states and stages
+packages/contracts/src/models/analysis.test.ts > constants and helpers rejects the source ID ""
+packages/contracts/src/models/analysis.test.ts > constants and helpers rejects the source ID "-a"
+packages/contracts/src/models/analysis.test.ts > constants and helpers rejects the source ID "A"
+packages/contracts/src/models/analysis.test.ts > constants and helpers rejects the source ID "a b"
+packages/contracts/src/models/analysis.test.ts > constants and helpers rejects the source ID "a.b"
+packages/contracts/src/models/analysis.test.ts > constants and helpers rejects the source ID "a_b"
+packages/contracts/src/models/analysis.test.ts > constants and helpers rejects the source ID "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+packages/contracts/src/models/analysis.test.ts > constants and helpers rejects the source ID "com1"
+packages/contracts/src/models/analysis.test.ts > constants and helpers rejects the source ID "con"
+packages/contracts/src/models/analysis.test.ts > constants and helpers rejects the source ID "lpt9"
+packages/contracts/src/models/analysis.test.ts > constants and helpers rejects the source ID "nul"
+packages/contracts/src/models/analysis.test.ts > constants and helpers rejects the source ID "選挙"
+packages/contracts/src/models/electionRegistry.test.ts > CandidateDefinitionSchema accepts a name of 1 and 50 code points and rejects empty and 51
+packages/contracts/src/models/electionRegistry.test.ts > CandidateDefinitionSchema accepts candidate IDs of 1 and 64 characters and rejects empty, blank and 65
+packages/contracts/src/models/electionRegistry.test.ts > CandidateDefinitionSchema requires at least one nameForm of 1 to 50 code points each
+packages/contracts/src/models/electionRegistry.test.ts > ELECTION_STATUSES accepts each status and rejects anything else
+packages/contracts/src/models/electionRegistry.test.ts > ELECTION_STATUSES lists exactly PAST, CURRENT and PLANNED
+packages/contracts/src/models/electionRegistry.test.ts > ElectionDefinitionSchema candidates accepts 1 to 20 candidates and rejects 0 and 21
+packages/contracts/src/models/electionRegistry.test.ts > ElectionDefinitionSchema electionDate accepts real calendar dates including 2026-11-15 and a leap day
+packages/contracts/src/models/electionRegistry.test.ts > ElectionDefinitionSchema electionDate rejects non-existent dates and other formats
+packages/contracts/src/models/electionRegistry.test.ts > ElectionDefinitionSchema electionId accepts 1 and 64 ASCII letters, digits and hyphens
+packages/contracts/src/models/electionRegistry.test.ts > ElectionDefinitionSchema electionId rejects empty, 65 characters, and characters outside the allowed set
+packages/contracts/src/models/electionRegistry.test.ts > ElectionDefinitionSchema name accepts 1 and 100 code points and rejects empty and 101
+packages/contracts/src/models/electionRegistry.test.ts > ElectionDefinitionSchema name counts code points, not UTF-16 units
+packages/contracts/src/models/electionRegistry.test.ts > ElectionRegistryFileSchema accepts a registry holding the 2022 election and a placeholder 2026 election
+packages/contracts/src/models/electionRegistry.test.ts > ElectionRegistryFileSchema is exported from the package entry
+packages/contracts/src/models/electionRegistry.test.ts > ElectionRegistryFileSchema rejects non-object input
+packages/contracts/src/models/electionRegistry.test.ts > ElectionRegistryFileSchema rejects unknown keys at the file, election and candidate level
+packages/contracts/src/models/electionRegistry.test.ts > ElectionRegistryFileSchema requires schemaVersion 1 and at least one election
+packages/contracts/src/models/electionRegistry.test.ts > existing 2022 contracts are untouched ElectionSchema still pins the 2022 election and rejects the 2026 date
+packages/contracts/src/models/runs-events.test.ts > strict run event contracts accepts the minimal append command and persisted hash envelope
+packages/contracts/src/models/runs-events.test.ts > strict run event contracts rejects missing integrity fields and unsupported event kinds
+packages/contracts/src/models/runs-events.test.ts > strict run event contracts rejects unknown envelope and payload fields
+packages/contracts/src/models/runs-events.test.ts > strict run event contracts requires the creation payload and envelope to identify the same run
+packages/contracts/src/provider/screen-data.test.ts > screen data provider contracts decodes the failure result through separate discriminated unions
+packages/contracts/src/provider/screen-data.test.ts > screen data provider contracts decodes the no-data result through separate discriminated unions
+packages/contracts/src/provider/screen-data.test.ts > screen data provider contracts decodes the no-results result through separate discriminated unions
+packages/contracts/src/provider/screen-data.test.ts > screen data provider contracts decodes the success result through separate discriminated unions
+packages/contracts/src/provider/screen-data.test.ts > screen data provider contracts does not reinterpret empty success as no-data or accept payloads on empty states
+packages/contracts/src/provider/screen-data.test.ts > screen data provider contracts keeps REAL_AI and FIXTURE request entrances separate and strict
+packages/contracts/src/provider/screen-data.test.ts > screen data provider contracts rejects unknown fields and mixed item data kinds
+packages/domain/src/analysis/passages.test.ts > attributePassage assigns a passage that names exactly one candidate, with its evidence
+packages/domain/src/analysis/passages.test.ts > attributePassage counts several mentions of one candidate as one candidate
+packages/domain/src/analysis/passages.test.ts > attributePassage ignores empty name forms and works without candidates
+packages/domain/src/analysis/passages.test.ts > attributePassage ignores whitespace and width differences inside the name
+packages/domain/src/analysis/passages.test.ts > attributePassage is safe when one registered name contains another
+packages/domain/src/analysis/passages.test.ts > attributePassage leaves a passage naming two candidates unassigned
+packages/domain/src/analysis/passages.test.ts > attributePassage leaves a passage without any registered name unassigned
+packages/domain/src/analysis/passages.test.ts > attributePassage matches a registered alternative spelling and reports that spelling
+packages/domain/src/analysis/passages.test.ts > normalizeForMatch applies NFKC and removes every kind of whitespace
+packages/domain/src/analysis/passages.test.ts > resolveEffectiveCandidate passage {"state":"ASSIGNED","candidateId":"c1"} in document {"state":"ASSIGNED","candidateId":"c1"} gives "c1"
+packages/domain/src/analysis/passages.test.ts > resolveEffectiveCandidate passage {"state":"ASSIGNED","candidateId":"c1"} in document {"state":"ASSIGNED","candidateId":"c2"} gives null
+packages/domain/src/analysis/passages.test.ts > resolveEffectiveCandidate passage {"state":"ASSIGNED","candidateId":"c1"} in document {"state":"SHARED"} gives "c1"
+packages/domain/src/analysis/passages.test.ts > resolveEffectiveCandidate passage {"state":"ASSIGNED","candidateId":"c1"} in document {"state":"UNASSIGNED"} gives "c1"
+packages/domain/src/analysis/passages.test.ts > resolveEffectiveCandidate passage {"state":"UNASSIGNED"} in document {"state":"ASSIGNED","candidateId":"c2"} gives "c2"
+packages/domain/src/analysis/passages.test.ts > resolveEffectiveCandidate passage {"state":"UNASSIGNED"} in document {"state":"SHARED"} gives null
+packages/domain/src/analysis/passages.test.ts > resolveEffectiveCandidate passage {"state":"UNASSIGNED"} in document {"state":"UNASSIGNED"} gives null
+packages/domain/src/analysis/passages.test.ts > splitIntoPassages cuts an over-long sentence at maxChars
+packages/domain/src/analysis/passages.test.ts > splitIntoPassages is deterministic
+packages/domain/src/analysis/passages.test.ts > splitIntoPassages merges neighbouring sentences up to maxChars and starts a new passage after that
+packages/domain/src/analysis/passages.test.ts > splitIntoPassages neither adds nor drops non-whitespace characters, and never crosses a page
+packages/domain/src/analysis/passages.test.ts > splitIntoPassages never splits a surrogate pair when cutting
+packages/domain/src/analysis/passages.test.ts > splitIntoPassages numbers pages from 1 and keeps offsets that slice the original text
+packages/domain/src/analysis/passages.test.ts > splitIntoPassages returns nothing for empty or blank pages
+packages/domain/src/analysis/passages.test.ts > splitIntoPassages starts a new passage at a newline-separated sentence boundary
+packages/domain/src/analysis/passages.test.ts > splitIntoPassages uses a default of 1000 and rejects an invalid limit
+packages/domain/src/data-kind/validateDataBoundary.property.test.ts > Property 8: data kind and storage-root exclusivity fails closed for every one-field tag mutation, mixed set, and root mismatch
+packages/domain/src/data-kind/validateDataBoundary.test.ts > validateDataBoundary accepts one consistent FIXTURE RUN boundary
+packages/domain/src/data-kind/validateDataBoundary.test.ts > validateDataBoundary accepts one consistent FIXTURE SCREEN boundary
+packages/domain/src/data-kind/validateDataBoundary.test.ts > validateDataBoundary accepts one consistent REAL_AI RUN boundary
+packages/domain/src/data-kind/validateDataBoundary.test.ts > validateDataBoundary accepts one consistent REAL_AI SCREEN boundary
+packages/domain/src/data-kind/validateDataBoundary.test.ts > validateDataBoundary composes only a validated REAL_AI run
+packages/domain/src/data-kind/validateDataBoundary.test.ts > validateDataBoundary returns no operation targets for a boundary violation
+packages/domain/src/data-kind/validateDataBoundary.test.ts > validateDataBoundary returns no operation targets for a boundary violation
+packages/domain/src/data-kind/validateDataBoundary.test.ts > validateDataBoundary returns no operation targets for a boundary violation
+packages/domain/src/data-kind/validateDataBoundary.test.ts > validateDataBoundary returns no operation targets for a boundary violation
+packages/domain/src/data-kind/validateDataBoundary.test.ts > validateDataBoundary returns no operation targets for a boundary violation
+packages/domain/src/data-kind/validateDataBoundary.test.ts > validateDataBoundary returns only fixed, value-free field paths
+packages/domain/src/election/registry.property.test.ts > Feature: multi-election-ai-analysis, Property 1: registry validation fails closed always accepts a registry that is valid by construction
+packages/domain/src/election/registry.property.test.ts > Feature: multi-election-ai-analysis, Property 1: registry validation fails closed rejects every registry that has no CURRENT election or two
+packages/domain/src/election/registry.property.test.ts > Feature: multi-election-ai-analysis, Property 1: registry validation fails closed returns a registry exactly when the data is valid, otherwise every applicable violation kind
+packages/domain/src/election/registry.property.test.ts > Feature: multi-election-ai-analysis, Property 2: current-election state machine keeps exactly one CURRENT election and changes only the two statuses on approval
+packages/domain/src/election/registry.test.ts > ValidatedRegistry brand cannot be built from a plain object literal
+packages/domain/src/election/registry.test.ts > decideChange APPROVE makes the old CURRENT PAST and the target CURRENT, and nothing else changes
+packages/domain/src/election/registry.test.ts > decideChange REJECT returns the same registry unchanged with reason REJECTED
+packages/domain/src/election/registry.test.ts > decideChange REJECT takes precedence over an invalid target
+packages/domain/src/election/registry.test.ts > decideChange returns TARGET_INVALID and the unchanged registry for an unregistered target
+packages/domain/src/election/registry.test.ts > decideChange returns TARGET_INVALID for a stale proposal whose from-election is no longer CURRENT
+packages/domain/src/election/registry.test.ts > decideChange returns TARGET_INVALID when the proposal names differ from the registry
+packages/domain/src/election/registry.test.ts > decideChange returns TARGET_INVALID when the target is already CURRENT
+packages/domain/src/election/registry.test.ts > decideChange returns a registry that can be proposed against again and switched back
+packages/domain/src/election/registry.test.ts > decideChange treats any decision other than the exact APPROVE as a rejection
+packages/domain/src/election/registry.test.ts > loadRegistry accepts a registry with a single CURRENT election and boundary sizes
+packages/domain/src/election/registry.test.ts > loadRegistry allows the same candidate ID in different elections
+packages/domain/src/election/registry.test.ts > loadRegistry does not mutate its input, even when the input is deeply frozen
+packages/domain/src/election/registry.test.ts > loadRegistry returns a ValidatedRegistry for the 2022 election plus a placeholder PLANNED election
+packages/domain/src/election/registry.test.ts > loadRegistry returns a deeply frozen registry that shares no references with the input
+packages/domain/src/election/registry.test.ts > loadRegistry violations lists a kind once however many times it occurs
+packages/domain/src/election/registry.test.ts > loadRegistry violations rejects input that is not a registry object
+packages/domain/src/election/registry.test.ts > loadRegistry violations reports CONTRACT_VIOLATION for out-of-range values
+packages/domain/src/election/registry.test.ts > loadRegistry violations reports CONTRACT_VIOLATION for unknown keys and a wrong schemaVersion
+packages/domain/src/election/registry.test.ts > loadRegistry violations reports DUPLICATE_CANDIDATE_ID only for repeats inside one election
+packages/domain/src/election/registry.test.ts > loadRegistry violations reports DUPLICATE_ELECTION_ID across election definitions
+packages/domain/src/election/registry.test.ts > loadRegistry violations reports INVALID_CURRENT_COUNT for zero and for two CURRENT elections
+packages/domain/src/election/registry.test.ts > loadRegistry violations returns a frozen error with a fixed message that leaks no input values
+packages/domain/src/election/registry.test.ts > loadRegistry violations returns every applicable kind once, in a fixed order
+packages/domain/src/election/registry.test.ts > loadRegistry violations still reports duplicates and count when the contract also fails
+packages/domain/src/election/registry.test.ts > proposeChange allows a registered PAST election as the target
+packages/domain/src/election/registry.test.ts > proposeChange rejects an unregistered target as TARGET_INVALID
+packages/domain/src/election/registry.test.ts > proposeChange rejects the election that is already CURRENT as TARGET_INVALID
+packages/domain/src/election/registry.test.ts > proposeChange returns the election names and IDs before and after, without changing anything
+packages/domain/src/index.test.ts > domain package entry narrows a generic Result by its ok discriminant
+packages/domain/src/index.test.ts > domain package entry reports that the package can be loaded
+packages/domain/src/provider/decodeProviderResult.property.test.ts > Property 40: data provider contract and UI shape isomorphism keeps equivalent provider models isomorphic and fails closed for one-field violations
+packages/domain/src/provider/decodeProviderResult.test.ts > decodeProviderResult fails closed for invalid payload 0
+packages/domain/src/provider/decodeProviderResult.test.ts > decodeProviderResult fails closed for invalid payload 1
+packages/domain/src/provider/decodeProviderResult.test.ts > decodeProviderResult fails closed for invalid payload 2
+packages/domain/src/provider/decodeProviderResult.test.ts > decodeProviderResult projects a strict failure detail without displaying result items
+packages/domain/src/provider/decodeProviderResult.test.ts > decodeProviderResult projects equivalent REAL_AI and FIXTURE success results to one screen shape
+packages/domain/src/provider/decodeProviderResult.test.ts > decodeProviderResult projects no-data without inventing items
+packages/domain/src/provider/decodeProviderResult.test.ts > decodeProviderResult projects no-results without inventing items
+packages/domain/src/runs/foldRunEvents.test.ts > foldRunEvents detects a missing sequence and does not fill or reorder events
+packages/domain/src/runs/foldRunEvents.test.ts > foldRunEvents detects duplicate sequence numbers
+packages/domain/src/runs/foldRunEvents.test.ts > foldRunEvents purely reconstructs the AnalysisRun display state from valid events
+packages/domain/src/runs/foldRunEvents.test.ts > foldRunEvents rejects a content hash mutation without returning a partial run
+packages/domain/src/runs/foldRunEvents.test.ts > foldRunEvents rejects a hash-chain break and an invalid reconstructed AnalysisRun
+packages/domain/src/runs/foldRunEvents.test.ts > foldRunEvents rejects an empty or schema-invalid sequence with fixed safe diagnostics
+packages/domain/src/security/redact.test.ts > protected-data detection classifies an explicit fictional 33.000001, 132.000001 pattern
+packages/domain/src/security/redact.test.ts > protected-data detection classifies an explicit fictional AKIAFAKEFAKEFAKEFAKE pattern
+packages/domain/src/security/redact.test.ts > protected-data detection classifies an explicit fictional Bearer fictional.header.signature pattern
+packages/domain/src/security/redact.test.ts > protected-data detection classifies an explicit fictional FAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE pattern
+packages/domain/src/security/redact.test.ts > protected-data detection classifies an explicit fictional IQoJb3JpZ2luX2VjFAKEFAKEFAKEFAKEFAKEFAKEFAKEFAKE pattern
+packages/domain/src/security/redact.test.ts > protected-data detection classifies an explicit fictional 架空の政策について教えてください？ pattern
+packages/domain/src/security/redact.test.ts > protected-data detection classifies an explicit fictional 架空県架空市架空町1丁目2番3号 pattern
+packages/domain/src/security/redact.test.ts > protected-data detection detects labeled credentials without returning their value
+packages/domain/src/security/redact.test.ts > protected-data detection does not mistake a SHA-256 value or local nonce shape for an AWS secret
+packages/domain/src/security/redact.test.ts > protected-data detection provides a pure pre-send AWS credential check for AI questions
+packages/domain/src/security/redact.test.ts > protected-data detection recognizes protected key name authorization
+packages/domain/src/security/redact.test.ts > protected-data detection recognizes protected key name aws_access_key_id
+packages/domain/src/security/redact.test.ts > protected-data detection recognizes protected key name current_location
+packages/domain/src/security/redact.test.ts > protected-data detection recognizes protected key name homeAddress
+packages/domain/src/security/redact.test.ts > protected-data detection recognizes protected key name latitude
+packages/domain/src/security/redact.test.ts > protected-data detection recognizes protected key name questionBody
+packages/domain/src/security/redact.test.ts > protected-data detection recognizes protected key name secretAccessKey
+packages/domain/src/security/redact.test.ts > protected-data detection recognizes protected key name session-token
+packages/domain/src/security/redact.test.ts > protected-data detection recognizes protected key name 質問本文
+packages/domain/src/security/redact.test.ts > recursive protected-data redaction allows repeated non-cyclic references and never mutates them
+packages/domain/src/security/redact.test.ts > recursive protected-data redaction omits a property when the property name itself contains a protected value
+packages/domain/src/security/redact.test.ts > recursive protected-data redaction redacts all requested key-name categories even for pattern-free values
+packages/domain/src/security/redact.test.ts > recursive protected-data redaction redacts nested object and array values while preserving safe data
+packages/domain/src/security/redact.test.ts > recursive protected-data redaction rejects a circular graph with a fixed value-free error
+packages/domain/src/security/redact.test.ts > recursive protected-data redaction rejects a getter without invoking it or exposing its closed-over value
+packages/domain/src/security/redact.test.ts > recursive protected-data redaction rejects dangerous key __proto__
+packages/domain/src/security/redact.test.ts > recursive protected-data redaction rejects dangerous key constructor
+packages/domain/src/security/redact.test.ts > recursive protected-data redaction rejects dangerous key prototype
+packages/domain/src/security/redact.test.ts > recursive protected-data redaction rejects nesting beyond the documented limit
+packages/domain/src/security/redact.test.ts > recursive protected-data redaction rejects proxies before invoking their traps
+packages/domain/src/security/redact.test.ts > recursive protected-data redaction rejects unsafe array shapes and unsupported JSON values
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON allows repeated non-cyclic references and null-prototype records
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON is independent of insertion order and does not mutate the input
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON rejects a non-JSON or unsafe value
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON rejects a non-JSON or unsafe value
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON rejects a non-JSON or unsafe value
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON rejects a non-JSON or unsafe value
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON rejects a non-JSON or unsafe value
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON rejects a non-JSON or unsafe value
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON rejects a non-JSON or unsafe value
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON rejects a non-JSON or unsafe value
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON rejects a polluted prototype without reading inherited data
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON rejects circular references
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON rejects getters without invoking them
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON rejects nesting beyond the documented safety limit
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON rejects symbols, proxies, sparse arrays, and custom array properties
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON rejects the dangerous key __proto__
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON rejects the dangerous key constructor
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON rejects the dangerous key prototype
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON rejects unsupported values inside objects and arrays instead of dropping or coercing them
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON sorts object keys recursively while preserving array order
+packages/domain/src/serialization/canonicalJson.test.ts > canonical JSON uses UTF-8 and LF without normalizing Unicode input
+packages/domain/src/serialization/canonicalJson.test.ts > content hashes changes the digest when canonical content changes
+packages/domain/src/serialization/canonicalJson.test.ts > content hashes hashes the exact canonical UTF-8 bytes reproducibly
+packages/domain/src/serialization/canonicalJson.test.ts > content hashes matches the standard SHA-256 test vector using lowercase hex
+packages/fixtures/src/index.test.ts > fixtures package entry creates only a FIXTURE-tagged strict record
+packages/fixtures/src/index.test.ts > fixtures package entry marks the package as fictional-only
+packages/fixtures/src/provider/fixtureDataProvider.test.ts > fixture data provider fails closed for an unconfigured request instead of falling back
+packages/fixtures/src/provider/fixtureDataProvider.test.ts > fixture data provider rejects REAL_AI requests and results at the fixture boundary
+packages/fixtures/src/provider/fixtureDataProvider.test.ts > fixture data provider rejects production composition
+packages/fixtures/src/provider/fixtureDataProvider.test.ts > fixture data provider rejects response/request mismatches and duplicate request IDs
+packages/fixtures/src/provider/fixtureDataProvider.test.ts > fixture data provider serves only explicitly configured FIXTURE scenarios in development
+packages/fixtures/src/provider/fixtureDataProvider.test.ts > fixture data provider serves only explicitly configured FIXTURE scenarios in test
+tests/harness/deterministic-sources.test.ts > FakeClock rejects invalid instants and negative advances
+tests/harness/deterministic-sources.test.ts > FakeClock returns snapshots and advances only when directed
+tests/harness/deterministic-sources.test.ts > FakeIdSource rejects invalid prefixes and seeds
+tests/harness/deterministic-sources.test.ts > FakeIdSource replays the same sequence from the same seed
+tests/harness/fast-check.test.ts > fast-check common configuration accepts a higher run count and replay seed/path
+tests/harness/fast-check.test.ts > fast-check common configuration enforces at least 100 runs and keeps detailed failure output
+tests/harness/fast-check.test.ts > fast-check common configuration rejects malformed run counts and seeds
+tests/harness/fast-check.test.ts > fast-check common configuration retains a failing seed, counterexample, and replay path
+tests/harness/network-guard.test.ts > external I/O guard allows a fake AWS port with its own send implementation
+tests/harness/network-guard.test.ts > external I/O guard allows browser transports replaced by explicit fakes
+tests/harness/network-guard.test.ts > external I/O guard fails before each configured AWS client can send
+tests/harness/network-guard.test.ts > external I/O guard fails fast for un-stubbed browser transports
+tests/harness/temporary-directory.test.ts > temporary directory helper creates below os.tmpdir and removes callback artifacts
+tests/harness/temporary-directory.test.ts > temporary directory helper provides idempotent cleanup
+tests/harness/temporary-directory.test.ts > temporary directory helper rejects the workspace real-data location without accessing it
+tests/harness/temporary-directory.test.ts > temporary directory helper removes callback artifacts when the test body fails
+tests/workspace-structure.test.ts > workspace skeleton declares every required npm workspace on a private root
+tests/workspace-structure.test.ts > workspace skeleton keeps a TypeScript project reference for every workspace
+tests/workspace-structure.test.ts > workspace skeleton records every workspace in the single npm lockfile
+tests/workspace-structure.test.ts > workspace skeleton retains the existing Git and specification assets

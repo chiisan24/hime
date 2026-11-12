@@ -8,6 +8,7 @@ export * from "./p0.js";
 export * from "./policy.js";
 export * from "./primitives.js";
 export * from "./readiness.js";
+export * from "./regional/index.js";
 export * from "./retrieval.js";
 export * from "./runs.js";
 export * from "./sources.js";

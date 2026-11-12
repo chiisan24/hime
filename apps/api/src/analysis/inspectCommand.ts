@@ -27,6 +27,11 @@ export type InspectDependencies = Readonly<{
 /** A PDF placed directly in `data/real/raw`; no path separators, no `..`. */
 const RAW_FILE_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}\.pdf$/iu;
 
+/** True for the name of a PDF placed directly in `data/real/raw`: no separators, no `..`. */
+export function isRawPdfFileName(name: string): boolean {
+  return RAW_FILE_NAME.test(name) && !name.includes("..");
+}
+
 export function parseInspectArgs(args: readonly string[]): InspectArgs | undefined {
   let file: string | undefined;
   let writeReview = false;
@@ -118,7 +123,7 @@ export async function inspectPdf(
   dependencies: InspectDependencies,
 ): Promise<number> {
   const { io } = dependencies;
-  if (!RAW_FILE_NAME.test(args.file) || args.file.includes("..")) {
+  if (!isRawPdfFileName(args.file)) {
     return reject(io, "INVALID_FILE_NAME", "Give the name of a PDF placed directly in data/real/raw.");
   }
 
