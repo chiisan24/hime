@@ -1,0 +1,4 @@
+{
+  "thresholds": { "t1": 50, "t2": 150 },
+  "guidanceMaxThemes": 3
+}

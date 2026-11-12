@@ -1,0 +1,26 @@
+{
+  "command": "npm.cmd test -- --reporter=json --outputFile=dist/regional-values-records/vitest-before.raw.json",
+  "note": "The console output was redirected to a file; the command itself is unchanged. Run once, before any other file was changed.",
+  "acquiredAt": "2026-11-12T04:12:26.039Z",
+  "recordedAt": "2026-11-12T04:14:34.998Z",
+  "rawReport": "dist/regional-values-records/vitest-before.raw.json",
+  "success": true,
+  "counts": {
+    "numTotalTests": 1344,
+    "numPassedTests": 1344,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTodoTests": 0,
+    "testFiles": 89,
+    "numTotalTestSuites": 259,
+    "numPassedTestSuites": 259,
+    "numFailedTestSuites": 0
+  },
+  "assertionStatusCounts": {
+    "passed": 1344
+  },
+  "testNameFormat": "<repo-relative test file path using '/'> > <vitest fullName>",
+  "sortOrder": "ascending by UTF-16 code unit (ordinal), not locale-dependent",
+  "failedTests": [],
+  "failedTestFiles": []
+}
