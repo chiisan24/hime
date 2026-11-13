@@ -6,7 +6,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { matchPath, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import {
   AppLink,
@@ -50,6 +50,18 @@ const PUBLIC_NAV_ITEMS = [
 ] as const;
 
 export const VISITOR_NAV_ITEMS = projectVisitorPresentation(PUBLIC_NAV_ITEMS);
+
+/** 選挙に依存しない画面（価値観診断）。2022年選挙専用の表示を出さない */
+const ELECTION_INDEPENDENT_PATH = "/values";
+
+/**
+ * 今の画面が、選挙に依存しない画面かどうか。
+ * React Router と同じ規則（大文字小文字を区別しない、末尾の / を許す）で判定する。
+ */
+function useIsElectionIndependentRoute(): boolean {
+  const { pathname } = useLocation();
+  return matchPath({ path: ELECTION_INDEPENDENT_PATH, end: true }, pathname) !== null;
+}
 
 /**
  * 共通ナビゲーション。画面に1つだけ置き、画面幅で位置を切り替える。
@@ -129,6 +141,10 @@ export function AppShell({
   dataKind = "REAL_AI",
   navigationItems,
 }: AppShellProps) {
+  // 価値観診断（/values）では、2022年選挙専用の表示（過去選挙表示・データ種別・フッター）を出さない。
+  // ローカル限定表示は、公開形態についての表示のため、どの画面でも残す。
+  const electionIndependent = useIsElectionIndependentRoute();
+
   return (
     // スマホでは、下部固定ナビの高さ分だけ下に余白を取り、フッターが隠れないようにする
     <div className="flex min-h-screen flex-col bg-surface pb-[calc(4rem+env(safe-area-inset-bottom))] text-ink md:pb-0">
@@ -144,9 +160,11 @@ export function AppShell({
         <div className="bg-primary-dark px-4 py-1 text-center text-xs font-bold leading-5 text-white">
           会場ローカルデモ・一般公開ではありません
         </div>
-        <div className="bg-accent-light px-4 py-1 text-center text-xs font-bold leading-5 text-accent-dark">
-          2022年に終了した過去選挙です。現在または将来の投票所判断には使えません
-        </div>
+        {electionIndependent ? null : (
+          <div className="bg-accent-light px-4 py-1 text-center text-xs font-bold leading-5 text-accent-dark">
+            2022年に終了した過去選挙です。現在または将来の投票所判断には使えません
+          </div>
+        )}
 
         <div className="border-b border-line md:border-b-0">
           <div className="mx-auto flex w-full max-w-[1200px] flex-wrap items-center gap-x-4 gap-y-1 px-4 py-1.5 sm:px-6 lg:px-8">
@@ -160,12 +178,14 @@ export function AppShell({
                 えひめ投票ナビ
               </span>
             </AppLink>
-            <p
-              className="mb-1.5 inline-flex min-h-7 items-center rounded-full bg-primary-light px-3 text-xs font-bold text-primary-dark sm:mb-0 sm:ml-auto"
-              data-kind={dataKind}
-            >
-              データ種別: {DATA_KIND_LABELS[dataKind]}
-            </p>
+            {electionIndependent ? null : (
+              <p
+                className="mb-1.5 inline-flex min-h-7 items-center rounded-full bg-primary-light px-3 text-xs font-bold text-primary-dark sm:mb-0 sm:ml-auto"
+                data-kind={dataKind}
+              >
+                データ種別: {DATA_KIND_LABELS[dataKind]}
+              </p>
+            )}
           </div>
         </div>
       </header>
@@ -183,10 +203,12 @@ export function AppShell({
         <Outlet />
       </main>
 
-      <footer className="border-t border-line bg-white px-4 py-5 text-center text-xs leading-5 text-ink-soft">
-        <p>対象: 令和4年（2022年）第20回愛媛県知事選挙</p>
-        <p className="mt-1">政策解析準備状態: NOT_READY</p>
-      </footer>
+      {electionIndependent ? null : (
+        <footer className="border-t border-line bg-white px-4 py-5 text-center text-xs leading-5 text-ink-soft">
+          <p>対象: 令和4年（2022年）第20回愛媛県知事選挙</p>
+          <p className="mt-1">政策解析準備状態: NOT_READY</p>
+        </footer>
+      )}
     </div>
   );
 }

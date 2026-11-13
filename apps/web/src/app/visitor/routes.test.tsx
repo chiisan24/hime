@@ -62,6 +62,7 @@ describe("Visitor route contract matrix", () => {
       },
       { path: "/comparison", heading: "政策比較", kind: "PUBLIC" },
       { path: "/venue", heading: "会場閲覧", kind: "PUBLIC" },
+      { path: "/values", heading: "価値観マップ", kind: "PUBLIC" },
       { path: "*", heading: "ページが見つかりません", kind: "WILDCARD" },
     ]);
 

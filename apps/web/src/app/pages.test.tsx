@@ -41,6 +41,8 @@ describe("split public and analyst page modules", () => {
       .map((link) => link.getAttribute("href"));
 
     expect(destinations).toEqual([
+      // 価値観診断の入口カード（regional-values-map tasks.md 14 の案Bの承認記録）
+      "/values",
       "/schedule",
       "/candidates",
       "/candidates/nakamura-tokihiro",

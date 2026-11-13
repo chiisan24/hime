@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 
+import { ValuesDiagnosis } from "../../features/values/ValuesDiagnosis.js";
 import { AppShell, VISITOR_NAV_ITEMS } from "../../shared/ui/AppShell.js";
 import {
   CandidateDetailPage,
@@ -21,6 +22,7 @@ export function AppRoutes() {
         <Route path="candidates/:candidateId" element={<CandidateDetailPage />} />
         <Route path="comparison" element={<ComparisonPage />} />
         <Route path="venue" element={<VenuePage />} />
+        <Route path="values" element={<ValuesDiagnosis />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
