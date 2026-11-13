@@ -1,7 +1,9 @@
 import {
+  ArrowRight,
   BookOpen,
   CalendarDays,
   ChevronRight,
+  Compass,
   Eye,
   FileText,
   Scale,
@@ -324,6 +326,45 @@ function CandidateSubLinks({ links }: Readonly<{ links: readonly FeatureLink[] }
   );
 }
 
+/** 価値観診断の入口（/values）。選挙に依存しない機能のため、メインメニューの一覧には入れず上に置く */
+const VALUES_DIAGNOSIS_PATH = "/values";
+
+function ValuesEntryCard() {
+  const headingId = useId();
+  return (
+    <section
+      aria-labelledby={headingId}
+      className="rounded-[var(--radius-card)] border-2 border-primary bg-primary-light p-4 shadow-[var(--shadow-card)] sm:p-6"
+    >
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
+          <span
+            aria-hidden="true"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-white"
+          >
+            <Compass className="size-6" />
+          </span>
+          <div className="min-w-0">
+            <h2 className="text-lg font-black text-primary-dark sm:text-xl" id={headingId}>
+              価値観診断をはじめる
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-ink">
+              愛媛の地域課題について答えて、自分が大切にしていることを整理しよう。
+            </p>
+          </div>
+        </div>
+        <AppLink
+          className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 font-bold text-white transition hover:bg-primary-dark"
+          to={VALUES_DIAGNOSIS_PATH}
+        >
+          診断をはじめる
+          <ArrowRight aria-hidden="true" className="size-5 shrink-0" />
+        </AppLink>
+      </div>
+    </section>
+  );
+}
+
 export function VisitorHomePage() {
   // 候補者ごとの詳細リンクは「候補者一覧」カードの中に入れる（リンクの並び順は変えない）
   const candidateLinks = VISITOR_HOME_LINKS.filter((link) =>
@@ -350,6 +391,9 @@ export function VisitorHomePage() {
           </p>
         </div>
       </section>
+
+      {/* 価値観診断の入口：主要機能のメニューより上に置く */}
+      <ValuesEntryCard />
 
       {/* メインメニュー：スマホ2列、1024px以上は4列 */}
       <section aria-label={HOME_MENU_REGION_NAME}>

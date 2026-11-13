@@ -28,6 +28,7 @@ export const ANALYST_ROUTE_CONTRACTS = [
   },
   { path: "/comparison", heading: "政策比較", kind: "PUBLIC" },
   { path: "/venue", heading: "会場閲覧", kind: "PUBLIC" },
+  { path: "/values", heading: "価値観マップ", kind: "PUBLIC" },
   {
     path: "/analyst/readiness",
     heading: "政策解析準備状態",

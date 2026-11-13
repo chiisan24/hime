@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 
+import { ValuesDiagnosis } from "../../features/values/ValuesDiagnosis.js";
 import { AppShell } from "../../shared/ui/AppShell.js";
 import {
   CandidateDetailPage,
@@ -33,6 +34,7 @@ export function AppRoutes() {
         <Route path="candidates/:candidateId" element={<CandidateDetailPage />} />
         <Route path="comparison" element={<ComparisonPage />} />
         <Route path="venue" element={<VenuePage />} />
+        <Route path="values" element={<ValuesDiagnosis />} />
         <Route path="analyst/readiness" element={<AnalystReadinessPage />} />
         <Route path="analyst/sources" element={<AnalystSourcesPage />} />
         <Route path="analyst/runs" element={<AnalystRunsPage />} />
