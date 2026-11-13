@@ -17,6 +17,7 @@ import {
 import { describe, expect, it } from "vitest";
 
 import { renderWithRouter } from "../../../../../tests/harness/react-renderer.js";
+import { ValuesDiagnosis } from "../../features/values/ValuesDiagnosis.js";
 import { AppShell } from "../../shared/ui/AppShell.js";
 import {
   CandidateDetailPage,
@@ -78,6 +79,8 @@ const PAGE_BY_CONTRACT_PATH = {
   "/candidates/:candidateId": CandidateDetailPage,
   "/comparison": ComparisonPage,
   "/venue": VenuePage,
+  // 価値観診断（regional-values-map tasks.md 14 の案Bの承認記録）
+  "/values": ValuesDiagnosis,
   "/analyst/readiness": analystPages.AnalystReadinessPage,
   "/analyst/sources": analystPages.AnalystSourcesPage,
   "/analyst/runs": analystPages.AnalystRunsPage,

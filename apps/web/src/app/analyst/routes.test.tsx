@@ -35,7 +35,14 @@ const REMAINING_PUBLIC_ROUTE_PATHS = [
   "/candidates/:candidateId",
   "/comparison",
   "/venue",
+  "/values",
 ] as const;
+
+/**
+ * 選挙に依存しない画面（価値観診断）。2022年選挙専用の表示（過去選挙表示・データ種別・フッター）を出さない
+ * （regional-values-map tasks.md 14 の案Bの承認記録）。
+ */
+const ELECTION_INDEPENDENT_PATHS: ReadonlySet<string> = new Set(["/values"]);
 
 const SAMPLE_PATH_PARAMETERS: Readonly<Record<string, string>> = {
   candidateId: "nakamura-tokihiro",
@@ -111,19 +118,31 @@ function sharedNavigation() {
   return screen.getByRole("navigation", { name: "共通ナビゲーション" });
 }
 
-function expectAnalystShell() {
+function expectAnalystShell(path?: string) {
   expect(
     screen.getByText("会場ローカルデモ・一般公開ではありません"),
   ).toBeInTheDocument();
-  expect(
-    screen.getByText(
-      "2022年に終了した過去選挙です。現在または将来の投票所判断には使えません",
-    ),
-  ).toBeInTheDocument();
-  expect(screen.getByText("データ種別: 2022年実資料・AI解析")).toHaveAttribute(
-    "data-kind",
-    "REAL_AI",
-  );
+  if (path !== undefined && ELECTION_INDEPENDENT_PATHS.has(path)) {
+    // 価値観診断では、2022年選挙専用の表示を出さず、デモ用の架空データであることを出す
+    expect(
+      screen.queryByText(
+        "2022年に終了した過去選挙です。現在または将来の投票所判断には使えません",
+      ),
+    ).not.toBeInTheDocument();
+    expect(document.querySelectorAll("[data-kind]")).toHaveLength(0);
+    expect(screen.queryByRole("contentinfo")).not.toBeInTheDocument();
+    expect(screen.getByRole("note")).toHaveTextContent("デモ用の架空データです");
+  } else {
+    expect(
+      screen.getByText(
+        "2022年に終了した過去選挙です。現在または将来の投票所判断には使えません",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("データ種別: 2022年実資料・AI解析")).toHaveAttribute(
+      "data-kind",
+      "REAL_AI",
+    );
+  }
   expect(screen.getByRole("main")).toHaveAttribute("id", "main-content");
   expect(
     within(sharedNavigation()).getByRole("link", { name: "分析状態" }),
@@ -215,7 +234,7 @@ describe("Analyst Router", () => {
       ).toBeInTheDocument();
       expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
       expect(screen.getByTestId("current-path")).toHaveTextContent(entry);
-      expectAnalystShell();
+      expectAnalystShell(path);
     },
   );
 

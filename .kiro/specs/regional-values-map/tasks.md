@@ -682,6 +682,10 @@
   - 承認者: 西原薙寧
   - 承認対象: Visitor / Analyst の`routes.tsx`と`routeContracts.ts`への`/values`追加、`build-boundary.mjs`の`PUBLIC_ROUTE_PATHS`への`/values`追加、`AppShell`で`/values`のときだけ2022年選挙のバナー・データ種別表示・フッターを非表示にする変更、既存のルート関連テスト6ファイルへの期待値の追加、関連仕様の更新。
   - 条件: `/values`以外の既存2022年選挙画面の動作・表示、`/analyst/*`、退役済み`/sources`の404、既存のroute contractを変更しない。テストは既存期待値の削除・緩和ではなく必要な期待値の追加だけにする。`apps/web`の実装は共同開発者が担当し、本featureの実装者は変更しない。
+
+  - **案B（既存の利用者アプリに`/values`を追加）の承認記録**（Req 10.9）: 承認者名: 西原（GitHub: bsi26028-dev）、承認日: 2026-11-13（UI担当への報告日。正式な承認日は西原さんの確認待ち）。
+    - 承認された範囲: (1) visitorとanalystの`routes.tsx`・`routeContracts.ts`に`/values`を1件ずつ追加する。(2) `apps/web/scripts/build-boundary.mjs`の`PUBLIC_ROUTE_PATHS`に`"/values"`を追加する。(3) `AppShell`で、`/values`のときだけ過去選挙表示・データ種別表示・フッターを表示しない（ローカル限定表示は残す）。(4) ルート一覧を固定しているテストに、`/values`の期待値と例外を追加する（削除と無効化はしない）。(5) ホーム画面に価値観診断の入口カードを追加する（共通ナビゲーションは5項目のまま）。
+    - 承認の対象外: 下の14.1〜14.8（案Aのリリース用ビルド基盤、`src/app/values-map/`、`release-boundary.mjs`）。`generateValuesMap`との接続。仕様書（design.mdのルート案、Req 10.7(c)、visitor-analyst-mode-separationのReq 6.3）の更新は担当者が別に行う。
   - [ ] 14.1 【C】リリース用のビルド基盤（`demo`・`public`）を追加する
     - **着手条件**: 共同開発者の承認（承認者名: ＿＿、承認日: ＿＿）をここに記録するまで着手しない（Req 10.9）。
     - **共同開発者が使うAPI**: 7.3・7.4（`ExpectedBundle`、`verifyBundleText`）、9.5（`regional-values build`が出す`dist/regional-values/<kind>/bundle.json`）、10.1（ブラウザ向けの入口）、10.3（連携ガイド）。

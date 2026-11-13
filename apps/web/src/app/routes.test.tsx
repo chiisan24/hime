@@ -64,9 +64,12 @@ const PUBLIC_HOME_LINK_CASES = [
   { link: "林紀子氏の詳細を見る", heading: "候補者詳細" },
   { link: "政策比較を見る", heading: "政策比較" },
   { link: "会場閲覧画面を見る", heading: "会場閲覧" },
+  { link: "診断をはじめる", heading: "価値観マップ" },
 ] as const;
 
 const PUBLIC_HOME_LINK_HREFS = [
+  // 価値観診断の入口カード（メインメニューより上。regional-values-map tasks.md 14 の案Bの承認記録）
+  "/values",
   "/schedule",
   "/candidates",
   "/candidates/nakamura-tokihiro",

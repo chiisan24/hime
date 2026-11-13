@@ -50,6 +50,8 @@ const PUBLIC_ROUTE_PATHS = Object.freeze([
   "/candidates/:candidateId",
   "/comparison",
   "/venue",
+  // 価値観診断（案B。regional-values-map tasks.md 14 の承認記録）
+  "/values",
 ]);
 
 const EXISTING_ANALYST_ROUTE_PATHS = Object.freeze([

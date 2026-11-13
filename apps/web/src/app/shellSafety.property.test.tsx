@@ -39,6 +39,7 @@ import {
 } from "./public/pages.js";
 import { VISITOR_ROUTE_CONTRACTS } from "./visitor/routeContracts.js";
 import { AppRoutes as VisitorAppRoutes } from "./visitor/routes.js";
+import { ValuesDiagnosis } from "../features/values/ValuesDiagnosis.js";
 
 /*
  * Feature: visitor-analyst-mode-separation, Property 6: preserved shell and route safety contracts
@@ -156,7 +157,23 @@ const PUBLIC_ROUTE_SPECS: readonly AvailableRouteSpec[] = [
     currentNavHref: "/venue",
     terminalStates: ["NOT_READY"],
   },
+  {
+    // 価値観診断（regional-values-map tasks.md 14 の案Bの承認記録）。共通ナビの項目はない
+    category: "PUBLIC",
+    template: "/values",
+    heading: "価値観マップ",
+    pageByMode: samePage(ValuesDiagnosis),
+    currentNavHref: null,
+    terminalStates: [],
+  },
 ];
+
+/**
+ * 選挙に依存しない画面。2022年選挙専用の表示（過去選挙表示・データ種別・フッター）を出さず、
+ * デモ用の架空データであることを出す。ローカル限定表示・ナビ・戻る操作などの共通の枠は保つ。
+ */
+const ELECTION_INDEPENDENT_TEMPLATES: ReadonlySet<string> = new Set(["/values"]);
+const DEMO_DATA_TEXT = "デモ用の架空データです";
 
 const ANALYST_ROUTE_SPECS: readonly AvailableRouteSpec[] = [
   {
@@ -251,6 +268,7 @@ const P2_ROUTES = [
 
 /** First path segments that belong to a defined category and must not be generated as "unknown". */
 const RESERVED_ROOT_SEGMENTS: ReadonlySet<string> = new Set([
+  "values",
   "schedule",
   "candidates",
   "comparison",
@@ -577,17 +595,27 @@ function sharedNavigationLinks(): HTMLElement[] {
   return within(navigation).getAllByRole("link");
 }
 
-function expectPreservedShell(mode: ApplicationMode) {
+function expectPreservedShell(mode: ApplicationMode, template: string | null = null) {
+  const electionIndependent = template !== null && ELECTION_INDEPENDENT_TEMPLATES.has(template);
   expect(screen.getAllByRole("banner")).toHaveLength(1);
   const banner = screen.getByRole("banner");
   expect(within(banner).getByText(LOCAL_ONLY_TEXT)).toBeInTheDocument();
-  expect(within(banner).getByText(PAST_ELECTION_TEXT)).toBeInTheDocument();
-
-  const dataKindLabels = Array.from(document.querySelectorAll("[data-kind]"));
-  expect(dataKindLabels).toHaveLength(1);
-  expect(dataKindLabels[0]).toHaveAttribute("data-kind", "REAL_AI");
-  expect(dataKindLabels[0]).toHaveTextContent(REAL_AI_DATA_KIND_TEXT);
   expect(document.body).not.toHaveTextContent(FIXTURE_DATA_KIND_LABEL);
+
+  if (electionIndependent) {
+    expect(within(banner).queryByText(PAST_ELECTION_TEXT)).not.toBeInTheDocument();
+    expect(document.querySelectorAll("[data-kind]")).toHaveLength(0);
+    expect(screen.queryAllByRole("contentinfo")).toHaveLength(0);
+    expect(screen.getByRole("note")).toHaveTextContent(DEMO_DATA_TEXT);
+  } else {
+    expect(within(banner).getByText(PAST_ELECTION_TEXT)).toBeInTheDocument();
+    const dataKindLabels = Array.from(document.querySelectorAll("[data-kind]"));
+    expect(dataKindLabels).toHaveLength(1);
+    expect(dataKindLabels[0]).toHaveAttribute("data-kind", "REAL_AI");
+    expect(dataKindLabels[0]).toHaveTextContent(REAL_AI_DATA_KIND_TEXT);
+    expect(screen.getAllByRole("contentinfo")).toHaveLength(1);
+    expect(screen.getByRole("contentinfo")).toHaveTextContent(FOOTER_NOT_READY_TEXT);
+  }
 
   expect(screen.getByRole("link", { name: "本文へ移動" })).toHaveAttribute(
     "href",
@@ -595,8 +623,6 @@ function expectPreservedShell(mode: ApplicationMode) {
   );
   expect(screen.getAllByRole("main")).toHaveLength(1);
   expect(screen.getByRole("main")).toHaveAttribute("id", "main-content");
-  expect(screen.getAllByRole("contentinfo")).toHaveLength(1);
-  expect(screen.getByRole("contentinfo")).toHaveTextContent(FOOTER_NOT_READY_TEXT);
 
   const navigationLinks = sharedNavigationLinks();
   expect(navigationLinks.map((link) => link.getAttribute("href"))).toEqual(
@@ -632,7 +658,7 @@ describe("Property 6 mounted shell contracts (bounded matrix)", () => {
       const expected = expectedSelection(mode, routeCase);
       renderWithRouter(routesForMode(mode), { initialEntries: [routeCase.pathname] });
 
-      expectPreservedShell(mode);
+      expectPreservedShell(mode, routeCase.spec?.template ?? null);
       expectNoSimulatedAiProgress();
 
       const headings = screen.getAllByRole("heading", { level: 1 });
