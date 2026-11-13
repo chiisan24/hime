@@ -13,7 +13,7 @@ import { AppRoutes as VisitorAppRoutes } from "./visitor/routes.js";
  * - ホームの入口カードから診断を始め、6問に答えて、デモ用の固定結果を表示できる。
  */
 
-const LOCAL_ONLY_TEXT = "会場ローカルデモ・一般公開ではありません";
+const LOCAL_ONLY_TEXT = "デモ版・コンテスト審査用の試作アプリです";
 const PAST_ELECTION_TEXT =
   "2022年に終了した過去選挙です。現在または将来の投票所判断には使えません";
 const FOOTER_NOT_READY_TEXT = "政策解析準備状態: NOT_READY";

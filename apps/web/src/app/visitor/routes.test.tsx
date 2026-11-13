@@ -84,7 +84,7 @@ describe("Visitor Router", () => {
       expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
       expect(screen.getByTestId("current-path")).toHaveTextContent(path);
       expect(
-        screen.getByText("会場ローカルデモ・一般公開ではありません"),
+        screen.getByText("デモ版・コンテスト審査用の試作アプリです"),
       ).toBeInTheDocument();
     },
   );
@@ -108,7 +108,7 @@ describe("Visitor Router", () => {
         "/",
       );
       expect(
-        screen.getByText("会場ローカルデモ・一般公開ではありません"),
+        screen.getByText("デモ版・コンテスト審査用の試作アプリです"),
       ).toBeInTheDocument();
       expect(
         screen.getByText(

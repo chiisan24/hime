@@ -241,7 +241,7 @@ describe("Visitor Router direct entry into analyst URLs", () => {
       expect(screen.getByRole("link", { name: "ホームへ移動" })).toHaveAttribute("href", "/");
 
       expect(
-        screen.getByText("会場ローカルデモ・一般公開ではありません"),
+        screen.getByText("デモ版・コンテスト審査用の試作アプリです"),
       ).toBeInTheDocument();
       expect(
         screen.getByText(

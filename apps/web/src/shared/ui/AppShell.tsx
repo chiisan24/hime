@@ -142,7 +142,7 @@ export function AppShell({
   navigationItems,
 }: AppShellProps) {
   // 価値観診断（/values）では、2022年選挙専用の表示（過去選挙表示・データ種別・フッター）を出さない。
-  // ローカル限定表示は、公開形態についての表示のため、どの画面でも残す。
+  // デモ版の表示は、公開形態についての表示のため、どの画面でも残す。
   const electionIndependent = useIsElectionIndependentRoute();
 
   return (
@@ -156,9 +156,9 @@ export function AppShell({
       </a>
 
       <header className="bg-white">
-        {/* 必須表示（文言は変更しない） */}
+        {/* 必須表示。Vercel で一般公開しているため、「一般公開ではありません」から「デモ版」の表示に改めた */}
         <div className="bg-primary-dark px-4 py-1 text-center text-xs font-bold leading-5 text-white">
-          会場ローカルデモ・一般公開ではありません
+          デモ版・コンテスト審査用の試作アプリです
         </div>
         {electionIndependent ? null : (
           <div className="bg-accent-light px-4 py-1 text-center text-xs font-bold leading-5 text-accent-dark">
