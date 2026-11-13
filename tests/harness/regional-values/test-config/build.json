@@ -1,0 +1,19 @@
+{
+  "dataVersion": "2026-01-01.1",
+  "quoteMaxChars": 200,
+  "realNames": [
+    "愛媛県",
+    "松山市",
+    "今治市",
+    "新居浜市",
+    "自由民主党",
+    "立憲民主党"
+  ],
+  "properNouns": [
+    "愛媛県",
+    "松山市",
+    "今治市",
+    "新居浜市"
+  ],
+  "requiredApprovers": 1
+}

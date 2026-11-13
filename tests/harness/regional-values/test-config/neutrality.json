@@ -1,0 +1,103 @@
+{
+  "candidateAndPartyNames": [
+    "試験候補甲",
+    "試験政党乙",
+    "ParX"
+  ],
+  "incumbencyWords": [
+    "現職",
+    "新人",
+    "元職"
+  ],
+  "doubleQuestionWords": [
+    "かつ",
+    "同時に"
+  ],
+  "loadedWords": [
+    "優劣語",
+    "推奨語",
+    "投票語"
+  ],
+  "labelLengthDiffMax": 6,
+  "directionLengthDiffMax": 20,
+  "policyNames": [
+    "試験施策丙"
+  ],
+  "budgetStanceWords": [
+    "予算",
+    "べき",
+    "賛成",
+    "反対"
+  ],
+  "importanceTemplate": "{テーマ名}は、あなたの暮らしにとってどのくらい大切ですか",
+  "premiseTemplates": [
+    "限られた予算や人手の中で、どちらかを先に進める場面を考えてください",
+    "限られた予算や人手の中で、どちらかを先に進める場面を考えてくださいあああああああああああああああああああああああああああ",
+    "限られた予算や人手の中で、どちらかを先に進める場面を考えてくださいああああああああああああああああああああああああああああ"
+  ],
+  "negationWords": [
+    "しない",
+    "せず",
+    "やめる",
+    "より",
+    "ではなく"
+  ],
+  "exclusiveWords": [
+    "だけ",
+    "のみ",
+    "しか"
+  ],
+  "disparagingWords": [
+    "重視していません",
+    "軽視",
+    "どうでもよい"
+  ],
+  "bannedWords": [
+    "優劣語",
+    "推奨語",
+    "投票語",
+    "一致率",
+    "一致度",
+    "ランキング",
+    "おすすめ",
+    "保守",
+    "革新",
+    "右派",
+    "左派",
+    "タイプ"
+  ],
+  "numeralExemptWords": [
+    "一方",
+    "万全"
+  ],
+  "wordCategories": {
+    "SUPERIORITY": [
+      "優劣語"
+    ],
+    "RECOMMENDATION": [
+      "推奨語"
+    ],
+    "VOTE_URGING": [
+      "投票語"
+    ]
+  },
+  "guidanceNames": [
+    "試験名称丁",
+    "松山市",
+    "今治市",
+    "新居浜市",
+    "自由民主党",
+    "立憲民主党"
+  ],
+  "choiceEncouragingWords": [
+    "すべき",
+    "してください",
+    "がおすすめ",
+    "に投票"
+  ],
+  "userClaimPatterns": [
+    "あなたは.+な人です",
+    ".+派です",
+    ".+主義です"
+  ]
+}

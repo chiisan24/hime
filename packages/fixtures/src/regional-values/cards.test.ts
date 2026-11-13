@@ -79,8 +79,14 @@ describe("regional values FIXTURE issue cards", () => {
 
   it("keeps the fictional source IDs of the facts within the card sources", () => {
     for (const card of cards()) {
+      if (card.dataKind !== "FIXTURE") {
+        throw new Error("The fixture card must be FIXTURE");
+      }
       const sourceIds = new Set(card.sources.map((source) => source.sourceId));
       for (const fact of card.facts) {
+        if (fact.dataKind !== "FIXTURE") {
+          throw new Error("The fixture fact must be FIXTURE");
+        }
         expect(sourceIds.has(fact.fictionalSourceId)).toBe(true);
       }
     }

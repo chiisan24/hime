@@ -25,7 +25,9 @@ async function browserDigest(input: Uint8Array): Promise<ArrayBuffer> {
   if (globalThis.crypto === undefined || globalThis.crypto.subtle === undefined) {
     throw new Error("WebCrypto SHA-256 is unavailable");
   }
-  return globalThis.crypto.subtle.digest("SHA-256", input);
+  const browserBytes = new Uint8Array(input.length);
+  browserBytes.set(input);
+  return globalThis.crypto.subtle.digest("SHA-256", browserBytes);
 }
 
 function hexOf(bytes: Uint8Array): string {

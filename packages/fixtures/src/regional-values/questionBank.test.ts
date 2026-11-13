@@ -64,7 +64,7 @@ describe("regional values FIXTURE question bank", () => {
     }
     const changedQuick = {
       ...quick,
-      themeIds: ["TRANSPORT", "HEALTHCARE_WELFARE", "ECONOMY_EMPLOYMENT"],
+      themeIds: (["TRANSPORT", "HEALTHCARE_WELFARE", "ECONOMY_EMPLOYMENT"] satisfies ThemeId[]),
     };
     const changedBank: QuestionBank = {
       ...changed,

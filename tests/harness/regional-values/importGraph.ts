@@ -198,3 +198,37 @@ export function findForbiddenUses(text: string): string[] {
   visit(parse("module.ts", text));
   return [...found].sort();
 }
+
+const NODE_GLOBALS: ReadonlySet<string> = new Set(["Buffer", "process", "require"]);
+
+function isPropertyNameOnly(node: ts.Identifier): boolean {
+  const parent = node.parent;
+  if (ts.isPropertyAccessExpression(parent)) {
+    return parent.name === node;
+  }
+  return (
+    (ts.isPropertyAssignment(parent) ||
+      ts.isPropertySignature(parent) ||
+      ts.isPropertyDeclaration(parent) ||
+      ts.isMethodDeclaration(parent) ||
+      ts.isMethodSignature(parent)) &&
+    parent.name === node
+  );
+}
+
+/**
+ * References to the Node.js globals `Buffer`, `process` and `require` in the module text.
+ * A property that happens to have one of these names (`value.process`, `{ process: 1 }`)
+ * is not a reference.
+ */
+export function findNodeGlobals(text: string): string[] {
+  const found = new Set<string>();
+  const visit = (node: ts.Node): void => {
+    if (ts.isIdentifier(node) && NODE_GLOBALS.has(node.text) && !isPropertyNameOnly(node)) {
+      found.add(node.text);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(parse("module.ts", text));
+  return [...found].sort();
+}

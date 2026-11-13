@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-import { describe, expect, expectTypeOf, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
   BUNDLE_SCHEMA_VERSION,
@@ -14,6 +14,7 @@ import {
   ResultTextSchema,
   requiredFixedTextKeys,
 } from "@ehime-vote-navigator/contracts";
+import type { ThemeId } from "@ehime-vote-navigator/contracts";
 import type { SessionBundle } from "../session/sessionTypes.js";
 import type { ViewBundle } from "../view/viewTypes.js";
 import { calculateContentHash } from "./contentHash.js";
@@ -56,13 +57,13 @@ function fixtureBody() {
   };
 }
 
-async function completeBundle(body = fixtureBody()) {
+async function completeBundle(body: unknown = fixtureBody()) {
   const parsed = RegionalBundleSchema.parse(body);
   const contentHash = await calculateContentHash(parsed);
   return RegionalBundleSchema.parse({ ...parsed, meta: { ...parsed.meta, contentHash } });
 }
 
-async function textOf(body = fixtureBody()): Promise<string> {
+async function textOf(body: unknown = fixtureBody()): Promise<string> {
   return JSON.stringify(await completeBundle(body));
 }
 
@@ -150,7 +151,8 @@ describe("verifyBundleText", () => {
     if (quick === undefined || firstQuestion === undefined || firstQuestion.kind === "PRIORITY_PICK") {
       throw new Error("The fixture needs a themed first question and QUICK");
     }
-    const changedSet = { ...quick, themeIds: ["TRANSPORT", "DISASTER_PREVENTION", "EDUCATION_CHILDCARE"] };
+    const changedThemeIds: ThemeId[] = ["TRANSPORT", "DISASTER_PREVENTION", "EDUCATION_CHILDCARE"];
+    const changedSet = { ...quick, themeIds: changedThemeIds };
     await expectCode(await textOf({ ...complete, diagnosticSets: [changedSet] }), DEMO_EXPECTED, "REFERENCE_BROKEN");
   });
 
@@ -204,8 +206,6 @@ describe("verifyBundleText", () => {
 
 describe("VerifiedBundle", () => {
   it("is structurally assignable to the session and view bundle types without a cast", async () => {
-    expectTypeOf<VerifiedBundle>().toMatchTypeOf<SessionBundle>();
-    expectTypeOf<VerifiedBundle>().toMatchTypeOf<ViewBundle>();
     const result = await verifyBundleText(await textOf(), DEMO_EXPECTED);
     if (result.ok) {
       expect(assertSession(result.value).cards).toHaveLength(3);

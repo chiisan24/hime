@@ -21,7 +21,8 @@
     "test": "vitest run --root ../.. apps/api/src",
     "build": "tsc -p tsconfig.json",
     "bedrock:smoke": "tsc -p tsconfig.json && node --env-file-if-exists=../../.env.local dist/aws/smoke.js",
-    "analysis": "tsc -p tsconfig.json && node dist/analysis/main.js"
+    "analysis": "tsc -p tsconfig.json && node dist/analysis/main.js",
+    "regional-values": "tsc -p tsconfig.json && node dist/regional-values/main.js"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock": "3.1162.0",

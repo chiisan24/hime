@@ -28,7 +28,7 @@
     "themeId": "POPULATION_REVITALIZATION",
     "axis": "IMPORTANCE",
     "level": 0,
-    "text": "地域活動をどちらでもないと回答したことを表します。",
+    "text": "地域活動をどちらともいえないと回答したことを表します。",
     "approval": {
       "status": "APPROVED",
       "approverId": "fixture-text-approver-v1",
@@ -64,7 +64,7 @@
     "themeId": "POPULATION_REVITALIZATION",
     "axis": "TRADEOFF",
     "level": 2,
-    "text": "どちらかを選ぶなら、地域活動では地域の外とのつながりを強く先に進めたい考えに近い。",
+    "text": "どちらかを選ぶなら、地域活動では地域の外とのつながりを先に進めたい考えに近い（強く）。",
     "approval": {
       "status": "APPROVED",
       "approverId": "fixture-text-approver-v1",
@@ -76,7 +76,7 @@
     "themeId": "POPULATION_REVITALIZATION",
     "axis": "TRADEOFF",
     "level": 1,
-    "text": "どちらかを選ぶなら、地域活動では地域の外とのつながりをやや先に進めたい考えに近い。",
+    "text": "どちらかを選ぶなら、地域活動では地域の外とのつながりを先に進めたい考えに近い（やや）。",
     "approval": {
       "status": "APPROVED",
       "approverId": "fixture-text-approver-v1",
@@ -100,7 +100,7 @@
     "themeId": "POPULATION_REVITALIZATION",
     "axis": "TRADEOFF",
     "level": -1,
-    "text": "どちらかを選ぶなら、地域活動では地域の中の暮らしを支える取り組みをやや先に進めたい考えに近い。",
+    "text": "どちらかを選ぶなら、地域活動では地域の中の暮らしを支える取り組みを先に進めたい考えに近い（やや）。",
     "approval": {
       "status": "APPROVED",
       "approverId": "fixture-text-approver-v1",
@@ -112,7 +112,7 @@
     "themeId": "POPULATION_REVITALIZATION",
     "axis": "TRADEOFF",
     "level": -2,
-    "text": "どちらかを選ぶなら、地域活動では地域の中の暮らしを支える取り組みを強く先に進めたい考えに近い。",
+    "text": "どちらかを選ぶなら、地域活動では地域の中の暮らしを支える取り組みを先に進めたい考えに近い（強く）。",
     "approval": {
       "status": "APPROVED",
       "approverId": "fixture-text-approver-v1",
@@ -148,7 +148,7 @@
     "themeId": "DISASTER_PREVENTION",
     "axis": "IMPORTANCE",
     "level": 0,
-    "text": "防災の備えをどちらでもないと回答したことを表します。",
+    "text": "防災の備えをどちらともいえないと回答したことを表します。",
     "approval": {
       "status": "APPROVED",
       "approverId": "fixture-text-approver-v1",
@@ -184,7 +184,7 @@
     "themeId": "DISASTER_PREVENTION",
     "axis": "TRADEOFF",
     "level": 2,
-    "text": "どちらかを選ぶなら、防災の備えでは避難に必要な情報を届ける取り組みを強く先に進めたい考えに近い。",
+    "text": "どちらかを選ぶなら、防災の備えでは避難に必要な情報を届ける取り組みを先に進めたい考えに近い（強く）。",
     "approval": {
       "status": "APPROVED",
       "approverId": "fixture-text-approver-v1",
@@ -196,7 +196,7 @@
     "themeId": "DISASTER_PREVENTION",
     "axis": "TRADEOFF",
     "level": 1,
-    "text": "どちらかを選ぶなら、防災の備えでは避難に必要な情報を届ける取り組みをやや先に進めたい考えに近い。",
+    "text": "どちらかを選ぶなら、防災の備えでは避難に必要な情報を届ける取り組みを先に進めたい考えに近い（やや）。",
     "approval": {
       "status": "APPROVED",
       "approverId": "fixture-text-approver-v1",
@@ -220,7 +220,7 @@
     "themeId": "DISASTER_PREVENTION",
     "axis": "TRADEOFF",
     "level": -1,
-    "text": "どちらかを選ぶなら、防災の備えでは避難する場所を整える取り組みをやや先に進めたい考えに近い。",
+    "text": "どちらかを選ぶなら、防災の備えでは避難する場所を整える取り組みを先に進めたい考えに近い（やや）。",
     "approval": {
       "status": "APPROVED",
       "approverId": "fixture-text-approver-v1",
@@ -232,7 +232,7 @@
     "themeId": "DISASTER_PREVENTION",
     "axis": "TRADEOFF",
     "level": -2,
-    "text": "どちらかを選ぶなら、防災の備えでは避難する場所を整える取り組みを強く先に進めたい考えに近い。",
+    "text": "どちらかを選ぶなら、防災の備えでは避難する場所を整える取り組みを先に進めたい考えに近い（強く）。",
     "approval": {
       "status": "APPROVED",
       "approverId": "fixture-text-approver-v1",
@@ -268,7 +268,7 @@
     "themeId": "EDUCATION_CHILDCARE",
     "axis": "IMPORTANCE",
     "level": 0,
-    "text": "教育・子育てをどちらでもないと回答したことを表します。",
+    "text": "教育・子育てをどちらともいえないと回答したことを表します。",
     "approval": {
       "status": "APPROVED",
       "approverId": "fixture-text-approver-v1",
@@ -304,7 +304,7 @@
     "themeId": "EDUCATION_CHILDCARE",
     "axis": "TRADEOFF",
     "level": 2,
-    "text": "どちらかを選ぶなら、教育・子育てでは子育ての相談を受ける取り組みを強く先に進めたい考えに近い。",
+    "text": "どちらかを選ぶなら、教育・子育てでは子育ての相談を受ける取り組みを先に進めたい考えに近い（強く）。",
     "approval": {
       "status": "APPROVED",
       "approverId": "fixture-text-approver-v1",
@@ -316,7 +316,7 @@
     "themeId": "EDUCATION_CHILDCARE",
     "axis": "TRADEOFF",
     "level": 1,
-    "text": "どちらかを選ぶなら、教育・子育てでは子育ての相談を受ける取り組みをやや先に進めたい考えに近い。",
+    "text": "どちらかを選ぶなら、教育・子育てでは子育ての相談を受ける取り組みを先に進めたい考えに近い（やや）。",
     "approval": {
       "status": "APPROVED",
       "approverId": "fixture-text-approver-v1",
@@ -340,7 +340,7 @@
     "themeId": "EDUCATION_CHILDCARE",
     "axis": "TRADEOFF",
     "level": -1,
-    "text": "どちらかを選ぶなら、教育・子育てでは子どもの学びを支える取り組みをやや先に進めたい考えに近い。",
+    "text": "どちらかを選ぶなら、教育・子育てでは子どもの学びを支える取り組みを先に進めたい考えに近い（やや）。",
     "approval": {
       "status": "APPROVED",
       "approverId": "fixture-text-approver-v1",
@@ -352,7 +352,7 @@
     "themeId": "EDUCATION_CHILDCARE",
     "axis": "TRADEOFF",
     "level": -2,
-    "text": "どちらかを選ぶなら、教育・子育てでは子どもの学びを支える取り組みを強く先に進めたい考えに近い。",
+    "text": "どちらかを選ぶなら、教育・子育てでは子どもの学びを支える取り組みを先に進めたい考えに近い（強く）。",
     "approval": {
       "status": "APPROVED",
       "approverId": "fixture-text-approver-v1",

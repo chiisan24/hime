@@ -34,7 +34,7 @@
     "title": "架空町みなとの避難の備え",
     "background": "架空町みなとでは、避難する場所と避難に必要な情報を確認する取り組みがあるという架空の記録があります。日常の備えを考える材料にします。",
     "glossary": [
-      { "term": "避難場所", "description": "危険を避けるために一時的に向かう場所です。" }
+      { "term": "避難場所", "description": "危険を避けるために、いったん向かう場所です。" }
     ],
     "quote": { "sourceId": "fixture-source-disaster-v1", "text": "避難する場所と避難に必要な情報を確認する取り組み" },
     "aiInvolvement": "HUMAN",

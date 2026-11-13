@@ -305,28 +305,28 @@
     - 焦点テスト: `npx.cmd vitest run packages/contracts/src/models/regional/content.card.test.ts`
     - _Requirements: 7.5, 7.7, 10.15_
 
-- [ ] 6. 架空データ（クイック版の暫定3テーマ）と使用例のテストを追加する
-  - [ ] 6.1 【A】架空の質問バンクと診断セットを追加する
+- [x] 6. 架空データ（クイック版の暫定3テーマ）と使用例のテストを追加する
+  - [x] 6.1 【A】架空の質問バンクと診断セットを追加する
     - `packages/fixtures/src/regional-values/question-bank.json`を新規作成する（`dataKind: FIXTURE`）。6テーマの定義と、クイック版の暫定3テーマ（人口減少・地域活性化、防災、教育・子育て）の大切さ質問3問・優先条件質問3問、`QUICK`の診断セット定義（3テーマはこのデータで決め、コードに固定しない）。`FULL`は定義しない。
     - 大切さ質問は「{テーマ名}は、あなたの暮らしにとってどのくらい大切ですか」の型、優先条件質問は前提文の初期案（「限られた予算や人手の中で、どちらかを先に進める場面を考えてください」）と、要件の表の方向A・方向B（肯定的な表現）を使う。方向の区分（`CHANGE`・`CONTINUE`・`NEUTRAL`）と表示位置の入れ替えは架空データ用の仮の割当てとして起案し、利用者のレビューを受ける。承認記録の承認者IDは架空の値（実在の人名・IDを使わない）にする。
     - テスト`packages/fixtures/src/regional-values/questionBank.test.ts`: 契約に適合すること、`QUICK`が3テーマ・6問であること、診断セット定義のテーマを差し替えると3テーマが変わること（コードに固定していない確認）。質問の検査（中立性など）は8.5と9.4で行う。
     - 焦点テスト: `npx.cmd vitest run packages/fixtures/src/regional-values/questionBank.test.ts`
     - _Requirements: 1.4, 2.1, 3.1, 3.2, 12.12_
 
-  - [ ] 6.2 【A】架空の課題カード、事実項目、架空資料の本文を追加する
+  - [x] 6.2 【A】架空の課題カード、事実項目、架空資料の本文を追加する
     - `packages/fixtures/src/regional-values/cards.json`と`sources/`配下の架空資料の本文（JSON）を新規作成する。3テーマ分の課題カード（`FIXTURE`、`APPROVED`、架空の承認者ID）。架空の自治体名と架空の数値を使い、背景説明に「架空」の語を含め、「愛媛県」の名称と実在の人名・政党名・団体名・自治体名を含めない。出典は架空の資料IDだけ。引用原文は架空資料の本文に部分文字列として含まれる。事実項目は`FIXTURE`の項目だけ（事実の文、数値と単位、基準日（架空）、対象地域（架空の自治体名）、架空の資料ID）。
     - テスト`cards.test.ts`: 契約に適合すること、3テーマそれぞれにカードが1件以上あること、実在名の語（「愛媛県」を含む試験用の一覧）を含まないこと、背景説明に「架空」があること、引用原文が架空資料の本文に含まれること。
     - 焦点テスト: `npx.cmd vitest run packages/fixtures/src/regional-values/cards.test.ts`
     - _Requirements: 7.1, 7.2, 7.3, 7.9, 7.17, 7.18_
 
-  - [ ] 6.3 【A】架空の結果解説、固定文言、活かし方の問いを追加する
+  - [x] 6.3 【A】架空の結果解説、固定文言、活かし方の問いを追加する
     - `packages/fixtures/src/regional-values/result-texts.json`（3テーマ×(大切さ5段階+優先条件5段階)の30件。各件に`dataKind: "FIXTURE"`を持たせる）、`fixed-texts.json`（`requiredFixedTextKeys('FIXTURE')`の全キー）、`guidance.json`（3テーマ×3場面の9件）を新規作成する。優先条件の固定文言は「どちらかを選ぶなら、◯◯では△△を先に進めたい考えに近い（やや／強く）」の型にし、段階0は両方向を同程度に述べる文にする。各文は60文字以内で、利用者の性格・思想を述べず、一方の軽視を述べない。
     - 文面は架空データ用の仮の文面として起案し、利用者のレビューを受ける。公開版の文面の承認は別（13.1と13.4）。
     - テスト`texts.test.ts`: 契約に適合すること、30件と9件がそろうこと、キーの欠落がないこと、各文が60文字以内であること。禁止語などの検査は8.8で行う。
     - 焦点テスト: `npx.cmd vitest run packages/fixtures/src/regional-values/texts.test.ts`
     - _Requirements: 5.3, 5.10, 5.12, 5.18, 6.6, 6.7, 8.20_
 
-  - [ ] 6.4 【A】架空データを使った使用例のテストを追加する（クイック版が動くこと）
+  - [x] 6.4 【A】架空データを使った使用例のテストを追加する（クイック版が動くこと）
     - `tests/harness/regional-values/loadFixtureBundle.ts`に、6.1〜6.3のJSONを読み、`ViewBundle`を組み立てる関数を置く。`tests/regional-values/fixtureUsage.test.ts`で、診断の開始から6問の回答、`generateValuesMap`、`buildResultViewModel`、回答の変更、最初からやり直すまでを、`diagnosticReducer`のイベントで通しで動かす。V15、V16に相当する回答で、4つの状態が別の欄に出ること、最優先テーマが「聞いていません」になることを確認する。
     - `tests/regional-values/factIndependence.property.test.ts`に次を実装する。
     - **Property 55: 事実項目で変わらない**（課題カード、事実項目、出典だけが異なる2つのバンドルから`toMapInput`が作る入力は等しく、`generateValuesMap`の出力は同一）
@@ -334,7 +334,7 @@
     - 焦点テスト: `npx.cmd vitest run tests/regional-values/fixtureUsage.test.ts tests/regional-values/factIndependence.property.test.ts`
 
 - [ ] 7. バンドルの契約と検証（`verifyBundleText`、`loadBundle`、`contentHash`）を実装する
-  - [ ] 7.1 【A】バンドル、メタ、指摘、ビルドレポートの契約を追加する
+  - [x] 7.1 【A】バンドル、メタ、指摘、ビルドレポートの契約を追加する
     - `packages/contracts/src/models/regional/bundle.ts`を新規作成し、`DATA_MODES`、`BUILD_KINDS`、`BUNDLE_SCHEMA_VERSION`（1）、`GATE_REASON_CODES`（前半の表と、後半で加えた`APPROVER_COUNT_INSUFFICIENT`・`FIXED_TEXT_NOT_APPROVED`・`FIXED_TEXT_INVALID`を含む全コード）と`GATE_REASON_CLASS`（`SHORTAGE`・`DEFECT`）、`BundleMetaSchema`、`RegionalBundleSchema`、`GateFindingSchema`（`targetKind`に`FIXED_TEXT`・`GUIDANCE_QUESTION`を含む）、`BuildReportSchema`をstrictで定義する。`regional/index.ts`へ`bundle.js`のexportを1行追加する。
     - refine: `meta.dataKind`と`dataModeResolved`の整合、`switched`と`switchReasonCodes`の整合（空⇔未切替、すべて`SHORTAGE`）、`buildKind: PUBLIC`のとき`REAL_AI`かつ`REAL`かつ未切替、`questions`・`cards`・`resultTexts`・`fixedTexts`と入れ子の項目の`dataKind`が`meta.dataKind`と一致（混在禁止。`resultTexts`の各件の`dataKind`は5.11で追加した項目）、`mapConfig`が`MapConfigSchema`に適合、`aiContribution`は0以上の整数で`rejectedByChecks + humanEdited + humanRejected ≤ drafted`。
     - **Property 36: バンドルとレポートのラウンドトリップ**（直列化、解析、再直列化の結果が元と深い等価で、文字列が同一）
@@ -343,14 +343,14 @@
     - 焦点テスト: `npx.cmd vitest run packages/contracts/src/models/regional/bundle.test.ts packages/contracts/src/models/regional/bundle.property.test.ts`
     - _Requirements: 7.10, 8.22, 10.1, 10.15, 10.16, 10.17, 11.9_
 
-  - [ ] 7.2 【A】ブラウザ向けの正準JSONと`contentHash`の再計算を実装する
+  - [x] 7.2 【A】ブラウザ向けの正準JSONと`contentHash`の再計算を実装する
     - `packages/domain/src/regional-values/bundle/portableCanonicalJson.ts`に、`node:util`を使わない正準JSON（キー順固定、2スペース字下げ、末尾LF1つ）を実装し、`bundle/contentHash.ts`に、WebCrypto（`crypto.subtle.digest`、`digest`引数で差し替え可能）による`contentHash`（`meta.contentHash`を除いた正準JSONのSHA-256）の計算を実装する。`packages/domain/tsconfig.json`は変更しない。`crypto.subtle`の型が解決できない場合は、型だけの最小の宣言を`bundle/`内に置く。
     - **Property 38: 正準JSONの同値と`contentHash`の再計算**（`portableCanonicalJson`の文字列が既存の`formatCanonicalJson`と同一で、`contentHash`が既存の`sha256Hex`と一致する）
     - **Validates: Requirements 11.9, 11.10**
     - 例示テスト: 空白・改行・日本語・入れ子・キー順の異なる同値のオブジェクト。
     - 焦点テスト: `npx.cmd vitest run packages/domain/src/regional-values/bundle/portableCanonicalJson.test.ts packages/domain/src/regional-values/bundle/contentHash.property.test.ts`
 
-  - [ ] 7.3 【A】`verifyBundleText`と`VerifiedBundle`を実装する
+  - [x] 7.3 【A】`verifyBundleText`と`VerifiedBundle`を実装する
     - `bundle/verifyBundleText.ts`に、設計書の検証手順（JSON解析、メタ5項目、`generatedAt`、スキーマ・データ・ビルド種別の期待値、strict契約、`contentHash`の再計算、参照の整合、公開版の条件）を順に行い、最初に失敗した段階の符号（`NOT_JSON`、`META_MISSING`、`GENERATED_AT_INVALID`、`SCHEMA_VERSION_MISMATCH`、`DATA_VERSION_MISMATCH`、`BUILD_KIND_MISMATCH`、`SCHEMA_INVALID`、`HASH_MISMATCH`、`REFERENCE_BROKEN`、`PUBLIC_CONDITION_FAILED`）を返す。成功時だけ`VerifiedBundle`（ブランド付き）を返し、失敗時は内容を一切返さない。`BundleLoadErrorCode`と`ExpectedBundle`を定義する。
     - 参照の整合（`REFERENCE_BROKEN`）は、診断セットの質問が存在する、`QUICK`がある、診断セットのテーマの結果解説・活かし方の問い・課題カードがそろう、`requiredFixedTextKeys`のキーがそろうこと。
     - **Property 39: バンドルの検証**（1種類の不備ごとに対応する符号を返し、内容を返さない。不備がなければ合格する）
@@ -358,14 +358,14 @@
     - 型の確認: `VerifiedBundle`が4.1の`SessionBundle`と5.3の`ViewBundle`に構造的に代入できること（キャスト不要）を型のテストで確認する。
     - 焦点テスト: `npx.cmd vitest run packages/domain/src/regional-values/bundle/verifyBundleText.test.ts packages/domain/src/regional-values/bundle/verifyBundleText.property.test.ts`
 
-  - [ ] 7.4 【A】`loadBundle`と読み込み失敗時の固定文言を実装する
+  - [x] 7.4 【A】`loadBundle`と読み込み失敗時の固定文言を実装する
     - `bundle/loadBundle.ts`に`loadBundle({ httpGet, url, expected, digest? })`を実装する。取得はGET 1回だけ（`cache: "no-cache"`、`credentials: "omit"`、`redirect: "error"`、`referrerPolicy: "no-referrer"`）、再試行も別のバンドルへの切替もしない。本文の上限は2,000,000バイト（`TOO_LARGE`）。`fetch`を直接参照せず、`httpGet`を引数で受ける。`bundle/loadFailureTexts.ts`に`LOAD_FAILURE_TEXTS`（`DEMO`は読み込み失敗の旨、`PUBLIC`は「準備中」だけ）を定義する。
     - テスト: `httpGet`のfakeが1回だけ呼ばれること、HTTPエラーが`FETCH_FAILED`、上限超過が`TOO_LARGE`、成功時に`VerifiedBundle`を返すこと、`LOAD_FAILURE_TEXTS`が禁止語の試験用一覧の語を含まないこと。
     - 焦点テスト: `npx.cmd vitest run packages/domain/src/regional-values/bundle/loadBundle.test.ts`
     - _Requirements: 9.2, 10.4, 10.17, 11.10_
 
-- [ ] 8. 質問バンク・課題カード・事実項目・固定文言の検査を実装する
-  - [ ] 8.1 【A】検査用設定の契約と読込み関数を追加する
+- [x] 8. 質問バンク・課題カード・事実項目・固定文言の検査を実装する
+  - [x] 8.1 【A】検査用設定の契約と読込み関数を追加する
     - `packages/contracts/src/models/regional/config.ts`へ追記する: `NeutralityConfigSchema`（候補者名と政党名、現職か新人かを示す語、二重質問の語、誘導語（1語以上）、文字数差の設定値（ラベル、方向）、施策名、予算や賛否の語、大切さ質問の型、前提文の型、否定表現、排他的な語、軽視を表す語、禁止語、漢数字の免除語、`wordCategories`（`SUPERIORITY`・`RECOMMENDATION`・`VOTE_URGING`の各1語以上）、`guidanceNames`、`choiceEncouragingWords`、`userClaimPatterns`）と`BuildConfigSchema`（`dataVersion`は`^\d{4}-\d{2}-\d{2}\.\d+$`、`quoteMaxChars`、`realNames`、`properNouns`、`requiredApprovers`）。`bannedWords`と`loadedWords`が`wordCategories`の和集合を含むことを読込み時に検査する。
     - `apps/api/src/regional-values/build/loadConfig.ts`へ`loadNeutralityConfig`と`loadBuildConfig`を追記する（2.1のファイルを変更するため、2.1の完了後に行う）。読めない、誘導語が0語、検査に失敗した場合は`CONFIG_UNREADABLE`にする。
     - **このタスクは設定ファイルの実体（`neutrality.json`、`build.json`）を作らない。** 要件に書かれていない語の一覧の内容は人間の承認が要るため、13.1で扱う。テストは`tests/harness/regional-values/testConfig.ts`に置く試験専用の語（実在の人名・政党名を含めない）の設定を、一時ディレクトリへ書いて読む。
@@ -374,13 +374,13 @@
     - 焦点テスト: `npx.cmd vitest run packages/contracts/src/models/regional/config.neutrality.test.ts apps/api/src/regional-values/build/loadConfig.test.ts`
     - _Requirements: 3.3, 3.5, 3.12, 4.18, 7.9, 7.11, 8.9_
 
-  - [ ] 8.2 【A】文字数・文・数値表現の判定（`textMetrics`）を実装する
+  - [x] 8.2 【A】文字数・文・数値表現の判定（`textMetrics`）を実装する
     - `packages/domain/src/regional-values/bank/textMetrics.ts`に、`lengthOf`（前後の空白を除いたコードポイント数）、`contentLength`（空白と改行を除いたコードポイント数）、`sentencesOf`（「。」「？」「！」と改行で区切った空でない文）、`numericTokens`（算用数字、全角数字、漢数字の連なり、年の表現（西暦、令和、平成、昭和）。免除語の一部なら数えない。免除語は引数で受ける）、`containsAny`（NFKC正規化して全角と半角を区別しない部分文字列の判定）を実装する。
     - テスト`textMetrics.test.ts`: 全角・半角の同一視、サロゲートペアの1文字計数、前提文の60文字と61文字、解説の49・50・200・201文字、「一方」「万全」の免除、年の表現。
     - 焦点テスト: `npx.cmd vitest run packages/domain/src/regional-values/bank/textMetrics.test.ts`
     - _Requirements: 3.1, 3.3, 3.17, 11.7_
 
-  - [ ] 8.3 【A】質問バンクの検査（文字列系）を実装する
+  - [x] 8.3 【A】質問バンクの検査（文字列系）を実装する
     - `bank/textChecks.ts`に、`NAME_FREE`、`SINGLE_ISSUE`、`LOADED_TERMS`、`IMPORTANCE_PATTERN`、`PREMISE`、`POSITIVE_FRAMING`、`NON_EXCLUSIVE`、`NO_FACT_NUMBERS`（バンドルの事実項目の数値・調査年と一致する表現を検出。事実の数値は`ReadonlySet<string>`で受け、事実項目の型を取り込まない）を実装する。AIを呼ばず、検査関数は質問形式と診断セットだけで分岐し、テーマ・データ種別・起案者区分で免除しない。
     - `tests/harness/regional-values/bankInjection.ts`に、合格する質問バンクの構築と、1種類の違反の注入、検査の基準から独立に計算した期待判定を置く（8.4・8.5が再利用する）。
     - **Property 18: 質問バンクの文字列の検査**（注入した検査IDと質問IDだけを返し、注入のない質問は違反にならない）
@@ -388,7 +388,7 @@
     - 例示テスト: 各検査の合格例と拒否例（前提文の60文字と61文字を含む）。
     - 焦点テスト: `npx.cmd vitest run packages/domain/src/regional-values/bank/textChecks.test.ts packages/domain/src/regional-values/bank/textChecks.property.test.ts`
 
-  - [ ] 8.4 【A】質問バンクの検査（釣り合い・構成・承認系）を実装する
+  - [x] 8.4 【A】質問バンクの検査（釣り合い・構成・承認系）を実装する
     - `bank/balanceChecks.ts`に、`LABEL_SYMMETRY`（固定5文言の完全一致、+2と−2・+1と−1の文字数差が設定値以下）、`DIRECTION_LENGTH`（方向A・Bの説明の文字数差が設定値以下）、`SWAP_BALANCE`（入れ替える質問と入れ替えない質問の数の差が1以下）、`DIRECTION_BALANCE`（方向Aの`CHANGE`と`CONTINUE`の数の差が1以下。`NEUTRAL`は数えない）、`SET_COMPOSITION`（`QUICK`は異なる3テーマ×各2問の計6問・`PRIORITY_PICK`なし、`FULL`は6テーマ×各2問と`PRIORITY_PICK`1問の計13問、重みはすべて1）、`REVIEW_APPROVAL`（版ごとの偏り確認と承認。版が変わった質問は前の版の記録を引き継がない）を実装する。
     - **Property 19: 釣り合いの検査**（文字数差の20と21、数の差の1と2などの境界を含む）
     - **Property 20: 診断セットの構成**（`QUICK`の3テーマは診断セット定義のデータで決まり、データを変えるとコードを変えずに3テーマが変わる）
@@ -397,7 +397,7 @@
     - 例示テスト: 診断セットの拒否例（`QUICK`に`PRIORITY_PICK`、2テーマと4テーマ、優先条件の欠落、`FULL`のテーマの欠落、`PRIORITY_PICK`が0問と2問、重みが1以外）、各テーマの質問数0・1・2。
     - 焦点テスト: `npx.cmd vitest run packages/domain/src/regional-values/bank/balanceChecks.test.ts packages/domain/src/regional-values/bank/balanceChecks.property.test.ts`
 
-  - [ ] 8.5 【A】`inspectQuestionBank`で検査を集約する
+  - [x] 8.5 【A】`inspectQuestionBank`で検査を集約する
     - `bank/inspectQuestionBank.ts`に、8.3・8.4の検査を実行して違反を全件集める関数を実装する。順序は検査の定義順、次に質問バンクの定義順で決定的。1件でも違反があれば成功値を返さず、入力のバンクを変更しない。診断セットごとの扱い（`QUICK`の承認不足は拒否、`FULL`の未定義・承認不足は含めずエラーなし、構成違反は常に拒否）は、設計書の表どおりに9.2の`assembleBundleBody`が適用する。
     - **Property 22: 全違反の収集と非破壊**
     - **Property 23: 検査の免除なし**（テーマ、データ種別、起案者区分だけを変えても違反の集合が変わらない）
@@ -405,29 +405,29 @@
     - 例示テスト: 複数の違反の同時検出、順序の決定性。
     - 焦点テスト: `npx.cmd vitest run packages/domain/src/regional-values/bank/inspectQuestionBank.test.ts packages/domain/src/regional-values/bank/inspectQuestionBank.property.test.ts`
 
-  - [ ] 8.6 【A】根拠の検査と引用の照合を実装する
+  - [x] 8.6 【A】根拠の検査と引用の照合を実装する
     - `packages/domain/src/regional-values/content/checkGrounding.ts`に、文の数値表現・日付表現・固有名詞（固有名詞の一覧は引数）がすべて引用原文に含まれるかを判定する`checkGrounding`を実装する。課題カードの検査と、AI下書きの検査（11.3）が同じ関数を使う。`content/quoteMatch.ts`に、改行と連続する空白を半角空白1つにそろえた部分文字列の照合と、引用の長さ（改行を除く文字数）の上限判定を実装する。
     - **Property 24: 根拠の検査**（引用原文にある数値・日付・固有名詞だけなら合格し、ないものを1つ混入すると必ず不合格）
     - **Property 25: 引用の照合**（改行と連続する空白の挿入や置換を含む切出しは見つかり、1文字変えると見つからない。上限超過は必ず`QUOTE_TOO_LONG`）
     - **Validates: Requirements 7.6, 7.11, 8.9**
     - 焦点テスト: `npx.cmd vitest run packages/domain/src/regional-values/content/checkGrounding.test.ts packages/domain/src/regional-values/content/grounding.property.test.ts`
 
-  - [ ] 8.7 【A】課題カードと事実項目の検査（架空データ分）を実装する
+  - [x] 8.7 【A】課題カードと事実項目の検査（架空データ分）を実装する
     - `content/checkIssueCard.ts`に`checkFixtureIssueCard`、`content/checkFactItem.ts`に`checkFixtureFactItem`を実装し、指摘（`GateFinding`）を返す。引数の型を`FIXTURE`のカード・事実項目に限定する。検査は、契約、引用の実在と長さ、背景説明・用語解説の根拠、架空課題の検査（実在名の一覧に一致する語を含まない、背景説明に「架空」が1回以上、出典は架空の資料IDだけ）、承認状態、診断セットの網羅（含まれる全テーマに承認済みのカードが1件以上）。`FIXTURE`の事実項目は契約の検査のみ。
     - `REAL_AI`用の検査（利用条件、送信可否、ライセンス情報、原本の変化、事実の数値の算出値との一致）は、要件更新（【要確認1】【要確認2】【要確認8】）と実データの読込みが要るため、13.11と13.12で別の関数として追加し、`checkIssueCard`・`checkFactItem`が種別で振り分ける。このタスクの関数は`REAL_AI`の入力を型で受け付けず、検査を黙って省略しない。
     - テスト: 6.2の架空データが指摘0件になること、架空課題が「愛媛県」を含む・「架空」がない・実在名を含む・出典にURLがある・引用が資料にない・用語解説が引用にない数値を含む場合の拒否。
     - 焦点テスト: `npx.cmd vitest run packages/domain/src/regional-values/content/checkIssueCard.test.ts packages/domain/src/regional-values/content/checkFactItem.test.ts`
     - _Requirements: 7.1, 7.2, 7.3, 7.6, 7.9, 7.11, 7.15, 7.16, 7.17_
 
-  - [ ] 8.8 【A】固定文言・結果解説・活かし方の問いの検査を実装する
+  - [x] 8.8 【A】固定文言・結果解説・活かし方の問いの検査を実装する
     - `content/inspectFixedTexts.ts`に`inspectFixedTexts`・`inspectResultTexts`・`inspectGuidance`を実装する。禁止語を含まない（免除は`notice`だけ。`banner.REAL_AI`の免除は【要確認18】のため13.4で扱う）、優先条件の結果解説が型「どちらかを選ぶなら、◯◯では△△を先に進めたい考えに近い（やや／強く）」に一致（±1は「やや」、±2は「強く」、0は両方向を同程度に述べる文）し否定表現・軽視を表す語を含まない、利用者の性格・思想・属性を述べる型（`userClaimPatterns`）に一致しない、各文が60文字以内、差込みの名前がキーの許可と一致、活かし方の問いが名称の一覧（`guidanceNames`）と特定の選択を促す語を含まず文末が「か」の1文。違反は`FIXED_TEXT_INVALID`、未承認・キー欠落は`FIXED_TEXT_NOT_APPROVED`の指摘で返す。
     - **Property 50: 文言の出所と禁止語**（検査に合格するバンドルの表示モデルは、`notice`を除くすべての文が承認済みの固定文言と差込み値と質問文・選択肢ラベルだけで構成され、禁止語を含まず、各文が60文字以内）
     - **Validates: Requirements 5.3, 5.10, 5.12, 5.18, 6.7, 11.7, 12.2**
     - テスト: 6.3の架空データが試験専用の設定で指摘0件になること、各検査の拒否例。
     - 焦点テスト: `npx.cmd vitest run packages/domain/src/regional-values/content/inspectFixedTexts.test.ts packages/domain/src/regional-values/content/inspectFixedTexts.property.test.ts`
 
-- [ ] 9. `dataMode`の判定と`FIXTURE`のビルドを実装する
-  - [ ] 9.1 【A】`resolveDataMode`と判定表、公開版の出力条件を実装する
+- [x] 9. `dataMode`の判定と`FIXTURE`のビルドを実装する
+  - [x] 9.1 【A】`resolveDataMode`と判定表、公開版の出力条件を実装する
     - `packages/domain/src/regional-values/gate/resolveDataMode.ts`に、`resolveDataMode(requested, buildKind, findings)`を純関数で実装する。判定表（状況A〜E × `REAL`・`FIXTURE`・`REAL_PREFERRED`）どおりに、採用するデータ種別、終了コード、`switched`、切替の理由コードを返す。`REAL_PREFERRED`が切り替えるのは`SHORTAGE`だけで、`DEFECT`は切り替えず失敗する。公開版は`dataMode`が`REAL`以外なら`PUBLIC_REQUIRES_REAL`で失敗し、指摘が1件でもあれば失敗する。
     - 指摘（`GateFinding`）は引数で受け、実データから指摘を作る処理は13.12で行う。ここでは合成した指摘で検査する。
     - **Property 32: `dataMode`の判定**（判定表と一致し、全域で決定的。`REAL`の5条件に対応する指摘を1つずつ加えると失敗する）
@@ -436,7 +436,7 @@
     - 例示テスト: 判定表の全セル（A〜E × 3モード）を1件ずつ。
     - 焦点テスト: `npx.cmd vitest run packages/domain/src/regional-values/gate/resolveDataMode.test.ts packages/domain/src/regional-values/gate/resolveDataMode.property.test.ts`
 
-  - [ ] 9.2 【A】`assembleBundleBody`と`contentHash`の付与を実装する
+  - [x] 9.2 【A】`assembleBundleBody`と`contentHash`の付与を実装する
     - `packages/domain/src/regional-values/bundle/assembleBundleBody.ts`に、検査済みの質問バンク、課題カード、結果解説、固定文言、活かし方の問い、設定値、AIの貢献を示す数（この段階では0）から、公開バンドルの本体を作る純関数を実装する。含めるのは、現在の版に承認記録のある質問、`APPROVED`のカード、承認済みの結果解説と固定文言、構成条件と承認がそろった診断セットだけ。除外した項目は`GateFinding`に記録する。診断セットの扱いは設計書の表に従う（`QUICK`の承認不足は拒否、`FULL`は未定義・承認不足なら含めない）。質問・結果解説・課題カードを`{ dataKind, recordId, payload }`にして既存の`validateDataBoundary`へ渡し、混在を検出する。
     - `bundle/finalizeBundle.ts`に、`contentHash`の計算（7.2）、`RegionalBundleSchema`による検証、ハッシュの再計算による自己検査を実装する。
     - **Property 35: バンドルの不変条件**（`dataKind`の一致、承認済み・検証済みだけが入ること、メタの整合、メタ5項目。反する入力からはバンドルが出力されない）
@@ -444,13 +444,13 @@
     - 例示テスト: `REAL_AI`の質問が1件混じる`FIXTURE`の入力で混在が検出されること、承認記録のない質問・`PENDING`のカードが除外され指摘に残ること。
     - 焦点テスト: `npx.cmd vitest run packages/domain/src/regional-values/bundle/assembleBundleBody.test.ts packages/domain/src/regional-values/bundle/assembleBundleBody.property.test.ts`
 
-  - [ ] 9.3 【A】ビルドレポートとビルドログを実装する
+  - [x] 9.3 【A】ビルドレポートとビルドログを実装する
     - `apps/api/src/regional-values/build/report.ts`に、`BuildReport`を作る関数（自由文を持たず、固定のコードとIDだけ。失敗時は`output`が`null`で`exitCode`が1）、`build/buildLog.ts`に、`createSafeLogger`で`BUILD_START`・`REAL_DATA_INSUFFICIENT`・`DATA_MODE_SWITCHED`・`BUILD_DONE`を出す関数を実装する。回答データ、認証キー、本文を出力に含めない。
     - テスト: 設計書のレポートとログの例と同じ形になること、`BuildReportSchema`に適合すること、ログに目印の文字列（認証キーに見立てた値）が現れないこと。
     - 焦点テスト: `npx.cmd vitest run apps/api/src/regional-values/build/report.test.ts apps/api/src/regional-values/build/buildLog.test.ts`
     - _Requirements: 7.8, 7.15, 7.19, 9.9, 10.16_
 
-  - [ ] 9.4 【A】`runBuild`（`FIXTURE`のビルド）を実装する
+  - [x] 9.4 【A】`runBuild`（`FIXTURE`のビルド）を実装する
     - `apps/api/src/regional-values/build/runBuild.ts`に、設計書の手順を実装する: 設定の読込み、出力先の古い`bundle.json`の削除（削除できなければ失敗）、`FIXTURE`なら実データを読まない、架空データ（`packages/fixtures/src/regional-values/`）の読込み（パスで読み、`@ehime-vote-navigator/fixtures`をimportしない）、検査（8.5、8.7、8.8）、`resolveDataMode`、`assembleBundleBody`、`bundle.json`と`build-report.json`の原子的な書込み（既存の`atomicReplaceFile`）。`REAL`と`REAL_PREFERRED`のための`RealDataLoader`の差込み口を用意し、既定の実装は`data/real/regional-values/`が存在しない場合に`REAL_DATA_ABSENT`（不足）を返す。ディレクトリが存在し空でない場合は、実データの読込みが未実装（13.12）であることを示して終了コード1にする（黙って架空データへ切り替えない）。
     - `build/loadFixtureData.ts`と`build/writeOutputs.ts`を分け、時計は`--generated-at`で固定でき、テストは時計を注入する。
     - **Property 33: 切替の理由コードの一致**（`meta`、レポート、ログの理由コードが同じ集合で、空でなく、すべて不足の区分。切り替えないときは3か所とも空）
@@ -461,7 +461,7 @@
     - `npm.cmd run build --workspace @ehime-vote-navigator/domain`を実行してから焦点テストを実行する。
     - 焦点テスト: `npx.cmd vitest run apps/api/src/regional-values/build/runBuild.test.ts apps/api/src/regional-values/build/runBuild.property.test.ts`
 
-  - [ ] 9.5 【A】CLI（`regional-values build`）と`package.json`のscriptを追加する
+  - [x] 9.5 【A】CLI（`regional-values build`）と`package.json`のscriptを追加する
     - `apps/api/src/regional-values/cli.ts`に`runRegionalValuesCli(argv, deps)`、`main.ts`にエントリを実装する（`apps/api/src/analysis/main.ts`と同じ方式。ポートを開かず、エラーの詳細を出力しない）。引数は`build --kind demo|public --data-mode REAL|FIXTURE|REAL_PREFERRED [--generated-at <ISO>] [--config-dir <path>]`。`--data-mode`の既定はデモ版が`REAL_PREFERRED`、公開版が`REAL`で、公開版は`REAL`以外を受け付けない。書き出したバンドルをブラウザ向けの`verifyBundleText`（7.3）で自己検査し、合格しなければ失敗にする。
     - 根の`package.json`と`apps/api/package.json`の`scripts`へ、`regional-values`を1行ずつ追加する（`analysis`と同じ形）。これ以外の変更はしない。
     - 例示テスト: 引数の誤りで終了コード1、`--data-mode FIXTURE`でバンドルが書かれること、書かれたバンドルが`verifyBundleText`に合格すること（Property 38のビルド側）、`--config-dir`に試験専用の設定を渡せること。
@@ -469,22 +469,22 @@
     - 焦点テスト: `npx.cmd vitest run apps/api/src/regional-values/cli.test.ts`
     - _Requirements: 7.16, 10.1, 10.3, 10.13, 10.16, 11.10_
 
-- [ ] 10. ブラウザ向けの入口と共同開発者向けの連携ガイドを追加する
-  - [ ] 10.1 【A】ブラウザ向けの入口（subpath export）を追加する
+- [x] 10. ブラウザ向けの入口と共同開発者向けの連携ガイドを追加する
+  - [x] 10.1 【A】ブラウザ向けの入口（subpath export）を追加する
     - `packages/domain/src/regional-values/browser.ts`を新規作成し、`map/`、`session/`、`view/`、`bundle/`（取得と検証）だけをexportする（`bank/`、`content/`、`gate/`、ビルドの組立ては公開しない。`storage/`は13.8で追加）。`packages/domain/package.json`の`exports`へ`"./regional-values"`（`types`と`import`）、`packages/contracts/package.json`の`exports`へ`"./regional"`を追加する。既存の`"."`は変更しない。
     - **Property 52: 依存閉包**（`map/index.ts`から到達するモジュールに、`node:*`、Bedrock、ネットワークの識別子、現在時刻の取得、乱数、課題カード・事実項目・出典のモジュールの取込みが0件。`browser.ts`から到達するモジュールに、`node:*`、`Buffer`、`process`、`require`、現在時刻の取得、乱数が0件）
     - **Validates: Requirements 4.1, 9.6, 12.9**
     - 3.10の`importGraph.ts`を再利用して`browser.dependencyClosure.test.ts`を作る。`exports.test.ts`で、`package.json`の既存`"."`の値が変わっていないことと、新しい2つの入口が追加されていることを確認する。
     - 焦点テスト: `npx.cmd vitest run packages/domain/src/regional-values/browser.dependencyClosure.test.ts packages/domain/src/regional-values/exports.test.ts`
 
-  - [ ] 10.2 【A】subpath exportが既存のビルドとテストに影響しないことを確認する
+  - [x] 10.2 【A】subpath exportが既存のビルドとテストに影響しないことを確認する
     - `npm.cmd run build --workspace @ehime-vote-navigator/contracts`、続けて`npm.cmd run build --workspace @ehime-vote-navigator/domain`を実行し、`packages/contracts/dist/models/regional/index.js`と`packages/domain/dist/regional-values/browser.js`が生成されることを確認する（`dist`の存在確認はテストに含めない）。`npm.cmd run typecheck`を実行する。
     - 既存の`npm.cmd run build`（ワークスペース全体）と`npm.cmd run check:build-boundary`を1回ずつ実行して結果を確認する。`apps/web`は変更しない。失敗した場合は、この変更が原因かを切り分け（`exports`の追加行だけの差分であること）、原因が既存の状態にある場合は変更せず報告して停止する。
     - 既存の契約テストと入口テストが変更なしで成功することを確認する: `npx.cmd vitest run packages/contracts/src/contracts.test.ts packages/contracts/src/index.test.ts packages/domain/src/index.test.ts`
     - 焦点テスト: 上記の1行
     - _Requirements: 10.7, 10.8_
 
-  - [ ] 10.3 【A】共同開発者向けの連携ガイドを作成する
+  - [x] 10.3 【A】共同開発者向けの連携ガイドを作成する
     - `.kiro/specs/regional-values-map/ui-integration-guide.md`を新規作成する（実装済みの型と関数から書く）。内容: UIが使う型と関数の一覧（`AnswerValue`、`Answers`、`ValuesMap`、`MapError`、`DiagnosticState`、`DiagnosticEvent`、`diagnosticReducer`、`QuestionPresentation`、`presentQuestion`、`ResultViewModel`、`buildResultViewModel`、`CardView`、`AboutView`、`loadBundle`、`ExpectedBundle`、`LOAD_FAILURE_TEXTS`）、質問と回答のデータ形式、価値観マップの出力形式、診断の状態遷移の表、架空データによる使用例（6.4のテストへの参照）、ブラウザ向けのimport方法（`@ehime-vote-navigator/domain/regional-values`と`@ehime-vote-navigator/contracts/regional`。`apps/web`は現在ワークスペースのパッケージをimportしておらず、`dependencies`への宣言の要否は共同開発者が決める）、バンドルの取得URL`/regional-values/bundle.json`と`__RV_EXPECTED__`、画面からの禁止事項（表示文字列の自作、スコア・並び順の再計算、保存領域への書込み、バンドルのGET以外の通信、ドメインの内部モジュールの取込み、`AnswerValue`の自作）、検証用バンドルの作り方（9.5の`--config-dir`と、13.1の承認前は試験専用の設定を使う手順）。
     - 同期テスト`tests/regional-values/guideSync.test.ts`で、ガイドが`browser.ts`のexport名と`DiagnosticEvent`のすべての`type`、`DiagnosticState`のすべての`phase`を挙げていることを確認する。
     - 焦点テスト: `npx.cmd vitest run tests/regional-values/guideSync.test.ts`
@@ -675,6 +675,13 @@
     - _Requirements: 7.2, 10.15, 10.16, 10.17_
 
 - [ ] 14. `apps/web`への画面実装（分類C。共同開発者が担当し、本featureの実装者は着手しない）
+
+  **共同開発者の変更着手承認（実装完了の承認ではない）**
+
+  - 承認日: 2026-11-13
+  - 承認者: 西原薙寧
+  - 承認対象: Visitor / Analyst の`routes.tsx`と`routeContracts.ts`への`/values`追加、`build-boundary.mjs`の`PUBLIC_ROUTE_PATHS`への`/values`追加、`AppShell`で`/values`のときだけ2022年選挙のバナー・データ種別表示・フッターを非表示にする変更、既存のルート関連テスト6ファイルへの期待値の追加、関連仕様の更新。
+  - 条件: `/values`以外の既存2022年選挙画面の動作・表示、`/analyst/*`、退役済み`/sources`の404、既存のroute contractを変更しない。テストは既存期待値の削除・緩和ではなく必要な期待値の追加だけにする。`apps/web`の実装は共同開発者が担当し、本featureの実装者は変更しない。
   - [ ] 14.1 【C】リリース用のビルド基盤（`demo`・`public`）を追加する
     - **着手条件**: 共同開発者の承認（承認者名: ＿＿、承認日: ＿＿）をここに記録するまで着手しない（Req 10.9）。
     - **共同開発者が使うAPI**: 7.3・7.4（`ExpectedBundle`、`verifyBundleText`）、9.5（`regional-values build`が出す`dist/regional-values/<kind>/bundle.json`）、10.1（ブラウザ向けの入口）、10.3（連携ガイド）。
@@ -703,13 +710,13 @@
     - 焦点テスト: `npx.cmd vitest run apps/web/src/app/values-map/CardScreen.test.tsx apps/web/src/app/values-map/AboutScreen.test.tsx`
     - _Requirements: 5.13, 7.4, 7.13, 7.21, 8.13, 10.12, 10.18, 10.19_
 
-  - [ ] 14.5 【C】ルート入口を実装する
-    - **着手条件**: 共同開発者の承認（承認者名: ＿＿、承認日: ＿＿）を記録するまで着手しない。
-    - **共同開発者が使うAPI**: 4.3・4.4（`OPEN_CARD`、`OPEN_ABOUT`）、14.2〜14.4の画面。
-    - 内容: ルート案Aに従い、`apps/web/src/app/values-map/routes.tsx`に`/`（診断アプリ）と`*`（見つからない）の2つだけを置き、リリース用のターゲット（14.1）の入口にする。「このアプリについて」と課題カードは`/`の中の状態として扱い、URLに診断の状態や回答由来の値を持たせない。既存の`visitor`・`analyst`のルート表、`applicationMode.ts`、`PUBLIC_ROUTE_PATHS`は変更しない。
-    - 焦点テスト: `npx.cmd vitest run apps/web/src/app/values-map/routes.test.tsx`
+  - [ ] 14.5 【C】既存アプリの`/values`ルートへ価値観診断を統合する
+    - **着手条件**: 本章の「共同開発者の変更着手承認」（西原薙寧、2026-11-13）の範囲内であること。これは変更作業の開始を認める記録であり、実装完了の承認ではない。
+    - **共同開発者が使うAPI**: 4.3・4.4（`OPEN_CARD`、`OPEN_ABOUT`）、14.2〜14.4の画面、7.4（`loadBundle`、`LOAD_FAILURE_TEXTS`）、10.1のブラウザ向け入口。
+    - 内容: `apps/web/src/app/visitor/routes.tsx`と`apps/web/src/app/analyst/routes.tsx`に、同じ`/values`のpublic routeを追加する。両方の`routeContracts.ts`に、`{ path: "/values", kind: "PUBLIC" }`の契約を追加する。`build-boundary.mjs`の`PUBLIC_ROUTE_PATHS`へ`/values`を追加する。`AppShell`は、現在のpathnameが`/values`のときだけ2022年選挙のバナー、2022年のデータ種別表示、2022年選挙のフッターを表示せず、その他の既存routeでは従来の表示を完全に保持する。ローカル限定バナー、skip link、landmark、戻る操作、Shared Navigationは本タスクの承認対象外であり、変更しない。診断の状態と回答由来の値をURL、クエリ、hashに持たせない。
+    - 既存のルート関連テスト6ファイル（`app/routes.test.tsx`、`app/visitor/visitorRoutes.property.test.tsx`、`app/analyst/analystRoutes.property.test.tsx`、`app/shellSafety.property.test.tsx`、`app/sourceBoundary.property.test.tsx`、`config/buildBoundary.test.ts`）には、`/values`の期待値を追加する。既存2022年選挙routeの期待値を削除、緩和、置換しない。`config/readmeContract.test.ts`は、route matrixの直接固定値を持たないため変更対象外とする。
+    - 焦点テスト: `npx.cmd vitest run apps/web/src/app/routes.test.tsx apps/web/src/app/visitor/visitorRoutes.property.test.tsx apps/web/src/app/analyst/analystRoutes.property.test.tsx apps/web/src/app/shellSafety.property.test.tsx apps/web/src/app/sourceBoundary.property.test.tsx apps/web/src/config/buildBoundary.test.ts`
     - _Requirements: 9.2, 10.3, 10.7, 10.9_
-
   - [ ] 14.6 【C】アクセシビリティと表示条件の画面テストを追加する
     - **着手条件**: 共同開発者の承認（承認者名: ＿＿、承認日: ＿＿）を記録するまで着手しない。
     - **共同開発者が使うAPI**: 5.5・5.6〜5.10の表示モデル。

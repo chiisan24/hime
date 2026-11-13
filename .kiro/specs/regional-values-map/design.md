@@ -1162,10 +1162,10 @@ declare const __RV_EXPECTED__: ExpectedBundle;     // Viteの define で置換�
 
 | 案 | 内容 | 既存への影響 | 判断 |
 | --- | --- | --- | --- |
-| A（推奨） | リリース用の別ターゲット`demo`と`public`に、新しいルート入口`src/app/values-map/routes.tsx`を置く。ルートは`/`（診断アプリ）と`*`（見つからない）の2つ。「このアプリについて」と課題カードは、`/`の中の状態（`ABOUT`、`FACT_CARD`）として扱う | 既存の`visitor`と`analyst`の表、`applicationMode.ts`、`PUBLIC_ROUTE_PATHS`に触れない | 共同開発者の承認後の別タスク（Req 10.9） |
-| B | 既存のvisitorの表に`/values-map`を追加する | `build-boundary.mjs`の`PUBLIC_ROUTE_PATHS`（完全一致で比較）、visitorのルート契約とそのテストの期待値を変える必要がある。Req 10.7(c)に抵触しうる | 採らない |
-
-URLに診断の状態を持たせない。回答由来の値をURLに出さない（Req 9.2）ためと、再読み込みで状態が消える仕様（Req 6.10）に合わせるためである。ブラウザの戻る操作はページ全体の履歴に従う。アプリ内の「戻る」はイベント`BACK`で行う。
+| A | リリース用の別ターゲット`demo`と`public`に、新しいルート入口`src/app/values-map/routes.tsx`を置く | 既存のroute matrixを変更しない | 採らない。既存アプリへの統合方針に置き換える |
+| B | 既存のvisitorの表に`/values-map`を追加する | `build-boundary.mjs`の`PUBLIC_ROUTE_PATHS`、visitorのルート契約とテストを変える必要がある | 採らない。pathを`/values`に統一する |
+| C（採用） | Visitor / Analyst 両方の既存route matrixに`/values`をpublic routeとして追加する。価値観診断の画面はこのroute内に置き、「このアプリについて」と課題カードは診断状態（`ABOUT`、`FACT_CARD`）として扱う | `visitor/routes.tsx`、`analyst/routes.tsx`、両方の`routeContracts.ts`、`build-boundary.mjs`の`PUBLIC_ROUTE_PATHS`、既存のルート関連テスト6ファイルを変更する。2022年選挙page、`/analyst/*`、退役済み`/sources`は変更しない | 共同開発者の変更着手承認済み（西原薙寧、2026-11-13）。実装完了の承認ではない |
+URLに診断の状態を持たせない。回答由来の値をURLに出さない（Req 9.2）ためと、再読み込みで状態が消える仕様（Req 6.10）に合わせるためである。ブラウザの戻る操作はページ全体の履歴に従う。アプリ内の「戻る」はイベント`BACK`で行う。`/values`では、2022年選挙に固有のバナー、データ種別表示、フッターを出さず、価値観診断の固定文言と`FrameView`の注記を表示する。ほかの既存routeのShell表示は変更しない。
 
 承認までは、新規モジュールだけで検証できる構成にする。
 

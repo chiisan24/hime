@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./regional": {
+      "types": "./dist/models/regional/index.d.ts",
+      "import": "./dist/models/regional/index.js"
     }
   },
   "files": ["dist"],

@@ -57,7 +57,7 @@
     },
     {
       "key": "level.importance.0",
-      "text": "どちらでもない",
+      "text": "どちらともいえない",
       "approval": {
         "status": "APPROVED",
         "approverId": "fixture-text-approver-v1",

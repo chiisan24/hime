@@ -1,8 +1,8 @@
 import {
-  BUNDLE_SCHEMA_VERSION,
   ISOInstantSchema,
   RegionalBundleSchema,
   requiredFixedTextKeys,
+  type BUNDLE_SCHEMA_VERSION,
   type BuildKind,
   type RegionalBundle,
 } from "@ehime-vote-navigator/contracts";
@@ -52,7 +52,12 @@ class VerifiedBundleImpl {
   readonly fixedTexts: RegionalBundle["fixedTexts"];
   readonly guidance: RegionalBundle["guidance"];
   readonly mapConfig: RegionalBundle["mapConfig"];
-  readonly aiContribution: RegionalBundle["aiContribution"];
+  readonly aiContribution: Readonly<{
+    DRAFTED: number;
+    REJECTED_BY_CHECKS: number;
+    HUMAN_EDITED: number;
+    HUMAN_REJECTED: number;
+  }>;
 
   constructor(bundle: RegionalBundle) {
     this.meta = bundle.meta;
@@ -64,7 +69,12 @@ class VerifiedBundleImpl {
     this.fixedTexts = bundle.fixedTexts;
     this.guidance = bundle.guidance;
     this.mapConfig = bundle.mapConfig;
-    this.aiContribution = bundle.aiContribution;
+    this.aiContribution = {
+      DRAFTED: bundle.aiContribution.drafted,
+      REJECTED_BY_CHECKS: bundle.aiContribution.rejectedByChecks,
+      HUMAN_EDITED: bundle.aiContribution.humanEdited,
+      HUMAN_REJECTED: bundle.aiContribution.humanRejected,
+    };
   }
 }
 
@@ -92,7 +102,6 @@ function allReferencesExist(bundle: RegionalBundle): boolean {
   if (definedThemeIds.size !== bundle.themes.length || definedThemeIds.size !== 6) {
     return false;
   }
-  const questionIds = new Set(bundle.questions.map((question) => question.questionId));
   const hasQuick = bundle.diagnosticSets.some((set) => set.setKind === "QUICK");
   if (!hasQuick) {
     return false;
