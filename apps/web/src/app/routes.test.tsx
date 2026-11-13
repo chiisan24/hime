@@ -29,7 +29,7 @@ type ModeFixture = Readonly<{
 const NOT_FOUND_HEADING = "ページが見つかりません";
 const RETIRED_SOURCES_HEADING = "出典一覧";
 const ANALYST_HOME_SECTION_HEADING = "ローカル分析のP0画面";
-const LOCAL_ONLY_TEXT = "会場ローカルデモ・一般公開ではありません";
+const LOCAL_ONLY_TEXT = "デモ版・コンテスト審査用の試作アプリです";
 const PAST_ELECTION_TEXT =
   "2022年に終了した過去選挙です。現在または将来の投票所判断には使えません";
 const REAL_AI_DATA_KIND_TEXT = "データ種別: 2022年実資料・AI解析";

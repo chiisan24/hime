@@ -120,7 +120,7 @@ function sharedNavigation() {
 
 function expectAnalystShell(path?: string) {
   expect(
-    screen.getByText("会場ローカルデモ・一般公開ではありません"),
+    screen.getByText("デモ版・コンテスト審査用の試作アプリです"),
   ).toBeInTheDocument();
   if (path !== undefined && ELECTION_INDEPENDENT_PATHS.has(path)) {
     // 価値観診断では、2022年選挙専用の表示を出さず、デモ用の架空データであることを出す
