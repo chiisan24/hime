@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./regional-values": {
+      "types": "./dist/regional-values/browser.d.ts",
+      "import": "./dist/regional-values/browser.js"
     }
   },
   "files": ["dist"],

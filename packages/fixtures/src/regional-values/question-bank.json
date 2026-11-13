@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 1,
+  "dataKind": "FIXTURE",
+  "themes": [
+    { "themeId": "TRANSPORT", "label": "地域交通" },
+    { "themeId": "EDUCATION_CHILDCARE", "label": "教育・子育て" },
+    { "themeId": "ECONOMY_EMPLOYMENT", "label": "地域経済・雇用" },
+    { "themeId": "HEALTHCARE_WELFARE", "label": "医療・福祉" },
+    { "themeId": "DISASTER_PREVENTION", "label": "防災" },
+    { "themeId": "POPULATION_REVITALIZATION", "label": "人口減少・地域活性化" }
+  ],
+  "questions": [
+    {
+      "questionId": "fixture-population-importance-v1",
+      "dataKind": "FIXTURE",
+      "author": "HUMAN",
+      "createdOn": "2026-01-01",
+      "version": 1,
+      "kind": "IMPORTANCE",
+      "themeId": "POPULATION_REVITALIZATION",
+      "text": "人口減少・地域活性化は、あなたの暮らしにとってどのくらい大切ですか",
+      "explanation": "地域の人口が減ると、交通、買い物、医療などの身近なサービスの維持に影響することがあります。ここでは、地域の暮らしについて考える材料としてたずねます。",
+      "opinionLabels": ["とても大切", "大切", "どちらともいえない", "あまり大切でない", "大切でない"],
+      "unsureLabel": "わからない",
+      "declineLabel": "回答しない",
+      "weight": 1,
+      "swapDirections": false,
+      "approval": {
+        "forVersion": 1,
+        "review": {
+          "modelId": "fixture-neutrality-review-v1",
+          "reviewedAt": "2026-01-02T09:00:00Z",
+          "verdict": "NO_BIAS_FOUND",
+          "findings": []
+        },
+        "approverId": "fixture-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "questionId": "fixture-population-tradeoff-v1",
+      "dataKind": "FIXTURE",
+      "author": "HUMAN",
+      "createdOn": "2026-01-01",
+      "version": 1,
+      "kind": "TRADEOFF",
+      "themeId": "POPULATION_REVITALIZATION",
+      "text": "人口減少・地域活性化について、限られた条件でどちらを先に進めたいですか",
+      "explanation": "地域の活動には、地域の外とのつながりを広げる方法と、地域の中の暮らしを支える方法があります。ここでは、両立が難しい場面での考えをたずねます。",
+      "opinionLabels": ["方向Aを強く優先", "方向Aをやや優先", "どちらも同じくらい大切", "方向Bをやや優先", "方向Bを強く優先"],
+      "unsureLabel": "わからない",
+      "declineLabel": "回答しない",
+      "weight": 1,
+      "swapDirections": false,
+      "premise": "限られた予算や人手の中で、どちらかを先に進める場面を考えてください",
+      "directionA": { "text": "地域の外とのつながりを広げる取り組み", "category": "CHANGE" },
+      "directionB": { "text": "地域の中の暮らしを支える取り組み", "category": "CONTINUE" },
+      "approval": {
+        "forVersion": 1,
+        "review": {
+          "modelId": "fixture-neutrality-review-v1",
+          "reviewedAt": "2026-01-02T09:00:00Z",
+          "verdict": "NO_BIAS_FOUND",
+          "findings": []
+        },
+        "approverId": "fixture-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "questionId": "fixture-disaster-importance-v1",
+      "dataKind": "FIXTURE",
+      "author": "HUMAN",
+      "createdOn": "2026-01-01",
+      "version": 1,
+      "kind": "IMPORTANCE",
+      "themeId": "DISASTER_PREVENTION",
+      "text": "防災は、あなたの暮らしにとってどのくらい大切ですか",
+      "explanation": "災害への備えには、避難に必要な情報を知ることや、安全な場所を確かめることがあります。ここでは、日常の暮らしと防災について考える材料としてたずねます。",
+      "opinionLabels": ["とても大切", "大切", "どちらともいえない", "あまり大切でない", "大切でない"],
+      "unsureLabel": "わからない",
+      "declineLabel": "回答しない",
+      "weight": 1,
+      "swapDirections": false,
+      "approval": {
+        "forVersion": 1,
+        "review": {
+          "modelId": "fixture-neutrality-review-v1",
+          "reviewedAt": "2026-01-02T09:00:00Z",
+          "verdict": "NO_BIAS_FOUND",
+          "findings": []
+        },
+        "approverId": "fixture-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "questionId": "fixture-disaster-tradeoff-v1",
+      "dataKind": "FIXTURE",
+      "author": "HUMAN",
+      "createdOn": "2026-01-01",
+      "version": 1,
+      "kind": "TRADEOFF",
+      "themeId": "DISASTER_PREVENTION",
+      "text": "防災について、限られた条件でどちらを先に進めたいですか",
+      "explanation": "防災の備えには、避難に必要な情報を届ける方法と、避難する場所を整える方法があります。ここでは、両立が難しい場面での考えをたずねます。",
+      "opinionLabels": ["方向Aを強く優先", "方向Aをやや優先", "どちらも同じくらい大切", "方向Bをやや優先", "方向Bを強く優先"],
+      "unsureLabel": "わからない",
+      "declineLabel": "回答しない",
+      "weight": 1,
+      "swapDirections": true,
+      "premise": "限られた予算や人手の中で、どちらかを先に進める場面を考えてください",
+      "directionA": { "text": "避難に必要な情報を届ける取り組み", "category": "CONTINUE" },
+      "directionB": { "text": "避難する場所を整える取り組み", "category": "CHANGE" },
+      "approval": {
+        "forVersion": 1,
+        "review": {
+          "modelId": "fixture-neutrality-review-v1",
+          "reviewedAt": "2026-01-02T09:00:00Z",
+          "verdict": "NO_BIAS_FOUND",
+          "findings": []
+        },
+        "approverId": "fixture-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "questionId": "fixture-education-importance-v1",
+      "dataKind": "FIXTURE",
+      "author": "HUMAN",
+      "createdOn": "2026-01-01",
+      "version": 1,
+      "kind": "IMPORTANCE",
+      "themeId": "EDUCATION_CHILDCARE",
+      "text": "教育・子育ては、あなたの暮らしにとってどのくらい大切ですか",
+      "explanation": "子どもの学びと子育てを支える取り組みには、相談の機会や学ぶ場所を整えることがあります。ここでは、地域の暮らしについて考える材料としてたずねます。",
+      "opinionLabels": ["とても大切", "大切", "どちらともいえない", "あまり大切でない", "大切でない"],
+      "unsureLabel": "わからない",
+      "declineLabel": "回答しない",
+      "weight": 1,
+      "swapDirections": false,
+      "approval": {
+        "forVersion": 1,
+        "review": {
+          "modelId": "fixture-neutrality-review-v1",
+          "reviewedAt": "2026-01-02T09:00:00Z",
+          "verdict": "NO_BIAS_FOUND",
+          "findings": []
+        },
+        "approverId": "fixture-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    },
+    {
+      "questionId": "fixture-education-tradeoff-v1",
+      "dataKind": "FIXTURE",
+      "author": "HUMAN",
+      "createdOn": "2026-01-01",
+      "version": 1,
+      "kind": "TRADEOFF",
+      "themeId": "EDUCATION_CHILDCARE",
+      "text": "教育・子育てについて、限られた条件でどちらを先に進めたいですか",
+      "explanation": "教育と子育てを支える取り組みには、子育ての相談を受ける方法と、子どもの学びを支える方法があります。ここでは、両立が難しい場面での考えをたずねます。",
+      "opinionLabels": ["方向Aを強く優先", "方向Aをやや優先", "どちらも同じくらい大切", "方向Bをやや優先", "方向Bを強く優先"],
+      "unsureLabel": "わからない",
+      "declineLabel": "回答しない",
+      "weight": 1,
+      "swapDirections": false,
+      "premise": "限られた予算や人手の中で、どちらかを先に進める場面を考えてください",
+      "directionA": { "text": "子育ての相談を受ける取り組み", "category": "CHANGE" },
+      "directionB": { "text": "子どもの学びを支える取り組み", "category": "CONTINUE" },
+      "approval": {
+        "forVersion": 1,
+        "review": {
+          "modelId": "fixture-neutrality-review-v1",
+          "reviewedAt": "2026-01-02T09:00:00Z",
+          "verdict": "NO_BIAS_FOUND",
+          "findings": []
+        },
+        "approverId": "fixture-approver-v1",
+        "approvedAt": "2026-01-03T09:00:00Z"
+      }
+    }
+  ],
+  "diagnosticSets": [
+    {
+      "setKind": "QUICK",
+      "themeIds": ["POPULATION_REVITALIZATION", "DISASTER_PREVENTION", "EDUCATION_CHILDCARE"],
+      "questionIds": [
+        "fixture-population-importance-v1",
+        "fixture-population-tradeoff-v1",
+        "fixture-disaster-importance-v1",
+        "fixture-disaster-tradeoff-v1",
+        "fixture-education-importance-v1",
+        "fixture-education-tradeoff-v1"
+      ]
+    }
+  ]
+}

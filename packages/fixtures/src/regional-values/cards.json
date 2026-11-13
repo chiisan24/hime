@@ -1,0 +1,86 @@
+[
+  {
+    "cardId": "fixture-card-population-v1",
+    "dataKind": "FIXTURE",
+    "themeId": "POPULATION_REVITALIZATION",
+    "title": "架空市あおばの地域活動",
+    "background": "架空市あおばでは、地域の集まりに参加する人が減っているという架空の記録があります。地域の外とのつながりと、地域の中の支え方を考える材料にします。",
+    "glossary": [
+      { "term": "地域活動", "description": "地域の人が協力して行う取り組みです。" }
+    ],
+    "quote": { "sourceId": "fixture-source-population-v1", "text": "地域の集まりに参加する人が減っている" },
+    "aiInvolvement": "HUMAN",
+    "updatedOn": "2026-01-01",
+    "approval": { "status": "APPROVED", "approverId": "fixture-card-approver-v1", "approvedAt": "2026-01-03T09:00:00Z" },
+    "sources": [
+      { "dataKind": "FIXTURE", "sourceId": "fixture-source-population-v1" }
+    ],
+    "facts": [
+      {
+        "dataKind": "FIXTURE",
+        "factId": "fixture-fact-population-v1",
+        "sentence": "架空市あおばの地域活動は12件です。",
+        "value": { "amount": 12, "unit": "件" },
+        "surveyDate": "2025-04-01",
+        "area": "架空市あおば",
+        "fictionalSourceId": "fixture-source-population-v1"
+      }
+    ]
+  },
+  {
+    "cardId": "fixture-card-disaster-v1",
+    "dataKind": "FIXTURE",
+    "themeId": "DISASTER_PREVENTION",
+    "title": "架空町みなとの避難の備え",
+    "background": "架空町みなとでは、避難する場所と避難に必要な情報を確認する取り組みがあるという架空の記録があります。日常の備えを考える材料にします。",
+    "glossary": [
+      { "term": "避難場所", "description": "危険を避けるために、いったん向かう場所です。" }
+    ],
+    "quote": { "sourceId": "fixture-source-disaster-v1", "text": "避難する場所と避難に必要な情報を確認する取り組み" },
+    "aiInvolvement": "HUMAN",
+    "updatedOn": "2026-01-01",
+    "approval": { "status": "APPROVED", "approverId": "fixture-card-approver-v1", "approvedAt": "2026-01-03T09:00:00Z" },
+    "sources": [
+      { "dataKind": "FIXTURE", "sourceId": "fixture-source-disaster-v1" }
+    ],
+    "facts": [
+      {
+        "dataKind": "FIXTURE",
+        "factId": "fixture-fact-disaster-v1",
+        "sentence": "架空町みなとの避難場所は8か所です。",
+        "value": { "amount": 8, "unit": "か所" },
+        "surveyDate": 2025,
+        "area": "架空町みなと",
+        "fictionalSourceId": "fixture-source-disaster-v1"
+      }
+    ]
+  },
+  {
+    "cardId": "fixture-card-education-v1",
+    "dataKind": "FIXTURE",
+    "themeId": "EDUCATION_CHILDCARE",
+    "title": "架空村ひなたの子育て相談",
+    "background": "架空村ひなたでは、子育てについて相談できる時間を設ける取り組みがあるという架空の記録があります。子どもの学びと子育てを考える材料にします。",
+    "glossary": [
+      { "term": "子育て相談", "description": "子育ての困りごとを話せる機会です。" }
+    ],
+    "quote": { "sourceId": "fixture-source-education-v1", "text": "子育てについて相談できる時間を設ける取り組み" },
+    "aiInvolvement": "HUMAN",
+    "updatedOn": "2026-01-01",
+    "approval": { "status": "APPROVED", "approverId": "fixture-card-approver-v1", "approvedAt": "2026-01-03T09:00:00Z" },
+    "sources": [
+      { "dataKind": "FIXTURE", "sourceId": "fixture-source-education-v1" }
+    ],
+    "facts": [
+      {
+        "dataKind": "FIXTURE",
+        "factId": "fixture-fact-education-v1",
+        "sentence": "架空村ひなたの子育て相談は6回です。",
+        "value": { "amount": 6, "unit": "回" },
+        "surveyDate": "2025-09-01",
+        "area": "架空村ひなた",
+        "fictionalSourceId": "fixture-source-education-v1"
+      }
+    ]
+  }
+]

@@ -22,6 +22,7 @@
 - **Visitor_Router**: 会場利用者向けrouteとwildcard 404だけを登録するReact Router構成。
 - **Analyst_Router**: 会場利用者向けroute、既存の分析者route、およびwildcard 404を登録するReact Router構成。
 - **Visitor_Home**: Visitor_Modeで表示する`/`画面。
+- **Values_Route**: Visitor_ModeとAnalyst_Modeの両方で登録する、地域の価値観診断を表示するpublic route`/values`。診断の状態と回答由来の値をURL、query string、hashに持たない。
 - **Shared_Navigation**: 既存`AppShell`内の共通ナビゲーション。
 - **Analyst_Internal_Content**: `/analyst/*`へのlink、分析者画面名、分析操作の説明、Source Manifest、run、検証、承認、評価、P0判定、AWS診断など共同開発者向けの導線または説明。
 - **Existing_Analyst_Route**: `/analyst/readiness`、`/analyst/sources`、`/analyst/runs`、`/analyst/runs/:runId`、`/analyst/verification/:artifactId`、`/analyst/review/:artifactId`、`/analyst/evaluation`、`/analyst/p0`、`/analyst/aws`。
@@ -113,12 +114,13 @@
 
 1. WHILE Visitor_ModeまたはAnalyst_Modeでdevelopment serverが動作している, THE えひめ投票ナビweb SHALL Local_Only_Bindingを使用する
 2. WHILE Visitor_ModeまたはAnalyst_Modeでpreview serverが動作している, THE えひめ投票ナビweb SHALL Local_Only_Bindingを使用する
-3. WHILE Visitor_ModeまたはAnalyst_Modeで動作している, THE えひめ投票ナビweb SHALL ローカル限定表示、過去選挙表示、および排他的なデータ種別表示を全routeに表示する
+3. WHILE Visitor_ModeまたはAnalyst_Modeで`Values_Route`以外のrouteを表示している, THE えひめ投票ナビweb SHALL ローカル限定表示、過去選挙表示、および排他的なデータ種別表示を表示する
 4. WHILE Visitor_ModeまたはAnalyst_Modeで動作している, THE えひめ投票ナビweb SHALL NOT_READY_Behaviorを保持する
 5. WHILE Visitor_ModeまたはAnalyst_Modeで動作している, THE えひめ投票ナビweb SHALL skip link、landmark、一意な`h1`、44 CSS pixel以上の操作領域、戻る操作、および現在routeの`aria-current`を各route contractに従って保持する
 6. WHEN Visitor_ModeまたはAnalyst_Modeで未定義URLを開いたとき, THE えひめ投票ナビweb SHALL Shell_Preserving_404を表示する
 7. WHILE Visitor_ModeまたはAnalyst_Modeで動作している, THE えひめ投票ナビweb SHALL P1およびP2 routeを未登録のまま保持する
 8. THE えひめ投票ナビweb SHALL 既存ローカルAPIのHost、Origin、nonce、およびloopback境界を変更しない
+9. WHILE Visitor_ModeまたはAnalyst_Modeで`Values_Route`を表示している, THE えひめ投票ナビweb SHALL 2022年選挙のバナー、2022年のデータ種別表示、および2022年選挙のフッターを表示せず、これらの表示を`Values_Route`以外の既存routeで変更しない。`Values_Route`はローカル限定表示、skip link、landmark、戻る操作、およびroute contractに必要なアクセシビリティを保持する
 
 ### Requirement 7: 自動テスト、README、および変更範囲
 
@@ -136,6 +138,7 @@
 8. THE README SHALL query string、Web Storage、browser toggle、および暗黙fallbackではmodeを変更できないことを記載する
 9. THE visitor-analyst-mode-separation実装 SHALL Task_Metadata_Fileを変更しない
 10. THE visitor-analyst-mode-separation実装 SHALL `.kiro/specs/ehime-vote-navigator/requirements.md`、`.kiro/specs/ehime-vote-navigator/design.md`、および`.kiro/specs/ehime-vote-navigator/tasks.md`を変更しない
+11. THE えひめ投票ナビweb SHALL Visitor_ModeとAnalyst_Modeの両方で`Values_Route`をpublic routeとして自動テスト対象にし、`Values_Route`で2022年選挙のバナー、2022年のデータ種別表示、2022年選挙のフッターが0件であること、および`Values_Route`以外の既存routeで従来どおり表示されることを確認する。route contractとbuild-boundaryの期待値は、既存の期待値を削除・緩和せず`/values`の期待値を追加する
 
 ### Requirement 8: 公開Standalone Sourcesの限定廃止
 
