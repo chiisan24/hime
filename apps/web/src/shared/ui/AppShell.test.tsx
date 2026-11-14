@@ -114,7 +114,7 @@ describe("AppShell navigation items", () => {
       "#main-content",
     );
     expect(screen.getByRole("banner")).toHaveTextContent(
-      "会場ローカルデモ・一般公開ではありません",
+      "デモ版・コンテスト審査用の試作アプリです",
     );
     expect(screen.getByRole("banner")).toHaveTextContent(
       "2022年に終了した過去選挙です",

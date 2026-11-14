@@ -36,7 +36,7 @@ describe("App with the normally selected route entry", () => {
     ).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(
-      screen.getByText("会場ローカルデモ・一般公開ではありません"),
+      screen.getByText("デモ版・コンテスト審査用の試作アプリです"),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -73,7 +73,7 @@ describe("App with the normally selected route entry", () => {
       ).toBeInTheDocument();
       expect(screen.getByText("404")).toBeInTheDocument();
       expect(
-        screen.getByText("会場ローカルデモ・一般公開ではありません"),
+        screen.getByText("デモ版・コンテスト審査用の試作アプリです"),
       ).toBeInTheDocument();
     },
   );
