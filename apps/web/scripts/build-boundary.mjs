@@ -29,6 +29,22 @@ const PUBLIC_PAGES_MODULE = "src/app/public/pages.tsx";
 const SHARED_SHELL_MODULE = "src/shared/ui/AppShell.tsx";
 const REQUIRED_APP_MODULES = Object.freeze(["src/main.tsx", "src/App.tsx"]);
 
+/**
+ * The past election (PAST_REAL) data module. Its identifying strings are the
+ * reference for the Visitor Build exclusion check, so they are never copied here.
+ */
+const PAST_ELECTION_DATA_MODULE = "src/data/visitorDisplayData.ts";
+/** Modules that carry the past election data or screens; only the Analyst Build may bundle them. */
+const PAST_ELECTION_MODULES = Object.freeze([
+  PAST_ELECTION_DATA_MODULE,
+  "src/services/visitorData.ts",
+  "src/app/public/pastElection.tsx",
+]);
+/** Declarations whose string literals identify the past election: its id, name, date, and candidates. */
+const PAST_ELECTION_IDENTIFYING_DECLARATIONS = Object.freeze(["TARGET_ELECTION", "TARGET_CANDIDATES"]);
+/** Emitted files that are scanned as text for past election strings. */
+const EMITTED_TEXT_ASSET_PATTERN = /\.(?:[cm]?js|css|html|json|svg|txt|webmanifest|xml)$/iu;
+
 const RETIRED_PUBLIC_SOURCES_PATH = "/sources";
 const RETIRED_PUBLIC_SOURCES_COMPONENT = "SourcesPage";
 const SOURCE_MANIFEST_ROUTE_PATH = "/analyst/sources";
@@ -869,6 +885,131 @@ export function extractAnalystHomeTexts(fileName, sourceText) {
   return Object.freeze([...texts].sort());
 }
 
+/**
+ * Extracts the strings that identify the past election (election id, name,
+ * date, candidate ids, and candidate names) from the past election data
+ * module, so a Visitor Build can be checked for their absence.
+ */
+export function extractPastElectionTexts(fileName, sourceText) {
+  const sourceFile = parseSourceFile(fileName, sourceText);
+  const texts = new Set();
+
+  const collectStrings = (node) => {
+    if (isStringLike(node) && node.text.trim() !== "") {
+      texts.add(node.text);
+    }
+    ts.forEachChild(node, collectStrings);
+  };
+
+  const visit = (node) => {
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isIdentifier(node.name) &&
+      PAST_ELECTION_IDENTIFYING_DECLARATIONS.includes(node.name.text) &&
+      node.initializer !== undefined
+    ) {
+      collectStrings(node.initializer);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+
+  return Object.freeze([...texts].sort());
+}
+
+/**
+ * Checks that a Visitor Build bundles no past election module and that no
+ * bundled module embeds a past election text in its runtime strings. Other
+ * build targets may include the past election, so they yield no violations.
+ */
+export function evaluatePastElectionExclusion({ target, manifest, sources, pastElectionTexts }) {
+  if (target.applicationMode !== "VISITOR") {
+    return Object.freeze([]);
+  }
+
+  const violations = [];
+  if (pastElectionTexts.length === 0) {
+    violations.push(`${PAST_ELECTION_DATA_MODULE}: past election reference texts could not be extracted`);
+  }
+  for (const entry of manifest.modules) {
+    if (PAST_ELECTION_MODULES.includes(entry.path)) {
+      violations.push(`${entry.path}: past election module is bundled into the Visitor Build`);
+    }
+  }
+  for (const [modulePath, sourceText] of sources) {
+    if (!ANALYZABLE_SOURCE_PATTERN.test(modulePath)) {
+      continue;
+    }
+    const runtimeStrings = [...analyzeModuleSource(modulePath, sourceText).runtimeStrings];
+    for (const text of pastElectionTexts) {
+      if (runtimeStrings.some((value) => value.includes(text))) {
+        violations.push(
+          `${modulePath}: contains the past election text ${JSON.stringify(text)} in the Visitor Build`,
+        );
+      }
+    }
+  }
+
+  return Object.freeze(violations);
+}
+
+/** Forms a string can take in emitted JavaScript, lowercased: raw UTF-8 and `\uXXXX` escapes. */
+function emittedTextForms(text) {
+  let escaped = "";
+  for (let index = 0; index < text.length; index += 1) {
+    const codeUnit = text.charCodeAt(index);
+    escaped += codeUnit < 0x80 ? text[index] : `\\u${codeUnit.toString(16).padStart(4, "0")}`;
+  }
+  return [...new Set([text.toLowerCase(), escaped.toLowerCase()])];
+}
+
+async function listFilesRecursively(directory) {
+  const files = [];
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...(await listFilesRecursively(entryPath)));
+    } else if (entry.isFile()) {
+      files.push(entryPath);
+    }
+  }
+  return files;
+}
+
+/**
+ * Scans the emitted text assets of one build output for past election texts,
+ * as raw UTF-8 and as JavaScript unicode escapes. `outputDirectory` is the
+ * absolute output path; violations name files relative to `displayDirectory`.
+ */
+export async function inspectEmittedPastElectionTexts({
+  outputDirectory,
+  displayDirectory,
+  pastElectionTexts,
+}) {
+  const violations = [];
+  const assets = (await listFilesRecursively(outputDirectory))
+    .filter((file) => EMITTED_TEXT_ASSET_PATTERN.test(file))
+    .sort();
+  if (assets.length === 0) {
+    violations.push(`${displayDirectory}: no emitted text assets to scan for past election texts`);
+  }
+
+  for (const asset of assets) {
+    const emitted = (await readFile(asset, "utf8")).toLowerCase();
+    const assetName = path.posix.join(
+      displayDirectory,
+      path.relative(outputDirectory, asset).split(path.sep).join("/"),
+    );
+    for (const text of pastElectionTexts) {
+      if (emittedTextForms(text).some((form) => emitted.includes(form))) {
+        violations.push(`${assetName}: emits the past election text ${JSON.stringify(text)}`);
+      }
+    }
+  }
+
+  return Object.freeze({ assetCount: assets.length, violations: Object.freeze(violations) });
+}
+
 function stripModuleExtension(modulePath) {
   return modulePath.replace(/\.(?:[cm]?[jt]sx?)$/u, "");
 }
@@ -1294,6 +1435,18 @@ function repositoryRootOf(webRoot) {
   return path.resolve(webRoot, "..", "..");
 }
 
+async function loadPastElectionTexts(webRoot) {
+  try {
+    return extractPastElectionTexts(
+      PAST_ELECTION_DATA_MODULE,
+      await readFile(path.join(webRoot, PAST_ELECTION_DATA_MODULE), "utf8"),
+    );
+  } catch {
+    // An unreadable data module leaves no reference texts, which fails the check closed.
+    return Object.freeze([]);
+  }
+}
+
 async function loadBoundaryReference(webRoot) {
   const analystPages = await readFile(path.join(webRoot, ANALYST_PAGES_MODULE), "utf8");
   const webPackage = JSON.parse(await readFile(path.join(webRoot, "package.json"), "utf8"));
@@ -1319,7 +1472,13 @@ async function loadBoundaryReference(webRoot) {
 export async function inspectBuildArtifact({ webRoot, outputRoot, requestedMode }) {
   const target = resolveBuildBoundaryTarget(requestedMode);
   const failed = (violations) =>
-    Object.freeze({ target, moduleCount: 0, packages: Object.freeze([]), violations: Object.freeze(violations) });
+    Object.freeze({
+      target,
+      moduleCount: 0,
+      packages: Object.freeze([]),
+      pastElectionScan: null,
+      violations: Object.freeze(violations),
+    });
 
   try {
     await inspectPreviewBuild(outputRoot, requestedMode);
@@ -1369,10 +1528,31 @@ export async function inspectBuildArtifact({ webRoot, outputRoot, requestedMode 
     ...evaluateBuildBoundary({ target, manifest, sources, ...reference }),
   );
 
+  // The Visitor Build is the public artifact: it must not carry the past election
+  // data, neither as a bundled module nor as text in any emitted asset.
+  let pastElectionScan = null;
+  if (target.applicationMode === "VISITOR") {
+    const pastElectionTexts = await loadPastElectionTexts(webRoot);
+    violations.push(
+      ...evaluatePastElectionExclusion({ target, manifest, sources, pastElectionTexts }),
+    );
+    const emitted = await inspectEmittedPastElectionTexts({
+      outputDirectory: path.join(outputRoot, target.outputDirectory),
+      displayDirectory: target.outputDirectory,
+      pastElectionTexts,
+    });
+    violations.push(...emitted.violations);
+    pastElectionScan = Object.freeze({
+      textCount: pastElectionTexts.length,
+      assetCount: emitted.assetCount,
+    });
+  }
+
   return Object.freeze({
     target,
     moduleCount: manifest.modules.length,
     packages: manifest.packages,
+    pastElectionScan,
     violations: Object.freeze(violations),
   });
 }
@@ -1461,6 +1641,12 @@ export function formatBuildBoundaryReport(report) {
       lines.push(
         `BUILD_BOUNDARY_OK ${label} modules=${artifact.moduleCount} packages=${artifact.packages.join(",")}`,
       );
+      if (artifact.pastElectionScan !== null) {
+        lines.push(
+          `BUILD_BOUNDARY_OK PAST_ELECTION_EXCLUDED ${label} ` +
+            `texts=${artifact.pastElectionScan.textCount} assets=${artifact.pastElectionScan.assetCount}`,
+        );
+      }
     } else {
       for (const violation of artifact.violations) {
         lines.push(`BUILD_BOUNDARY_FAILED ${label}: ${violation}`);

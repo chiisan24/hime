@@ -56,10 +56,20 @@ export type LayoutDescriptor = Readonly<{
   navigationItems: string | null;
 }>;
 
+/** What the past election exclusion scan covered; only the Visitor Build is scanned. */
+export type PastElectionScan = Readonly<{
+  /** Identifying past election texts extracted from the past election data module. */
+  textCount: number;
+  /** Emitted text assets scanned for those texts. */
+  assetCount: number;
+}>;
+
 export type BuildArtifactInspection = Readonly<{
   target: BuildBoundaryTarget;
   moduleCount: number;
   packages: readonly string[];
+  /** `null` for the Analyst Build and for artifacts that failed before the scan. */
+  pastElectionScan: PastElectionScan | null;
   violations: readonly string[];
 }>;
 
@@ -109,6 +119,33 @@ export function evaluateBuildBoundary(
 export function evaluateSourceContractModules(
   sources: ReadonlyMap<string, string>,
 ): readonly string[];
+
+export function extractPastElectionTexts(
+  fileName: string,
+  sourceText: string,
+): readonly string[];
+
+export function evaluatePastElectionExclusion(
+  input: Readonly<{
+    target: BuildBoundaryTarget;
+    manifest: WebModuleManifest;
+    sources: ReadonlyMap<string, string>;
+    pastElectionTexts: readonly string[];
+  }>,
+): readonly string[];
+
+export function inspectEmittedPastElectionTexts(
+  input: Readonly<{
+    outputDirectory: string;
+    displayDirectory: string;
+    pastElectionTexts: readonly string[];
+  }>,
+): Promise<
+  Readonly<{
+    assetCount: number;
+    violations: readonly string[];
+  }>
+>;
 
 export function assertIsolatedOutputRoot(
   outputRoot: string,

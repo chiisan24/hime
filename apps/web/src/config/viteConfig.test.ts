@@ -83,6 +83,25 @@ describe("createWebViteConfig", () => {
     expect(pluginNames(config)).toContain("web-build-marker");
   });
 
+  // The past election (PAST_REAL) data and screens stay out of the visitor build and dev server.
+  it.each([undefined, "development", "production", "unknown", "Analyst", " analyst", "TEST"])(
+    "resolves #past-election to the module without the past election for mode %s",
+    (mode) => {
+      expect(aliasFor(createWebViteConfig(mode), "#past-election")).toBe(
+        path.resolve(webRoot, "src/app/public/pastElectionExcluded.ts"),
+      );
+    },
+  );
+
+  it.each(["analyst", "test"])(
+    "resolves #past-election to the past election module only for mode %s",
+    (mode) => {
+      expect(aliasFor(createWebViteConfig(mode), "#past-election")).toBe(
+        path.resolve(webRoot, "src/app/public/pastElection.tsx"),
+      );
+    },
+  );
+
   it.each([
     {
       mode: undefined,

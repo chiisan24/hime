@@ -1,21 +1,37 @@
+import { PAST_ELECTION } from "#past-election";
+
+import type { PastElection } from "../app/public/pastElectionTypes.js";
 import { ELECTION_DATA_SOURCE, type ElectionDataSource } from "../data/electionDataSource.js";
 import { ELECTION_MOCK_DATA } from "../data/mock/electionMockData.js";
 import type { ElectionMockData } from "../data/mock/types.js";
 import type { CandidateSummary } from "../data/types.js";
-import { listCandidates } from "./visitorData.js";
 
 /*
  * 選挙関連ページ（選挙日程・候補者・政策比較・会場閲覧）の表示データを選ぶ窓口。
- * 使うデータの種類は data/electionDataSource.ts の設定で決まる。
+ * 使うデータの種類は data/electionDataSource.ts の設定で決まる。読み込みの経路は種類ごとに分ける。
  * - MOCK      : data/mock/ のモックデータ。提供された項目のページだけが「表示できる」ページになる。
- * - PAST_REAL : 過去の選挙の既存データ。すべてのページが「表示できる」ページになる。
- * 画面・ナビゲーション・ホームは、表示できるかどうかをここで判定する。
+ * - PAST_REAL : 過去の選挙の既存データ。#past-election（vite.config.ts）からだけ読み込む。
+ *               すべてのページが「表示できる」ページになる。
+ *               利用者向けのビルドには過去の選挙が含まれない（PAST_ELECTION が null）ため、
+ *               設定が PAST_REAL でもモックデータを使う。
+ * 各ページとホームのカードは、表示できるかどうか（モックデータ表示か、開発中の空状態か）をここで判定する。
+ * ナビゲーションとホームの入口は、表示できるかどうかにかかわらず残す。
+ * projectAvailableElectionDestinations は、入口を外す必要が出たときのために残している（今は画面から使っていない）。
  */
 
 export type ElectionPageId = "schedule" | "candidates" | "comparison" | "venue";
 
+/**
+ * 表示する過去の選挙（画面と表示データ）。設定が PAST_REAL で、このビルドに過去の選挙が
+ * 含まれるときだけ返す。それ以外は null で、選挙関連ページはモックデータで表示する。
+ */
+export function getActivePastElection(): PastElection | null {
+  return ELECTION_DATA_SOURCE === "PAST_REAL" ? PAST_ELECTION : null;
+}
+
+/** 実際に表示に使うデータの種類（このビルドで使えない PAST_REAL は MOCK になる） */
 export function getElectionDataSource(): ElectionDataSource {
-  return ELECTION_DATA_SOURCE;
+  return getActivePastElection() === null ? "MOCK" : "PAST_REAL";
 }
 
 export function getMockElectionData(): ElectionMockData {
@@ -86,8 +102,9 @@ export function projectAvailableElectionDestinations<T extends Readonly<{ to: st
 
 /** いま選んでいるデータの種類で表示する候補者 */
 export function listActiveCandidates(): readonly CandidateSummary[] {
-  if (getElectionDataSource() === "PAST_REAL") {
-    return listCandidates();
+  const pastElection = getActivePastElection();
+  if (pastElection !== null) {
+    return pastElection.candidates;
   }
 
   return (getMockElectionData().candidates ?? []).map(({ candidateId, name }) => ({

@@ -25,6 +25,26 @@ function routeEntryPath(target: BuildTarget): string {
   );
 }
 
+/**
+ * 過去の選挙（data/electionDataSource.ts の "PAST_REAL"）の表示データと画面（#past-election）の実体。
+ * 過去の選挙を含めるのは、分析者モード（analyst）と Vitest（test）だけにする。
+ * 利用者向けのビルドと開発サーバー（production・development・その他のモード）は、過去の選挙を
+ * 含まない差し替え（PAST_ELECTION が null）を使い、過去の選挙のデータを公開成果物に入れない
+ * （scripts/build-boundary.mjs で確認する）。
+ * 型の確認（tsc）は、tsconfig の paths で pastElection.tsx を見る。どちらの実体も同じ型で書き出す。
+ */
+function pastElectionEntryPath(mode: unknown): string {
+  const includesPastElection = mode === "analyst" || mode === "test";
+
+  return path.resolve(
+    WEB_ROOT,
+    "src",
+    "app",
+    "public",
+    includesPastElection ? "pastElection.tsx" : "pastElectionExcluded.ts",
+  );
+}
+
 function buildMarkerPlugin(target: BuildTarget): Plugin {
   return {
     name: "web-build-marker",
@@ -47,6 +67,7 @@ export function createWebViteConfig(mode: unknown): UserConfig {
     resolve: {
       alias: {
         "#app-routes": routeEntryPath(target),
+        "#past-election": pastElectionEntryPath(mode),
       },
     },
     build: {

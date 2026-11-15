@@ -13,7 +13,8 @@ import { AppRoutes as VisitorRoutes } from "./visitor/routes.js";
  * 出荷時の設定（モックデータ・未提供）での表示を確認する。
  * このファイルはデータの設定を差し替えない。設定が変わったときにも、この表示が崩れないことを守る。
  * - 過去の選挙（2022年）のデータが、どの画面にも出ない（URLを直接開いた場合を含む）。
- * - 選挙関連ページは空状態になり、ナビゲーションとホームの入口から外れる。
+ * - 選挙関連ページは、既存のデザイン（カードの構成）のまま「開発中」の空状態を表示し、
+ *   ナビゲーションとホームの入口にも残る（一次審査のデモで画面を確認できるようにするため）。
  * - 価値観診断の入口と画面は、これまでどおり使える。
  */
 
@@ -73,11 +74,40 @@ describe("利用者向け画面（visitor）", () => {
         "href",
         "/values",
       );
+      // 開発中であることを示し、デモ用データの表示は出さない（モックデータは未設定）
+      expect(document.querySelector("[data-election-demo-status='no-data']")).not.toBeNull();
+      expect(document.querySelector("[data-election-demo-status='mock-data']")).toBeNull();
+      expect(screen.getAllByText("開発中").length).toBeGreaterThan(0);
       // 公開形態の表示（デモ版）は残す
       expect(screen.getByText("デモ版・コンテスト審査用の試作アプリです")).toBeInTheDocument();
       expectNoPastElectionData();
     },
   );
+
+  it.each([
+    { path: "/schedule", regions: ["この選挙", "当日の投票時間", "期日前投票"] },
+    { path: "/candidates", regions: ["候補者"] },
+    { path: "/comparison", regions: ["比べる項目"] },
+    { path: "/venue", regions: ["この画面に表示されるもの（デモ用データが設定されたあと）"] },
+  ])("$path は、モックデータが未設定でも既存のカードの構成を保つ", ({ path, regions }) => {
+    renderWithRouter(<VisitorRoutes />, { initialEntries: [path] });
+
+    for (const name of regions) {
+      expect(screen.getByRole("region", { name })).toBeInTheDocument();
+    }
+    expectNoPastElectionData();
+  });
+
+  it("候補者一覧と候補者詳細は、候補者のカードを作らず、写真の共通の枠だけを残す", () => {
+    for (const path of ["/candidates", "/candidates/some-candidate"]) {
+      const { unmount } = renderWithRouter(<VisitorRoutes />, { initialEntries: [path] });
+
+      expect(screen.queryAllByRole("article")).toHaveLength(0);
+      expect(screen.getAllByRole("img", { name: "候補者写真の共通プレースホルダー" }).length).toBe(1);
+      expect(document.body.textContent).not.toContain("some-candidate");
+      unmount();
+    }
+  });
 
   it("候補者詳細のURLに過去の候補者IDを入れても、IDも氏名も表示しない", () => {
     renderWithRouter(<VisitorRoutes />, {
@@ -89,15 +119,15 @@ describe("利用者向け画面（visitor）", () => {
   });
 
   it.each(["/", ...ELECTION_PAGES.map(({ path }) => path), "/values", "/not-a-route"])(
-    "%s の共通ナビゲーションは、選挙関連ページの項目を外してホームだけを残す",
+    "%s の共通ナビゲーションは、モックデータが未設定でも選挙関連ページの項目を残す",
     (path) => {
       renderWithRouter(<VisitorRoutes />, { initialEntries: [path] });
 
-      expect(navigationHrefs()).toEqual(["/"]);
+      expect(navigationHrefs()).toEqual(["/", "/schedule", "/candidates", "/comparison", "/venue"]);
     },
   );
 
-  it("ホームは価値観診断の入口を残し、選挙関連の入口と過去の選挙の情報を出さない", () => {
+  it("ホームは価値観診断の入口と選挙関連の4つの入口を出し、入口に「開発中」と示し、過去の選挙の情報を出さない", () => {
     renderWithRouter(<VisitorRoutes />, { initialEntries: ["/"] });
 
     expect(screen.getByRole("heading", { level: 1, name: "えひめ投票ナビ" })).toBeInTheDocument();
@@ -106,16 +136,38 @@ describe("利用者向け画面（visitor）", () => {
       "href",
       "/values",
     );
-    expect(screen.queryByRole("region", { name: "会場閲覧のP0画面" })).not.toBeInTheDocument();
+    const menu = screen.getByRole("region", { name: "会場閲覧のP0画面" });
+    expect(within(menu).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
+      "/schedule",
+      "/candidates",
+      "/comparison",
+      "/venue",
+    ]);
+    // 候補者ごとの入口は、モックデータの候補者がいないので出さない
+    expect(within(menu).getAllByText("開発中")).toHaveLength(4);
+    const info = screen.getByRole("region", { name: "選挙情報" });
+    expect(info).toHaveTextContent("デモ用データ未設定");
     expect(
       screen.getByRole("heading", { level: 2, name: "選挙に関する情報は準備中です" }),
     ).toBeInTheDocument();
     expect(document.querySelector("[data-mock-data-notice]")).toBeNull();
+    expectNoPastElectionData();
+  });
 
-    const hrefs = screen.getAllByRole("link").map((link) => link.getAttribute("href") ?? "");
+  it.each([
+    { label: "選挙日程を見る", heading: "選挙日程" },
+    { label: "候補者一覧を見る", heading: "候補者一覧" },
+    { label: "政策比較を見る", heading: "政策比較" },
+    { label: "会場閲覧画面を見る", heading: "会場閲覧" },
+  ])("ホームの入口「$label」から、開発中の空状態のページへ進める", ({ label, heading }) => {
+    renderWithRouter(<VisitorRoutes />, { initialEntries: ["/"] });
+
+    fireEvent.click(screen.getByRole("link", { name: label }));
+
+    expect(screen.getByRole("heading", { level: 1, name: heading })).toBeInTheDocument();
     expect(
-      hrefs.filter((href) => /^\/(?:schedule|candidates|comparison|venue)/u.test(href)),
-    ).toEqual([]);
+      screen.getByRole("heading", { level: 2, name: "表示できる情報はまだありません" }),
+    ).toBeInTheDocument();
     expectNoPastElectionData();
   });
 
@@ -164,9 +216,16 @@ describe("分析者向け画面（analyst）でも、選挙関連ページに過
     expectNoPastElectionData();
   });
 
-  it("共通ナビゲーションは、ホームと分析状態だけになる", () => {
+  it("共通ナビゲーションは、選挙関連ページの項目を残し、最後に分析状態を置く", () => {
     renderWithRouter(<AnalystRoutes />, { initialEntries: ["/analyst/readiness"] });
 
-    expect(navigationHrefs()).toEqual(["/", "/analyst/readiness"]);
+    expect(navigationHrefs()).toEqual([
+      "/",
+      "/schedule",
+      "/candidates",
+      "/comparison",
+      "/venue",
+      "/analyst/readiness",
+    ]);
   });
 });
