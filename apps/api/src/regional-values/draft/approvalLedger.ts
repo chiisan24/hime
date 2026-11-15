@@ -1,5 +1,5 @@
 import { ApprovalLedgerRecordSchema, Sha256Schema } from "@ehime-vote-navigator/contracts";
-import type { ApprovalLedgerRecord, ApprovalTargetKind, Sha256 } from "@ehime-vote-navigator/contracts";
+import type { ApprovalBasisFact, ApprovalLedgerRecord, ApprovalTargetKind, Sha256 } from "@ehime-vote-navigator/contracts";
 import { encodeCanonicalJson, sha256Hex } from "@ehime-vote-navigator/domain";
 
 import type { AtomicFileOperationOverrides } from "../../store/atomicFiles.js";
@@ -91,7 +91,15 @@ function instant(value: string): number {
   return Date.parse(value);
 }
 
-export type ApprovalEntry = Readonly<{ approverId: string; approvedAt: string }>;
+export type ApprovalEntry = Readonly<{
+  approverId: string;
+  approvedAt: string;
+  /**
+   * The fact items that an approval of an issue rested on, with their SHA-256 at the time. A record made before the basis was
+   * recorded has none, and the entry does not say anything about the facts that are there now.
+   */
+  basisFacts?: readonly ApprovalBasisFact[];
+}>;
 
 export type ApprovalsOfContent = Readonly<{
   /** Every approval of this content (the approvals of the ledger, and the one that the target holds). */
@@ -123,7 +131,7 @@ export function approvalsOf(records: readonly ApprovalLedgerRecord[], query: App
   }
   for (const record of records) {
     if (record.type === "APPROVE" && same(record)) {
-      all.push({ approverId: record.approverId, approvedAt: record.approvedAt });
+      all.push({ approverId: record.approverId, approvedAt: record.approvedAt, ...(record.basisFacts === undefined ? {} : { basisFacts: record.basisFacts }) });
     }
   }
   return {

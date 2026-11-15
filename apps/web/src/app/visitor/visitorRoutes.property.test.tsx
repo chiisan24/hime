@@ -9,7 +9,12 @@ import {
   Routes,
   type RouteObject,
 } from "react-router-dom";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+// 過去の選挙（2022年）の既存の表示を確認するテスト。
+// 選挙データの設定を PAST_REAL にして、既存の期待値を変えずに検証する。
+// 既定の設定（MOCK）の表示は electionDataDefault.test.tsx と electionDataMock.test.tsx で確認する。
+vi.mock("../../data/electionDataSource.js", () => ({ ELECTION_DATA_SOURCE: "PAST_REAL" }));
 
 import { renderWithRouter } from "../../../../../tests/harness/react-renderer.js";
 import { AppShell, VISITOR_NAV_ITEMS } from "../../shared/ui/AppShell.js";

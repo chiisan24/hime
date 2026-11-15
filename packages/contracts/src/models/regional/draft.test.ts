@@ -389,6 +389,25 @@ describe("ApprovalLedgerRecordSchema", () => {
     expect(ApprovalLedgerRecordSchema.safeParse(issueApprove()).success).toBe(true);
   });
 
+  it("accepts the basis of an approval of an issue: the SHA-256 of each fact item, and still accepts a record that was made before the basis was recorded", () => {
+    const basisFacts = [
+      { factId: "fact-1", sha256: SHA_A },
+      { factId: "fact-2", sha256: SHA_A },
+    ];
+    expect(ApprovalLedgerRecordSchema.safeParse(issueApprove({ basisFacts })).success).toBe(true);
+    expect(ApprovalLedgerRecordSchema.safeParse(issueApprove()).success).toBe(true);
+  });
+
+  it("rejects a basis that is empty, that names a fact item twice, that has a wrong SHA-256 or another key, or that is on an approval that is not of an issue", () => {
+    const one = { factId: "fact-1", sha256: SHA_A };
+    expect(rejectedPaths(ApprovalLedgerRecordSchema, issueApprove({ basisFacts: [] }))).toContain("basisFacts");
+    expect(rejectedPaths(ApprovalLedgerRecordSchema, issueApprove({ basisFacts: [one, one] }))).toContain("basisFacts");
+    expect(ApprovalLedgerRecordSchema.safeParse(issueApprove({ basisFacts: [{ factId: "fact-1", sha256: "not-a-hash" }] })).success).toBe(false);
+    expect(ApprovalLedgerRecordSchema.safeParse(issueApprove({ basisFacts: [{ ...one, value: 12 }] })).success).toBe(false);
+    expect(ApprovalLedgerRecordSchema.safeParse(issueApprove({ basisFacts: Array.from({ length: 11 }, (_unused, index) => ({ factId: `fact-${index}`, sha256: SHA_A })) })).success).toBe(false);
+    expect(rejectedPaths(ApprovalLedgerRecordSchema, cardApprove({ basisFacts: [one] }))).toContain("basisFacts");
+  });
+
   it("accepts an approval of every other kind without the version and the confirmations", () => {
     for (const targetKind of ["QUESTION", "CARD", "RESULT_TEXT", "FIXED_TEXT"]) {
       expect(ApprovalLedgerRecordSchema.safeParse(cardApprove({ targetKind })).success, targetKind).toBe(true);

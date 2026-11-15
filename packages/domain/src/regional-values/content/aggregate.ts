@@ -192,25 +192,47 @@ function refuse(error: AggregateRefusal): Result<never, AggregateRefusal> {
 
 type Table = Readonly<{ columns: ReadonlyMap<string, number>; rows: readonly CsvRecord[] }>;
 
+/** Why a header and its rows are not a table. The order of the checks is the order of this list, apart from `NO_DATA_ROWS`, which is last. */
+type TableViolation = Readonly<{ code: "HEADER_BLANK" | "HEADER_DUPLICATE" | "COLUMN_COUNT_MISMATCH" | "NO_DATA_ROWS"; line: number }>;
+
+type TableCheck = Readonly<{ table: Table }> | Readonly<{ violation: TableViolation }>;
+
+/** The one place that decides whether the records are a table: `aggregate` and `inspectCsvTable` both go through it. */
+function checkTable(header: CsvRecord, rows: readonly CsvRecord[]): TableCheck {
+  const columns = new Map<string, number>();
+  for (const [position, name] of header.fields.entries()) {
+    const key = normalize(name);
+    if (key === "") {
+      // A column without a name cannot be pointed at.
+      return { violation: { code: "HEADER_BLANK", line: header.startLine } };
+    }
+    if (columns.has(key)) {
+      // Nor can two columns of one name.
+      return { violation: { code: "HEADER_DUPLICATE", line: header.startLine } };
+    }
+    columns.set(key, position);
+  }
+  const ragged = rows.find((row) => row.fields.length !== header.fields.length);
+  if (ragged !== undefined) {
+    return { violation: { code: "COLUMN_COUNT_MISMATCH", line: ragged.startLine } };
+  }
+  if (rows.length === 0) {
+    return { violation: { code: "NO_DATA_ROWS", line: header.startLine } };
+  }
+  return { table: { columns, rows } };
+}
+
 function readTable(text: string): Table | typeof NO_DATA | null {
   const records = parseCsv(text);
   const [header, ...rows] = records ?? [];
   if (header === undefined) {
     return null;
   }
-  const columns = new Map<string, number>();
-  for (const [position, name] of header.fields.entries()) {
-    const key = normalize(name);
-    if (key === "" || columns.has(key)) {
-      // A column without a name, or two columns of one name, cannot be pointed at.
-      return null;
-    }
-    columns.set(key, position);
+  const checked = checkTable(header, rows);
+  if ("table" in checked) {
+    return checked.table;
   }
-  if (rows.some((row) => row.fields.length !== header.fields.length)) {
-    return null;
-  }
-  return rows.length === 0 ? NO_DATA : { columns, rows };
+  return checked.violation.code === "NO_DATA_ROWS" ? NO_DATA : null;
 }
 
 function columnOf(table: Table, name: string | null | undefined): number | null {
@@ -354,4 +376,132 @@ export function aggregate(input: AggregateInput): Result<AggregateResult, Aggreg
       surveyDate: surveyDate.data,
     },
   };
+}
+
+// ---------------------------------------------------------------------------
+// The shape of a CSV text, for the intake (13.15)
+// ---------------------------------------------------------------------------
+
+/**
+ * Why a text is not taken in as a table. `aggregate` says only `INVALID_CSV` for all of them; the
+ * intake tells a person which one it is. The codes come with a line number at most, never a value.
+ */
+export const CSV_TABLE_REFUSALS = [
+  "EMPTY_TEXT",
+  "MALFORMED_CSV",
+  "HEADER_BLANK",
+  "HEADER_DUPLICATE",
+  "COLUMN_COUNT_MISMATCH",
+  "NO_DATA_ROWS",
+] as const;
+
+export type CsvTableRefusalCode = (typeof CSV_TABLE_REFUSALS)[number];
+
+export type CsvTableRefusal = Readonly<{
+  code: CsvTableRefusalCode;
+  /** The line (from 1) of the header or of the first row that does not fit. `null` when no line is to blame. */
+  line: number | null;
+}>;
+
+export type CsvTableSummary = Readonly<{
+  /** The names of the columns as `aggregate` reads them: NFKC, without the spaces at both ends. */
+  headers: readonly string[];
+  columnCount: number;
+  /** The data rows. The header is not one, and a line with nothing on it is not one. */
+  rowCount: number;
+  /** The rows of the header and of the data: the number that a conversion keeps from the original (Req 7.24). */
+  recordCount: number;
+  headerLine: number;
+  firstDataLine: number;
+  /** The last line of the last data row. */
+  lastDataLine: number;
+  /** The data cells that are blank. A blank cell is a missing value (Req 7.27 b). */
+  blankCellCount: number;
+  /** The data rows that are the same as an earlier row. `aggregate` refuses them unless the method has `dedupeColumns` (Req 7.27 c). */
+  duplicateRowCount: number;
+}>;
+
+/**
+ * Reads a text as `aggregate` would and says what the table is, or why it is not one. The two cannot
+ * disagree: both read the text with `parseCsv` and judge it with `checkTable`. A text that this
+ * function takes in is a text that `aggregate` does not refuse as `INVALID_CSV`, and the other way round.
+ * It is a pure function, like `aggregate`, and it keeps no value of the table.
+ */
+export function inspectCsvTable(text: string): Result<CsvTableSummary, CsvTableRefusal> {
+  const [header, ...rows] = parseCsv(text) ?? [];
+  if (header === undefined) {
+    const source = text.startsWith("\uFEFF") ? text.slice(1) : text;
+    return { ok: false, error: { code: source.trim() === "" ? "EMPTY_TEXT" : "MALFORMED_CSV", line: null } };
+  }
+  const checked = checkTable(header, rows);
+  if ("violation" in checked) {
+    return { ok: false, error: { code: checked.violation.code, line: checked.violation.line } };
+  }
+  const { columns, rows: dataRows } = checked.table;
+  const first = dataRows[0];
+  const last = dataRows[dataRows.length - 1];
+  if (first === undefined || last === undefined) {
+    return { ok: false, error: { code: "NO_DATA_ROWS", line: header.startLine } };
+  }
+
+  let blankCellCount = 0;
+  let duplicateRowCount = 0;
+  const seen = new Set<string>();
+  for (const row of dataRows) {
+    for (const value of row.fields) {
+      if (normalize(value) === "") {
+        blankCellCount += 1;
+      }
+    }
+    // The same key as the refusal of `DUPLICATE_ROWS`.
+    const key = JSON.stringify(row.fields.map(normalize));
+    if (seen.has(key)) {
+      duplicateRowCount += 1;
+    } else {
+      seen.add(key);
+    }
+  }
+  return {
+    ok: true,
+    value: {
+      headers: [...columns.keys()],
+      columnCount: columns.size,
+      rowCount: dataRows.length,
+      recordCount: dataRows.length + 1,
+      headerLine: header.startLine,
+      firstDataLine: first.startLine,
+      lastDataLine: last.endLine,
+      blankCellCount,
+      duplicateRowCount,
+    },
+  };
+}
+
+/**
+ * The number that a cell of a table writes, with its unit (the rest of the text), read as `aggregate` reads a cell that it
+ * sums: NFKC, without the commas of digit groups. `null` when the cell is not a number or a number with a unit. For the
+ * check of a quoted fact item (13.11), which has to read a cell as the sum of a column does.
+ */
+export function csvCellNumber(cell: string): Readonly<{ amount: number; unit: string | null }> | null {
+  const parsed = readNumber(cell);
+  if (parsed === null) {
+    return null;
+  }
+  const amount = sumOf([parsed.decimal]);
+  return amount === null ? null : { amount, unit: parsed.unit === "" ? null : parsed.unit };
+}
+
+/**
+ * The cells of the data rows that are on the lines from `startLine` to `endLine` of the text (a row that is
+ * only in part on them counts), as they are written, not normalized. It is the way to look at the place that
+ * the location of a quoted fact item (`text-lines`) points to (13.11). `null` when the text is not a table
+ * (`inspectCsvTable` refuses it) or when no data row is on the lines. The header is not a data row.
+ */
+export function csvCellsOfLines(text: string, startLine: number, endLine: number): readonly string[] | null {
+  const [header, ...rows] = parseCsv(text) ?? [];
+  if (header === undefined || !("table" in checkTable(header, rows))) {
+    return null;
+  }
+  const cells = rows.filter((row) => row.endLine >= startLine && row.startLine <= endLine).flatMap((row) => [...row.fields]);
+  return cells.length === 0 ? null : cells;
 }

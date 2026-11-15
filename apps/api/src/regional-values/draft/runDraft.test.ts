@@ -3,9 +3,10 @@ import { join } from "node:path";
 
 import { DraftRecordSchema } from "@ehime-vote-navigator/contracts";
 import type { DataKind } from "@ehime-vote-navigator/contracts";
+import { encodeCanonicalJson, sha256Hex } from "@ehime-vote-navigator/domain";
 import { afterEach, describe, expect, it } from "vitest";
 
-import type { BedrockConverseError } from "../../aws/bedrockConverse.js";
+import type { BedrockConverseClient, BedrockConverseError } from "../../aws/bedrockConverse.js";
 import {
   TEST_MODELS,
   candidateRequest,
@@ -25,7 +26,7 @@ import type { TempRoot } from "../../../../../tests/harness/regional-values/draf
 import { createSafeLogger } from "../../logging/safeLogger.js";
 import { readAiContribution } from "./contribution.js";
 import { deriveDisposition } from "./disposition.js";
-import { PROMPT_VERSION } from "./prompts/index.js";
+import { buildPrompt, promptOptionsOf, PROMPT_VERSION } from "./prompts/index.js";
 import { mapClientError, modelRoleOf, runDraft } from "./runDraft.js";
 import type { DraftDeps, DraftOutcome } from "./runDraft.js";
 
@@ -438,6 +439,100 @@ describe("runDraft: an output that the checks refuse (Properties 27, 60)", () =>
       expect(await runDraft(deps, candidateRequest())).toEqual({ ok: false, error: { code: "CHECK_FAILED", violations: [{ check: "DR_JSON", target: "output" }] } });
       expect(await exists(join(temp.root.rootDir, "drafts"))).toBe(false);
     }
+  });
+});
+
+describe("runDraft: how the model is asked", () => {
+  it("asks with the defaults of the service when nothing is set, and the key is the one that it always was", async () => {
+    const { temp, fake, deps } = await setup([ok]);
+
+    const outcome = await runDraft(deps, candidateRequest());
+
+    expect(outcome.ok).toBe(true);
+    expect(fake.calls).toHaveLength(1);
+    expect(fake.calls[0]).not.toHaveProperty("thinking");
+    // The hash of the input is made of the prompt and the sources and nothing else, as it was before the setting existed.
+    const prompt = buildPrompt(candidateRequest(), promptOptionsOf(deps.checks));
+    const inputHash = sha256Hex(encodeCanonicalJson({ system: prompt.system, text: prompt.text, inputSources: [] }));
+    const saved = DraftRecordSchema.parse(
+      JSON.parse(await readFile(join(temp.root.rootDir, "drafts", "ISSUE_CANDIDATE", `${outcome.ok ? outcome.value.draftId : ""}.json`), "utf8")),
+    );
+    expect(saved.key.inputHash).toBe(inputHash);
+  });
+
+  it("passes the thinking to the client and makes it a part of the key, so that another setting is another draft", async () => {
+    const { fake, deps } = await setup([ok]);
+    const off = { ...deps, inference: { thinking: { mode: "DISABLED" as const } } };
+    const less = { ...deps, inference: { thinking: { mode: "ADAPTIVE" as const, effort: "low" as const } } };
+
+    const byDefault = await runDraft(deps, candidateRequest());
+    const disabled = await runDraft(off, candidateRequest());
+    const lessEffort = await runDraft(less, candidateRequest());
+    const disabledAgain = await runDraft(off, candidateRequest());
+
+    expect(fake.calls.map((call) => call.thinking)).toEqual([undefined, { mode: "DISABLED" }, { mode: "ADAPTIVE", effort: "low" }]);
+    const ids = [byDefault, disabled, lessEffort].map((outcome) => (outcome.ok ? outcome.value.draftId : ""));
+    expect(new Set(ids).size).toBe(3);
+    expect(ids).not.toContain("");
+    // The same setting again is the same draft: nothing is called.
+    expect(disabledAgain.ok && disabledAgain.value).toEqual({ draftId: ids[1], task: "ISSUE_CANDIDATE", cached: true, modelId: TEST_MODELS.generation });
+    expect(fake.calls).toHaveLength(3);
+  });
+
+  it("does not take a setting that is empty for one that is set: no thinking in the key is no thinking in the call", async () => {
+    const { fake, deps } = await setup([ok]);
+
+    const first = await runDraft({ ...deps, inference: {} }, candidateRequest());
+    const second = await runDraft(deps, candidateRequest());
+
+    expect(first.ok && second.ok && first.value.draftId === second.value.draftId).toBe(true);
+    expect(fake.calls).toHaveLength(1);
+    expect(fake.calls[0]).not.toHaveProperty("thinking");
+  });
+});
+
+describe("runDraft: an output that stopped at the limit of the output", () => {
+  /** A client that answers with the text and the reason that the model stopped. */
+  async function runWith(text: string, stopReason: string | undefined) {
+    const temp = await createTempRoot("FIXTURE");
+    temps.push(temp);
+    const client: BedrockConverseClient = {
+      converse: () => Promise.resolve({ ok: true, value: { text, status: 200, elapsedMs: 1, ...(stopReason === undefined ? {} : { stopReason }) } }),
+    };
+    const { deps } = createTestDeps(temp.root, client);
+    return { temp, deps, outcome: await runDraft(deps, candidateRequest()) };
+  }
+
+  const cut = ok.slice(0, 200);
+
+  it("says that the output was cut off, together with the check that refused it", async () => {
+    const { outcome } = await runWith(cut, "max_tokens");
+
+    expect(outcome).toEqual({
+      ok: false,
+      error: { code: "CHECK_FAILED", violations: [{ check: "DR_JSON", target: "output" }], truncated: true },
+    });
+  });
+
+  it.each(["end_turn", "stop_sequence", undefined])("does not say it when the reason to stop is %s: the output is wrong, not cut off", async (stopReason) => {
+    const { outcome } = await runWith(cut, stopReason);
+
+    expect(outcome.ok).toBe(false);
+    expect(!outcome.ok && outcome.error).not.toHaveProperty("truncated");
+    expect(!outcome.ok && outcome.error.code).toBe("CHECK_FAILED");
+  });
+
+  it("counts it like any output that the checks refused, and saves nothing", async () => {
+    const { temp, deps } = await runWith(cut, "max_tokens");
+
+    expect(await exists(join(temp.root.rootDir, "drafts"))).toBe(false);
+    expect(await readAiContribution(deps.store)).toEqual({ ok: true, value: { drafted: 1, rejectedByChecks: 1, humanEdited: 0, humanRejected: 0 } });
+  });
+
+  it("saves an output that passes the checks, whatever the reason to stop: the checks judge the output itself", async () => {
+    const { outcome } = await runWith(ok, "max_tokens");
+
+    expect(outcome.ok).toBe(true);
   });
 });
 

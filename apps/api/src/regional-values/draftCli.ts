@@ -15,7 +15,7 @@ import { createSafeLogger } from "../logging/safeLogger.js";
 import { loadBuildConfig, loadNeutralityConfig } from "./build/loadConfig.js";
 import type { RegionalValuesCliIo } from "./cli.js";
 import { factNumeralsOf } from "./draft/checks.js";
-import type { DraftCheckConfig, DraftCheckContext } from "./draft/checks.js";
+import type { DraftCheckConfig, DraftCheckContext, DraftCheckWords } from "./draft/checks.js";
 import { readAiContribution } from "./draft/contribution.js";
 import { deriveDisposition } from "./draft/disposition.js";
 import type { Disposition } from "./draft/disposition.js";
@@ -24,7 +24,7 @@ import type { DraftStore } from "./draft/draftStore.js";
 import { DraftRequestSchema } from "./draft/request.js";
 import { adoptDraft, approveTarget, rejectDraft, revokeApproval } from "./draft/review.js";
 import { runDraft } from "./draft/runDraft.js";
-import type { DraftModels } from "./draft/runDraft.js";
+import type { DraftInference, DraftModels } from "./draft/runDraft.js";
 import { defaultRecordRoot } from "./draft/types.js";
 import type { RecordRoot } from "./draft/types.js";
 
@@ -45,6 +45,8 @@ export type DraftCommandSeams = Readonly<{
   pacer?: Pacer;
   /** The models of the two roles. Without them they are read from the settings of the environment. */
   models?: DraftModels;
+  /** How the model is asked (the thinking). Without it the defaults of the service apply. No option of the command sets it: only the check of the real model does. */
+  inference?: DraftInference;
   /** Whether an original is a registered election bulletin. Without it the intake records are asked. */
   isElectionBulletin?: (sha256: string) => Promise<boolean>;
   /** Reads a file of a request or of the settings. */
@@ -77,6 +79,11 @@ export const DraftRunSettingsSchema = z
   .strict();
 
 export type DraftRunSettings = z.infer<typeof DraftRunSettingsSchema>;
+
+/** The lists of words of the settings, as the checks and the prompt take them (one place, so that they cannot drift). */
+export function checkWordsOf(settings: DraftRunSettings): DraftCheckWords {
+  return { causalWords: settings.causalWords, hedgeEndings: settings.hedgeEndings, comparisonWords: settings.comparisonWords };
+}
 
 /** The six confirmations of a person who approves an issue (Req 8.27), each as a question that "yes" confirms. */
 export const ISSUE_CONFIRMATION_QUESTIONS: ReadonlyArray<readonly [keyof IssueConfirmation, string]> = [
@@ -194,11 +201,7 @@ async function loadRunConfig(options: DraftCommandOptions, parsed: Parsed): Prom
       neutrality: neutrality.value,
       properNouns: build.value.properNouns,
       sentenceMaxChars: settings.data.sentenceMaxChars,
-      words: {
-        causalWords: settings.data.causalWords,
-        hedgeEndings: settings.data.hedgeEndings,
-        comparisonWords: settings.data.comparisonWords,
-      },
+      words: checkWordsOf(settings.data),
     },
   };
 }
@@ -249,6 +252,7 @@ async function draftRun(args: readonly string[], options: DraftCommandOptions): 
       pacer: seams.pacer ?? createPacer(),
       now: options.now ?? ((): Date => new Date()),
       models,
+      ...(seams.inference === undefined ? {} : { inference: seams.inference }),
       gate: { limits: { maxEvidenceUnits: config.settings.maxEvidenceUnits, evidenceMaxChars: config.settings.evidenceMaxChars } },
       isElectionBulletin:
         seams.isElectionBulletin ??
@@ -277,6 +281,10 @@ async function draftRun(args: readonly string[], options: DraftCommandOptions): 
   } else if (error.code === "CHECK_FAILED") {
     for (const violation of error.violations) {
       io.write(`violation=${violation.check}:${violation.target}`);
+    }
+    if (error.truncated === true) {
+      // The model stopped at the limit of the output: the failure is a cut-off output, not a wrong one.
+      io.write("truncated=true");
     }
   } else if (error.code === "STORE_READ_FAILED" || error.code === "STORE_WRITE_FAILED") {
     io.write(`cause=${error.cause}`);

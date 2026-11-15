@@ -2,6 +2,7 @@ import { THEME_IDS } from "@ehime-vote-navigator/contracts";
 import type { DraftTask } from "@ehime-vote-navigator/contracts";
 import { factGroundingText } from "@ehime-vote-navigator/domain";
 
+import type { DraftCheckConfig } from "../checks.js";
 import type { DraftRequest } from "../request.js";
 import { DATA_CLOSE, DATA_OPEN } from "./delimiters.js";
 
@@ -10,11 +11,45 @@ import { DATA_CLOSE, DATA_OPEN } from "./delimiters.js";
  * never holds the material. The material is put between the delimiters in the body (`text`), and the
  * instruction says that what is inside is material and not an instruction. A change of any text
  * here is a new `promptVersion`, because the version is a part of the key of a saved draft.
+ *
+ * The words that the checks use (the endings of a hypothesis, the words of a cause) are not written
+ * here: they come from the settings (`PromptOptions`), so that the instruction names exactly the
+ * lists that the checks apply, and a list that a person approves later reaches the model without a
+ * change of this file. They are a part of the text, so another list gives another `inputHash`.
+ *
+ * rv-draft-2: the instruction of an issue candidate names the endings and the words of the settings,
+ * and says that a cause, a thing that is not in the facts, and a comparison of one fact are not written.
  */
 
-export const PROMPT_VERSION = "rv-draft-1";
+export const PROMPT_VERSION = "rv-draft-2";
 
 const THEME_LIST = THEME_IDS.join(", ");
+
+export type PromptOptions = Readonly<{
+  /** The fixed forms of the premise of a trade-off question (`neutrality.json`). */
+  premiseTemplates: readonly string[];
+  /** The endings that the statement of an issue candidate may have: the list that the check `DR_HEDGE_REQUIRED` applies. */
+  hedgeEndings: readonly string[];
+  /** The words that a sentence of an issue candidate must not have: the list that the check `DR_CAUSAL_CLAIMS` applies. */
+  causalWords: readonly string[];
+}>;
+
+/** The options of a prompt from the settings of the checks, so that the prompt and the checks read the same lists. */
+export function promptOptionsOf(checks: Pick<DraftCheckConfig, "neutrality" | "words">): PromptOptions {
+  return {
+    premiseTemplates: checks.neutrality.premiseTemplates,
+    hedgeEndings: checks.words.hedgeEndings,
+    causalWords: checks.words.causalWords,
+  };
+}
+
+/** `「a」「b」`: the words of a list of the settings. An empty word is left out, as the checks leave it out. */
+function quotedList(words: readonly string[]): string {
+  return words
+    .filter((word) => word !== "")
+    .map((word) => `「${word}」`)
+    .join("、");
+}
 
 const COMMON_RULES = [
   "あなたは、地域の政策課題について、資料にもとづく下書きを作る補助者です。",
@@ -27,11 +62,28 @@ const COMMON_RULES = [
 
 const SENTENCE_SHAPE = '{"text": 60文字以内の1文, "groundIds": 根拠にした資料のID(1件以上)}';
 
-const SYSTEM_BY_TASK: Readonly<Record<Exclude<DraftTask, "QUESTION_DRAFT">, string>> = {
-  ISSUE_CANDIDATE: [
+/**
+ * The instruction of an issue candidate. Each rule is the one that a check applies to the output, so
+ * that a model that follows the instruction passes the check: the ending of the statement
+ * (`DR_HEDGE_REQUIRED`), the words of a cause (`DR_CAUSAL_CLAIMS`), the things that are not in the facts
+ * (`DR_CANDIDATE_FACTS`) and a comparison (`DR_COMPARISON`). What the checks cannot see, the reading of
+ * a cause between two facts, is asked in the same instruction and is left to the person who reviews.
+ */
+function issueCandidateSystem(options: PromptOptions): string {
+  const endings = quotedList(options.hedgeEndings);
+  const causalWords = quotedList(options.causalWords);
+  return [
     "課題の候補を1件作ってください。課題の候補は、資料の事実項目にもとづく仮説です。",
     "これは提案であり、事実でも公式機関の見解でもありません。因果関係を断定せず、順位、推奨、優劣を書かないでください。",
-    "statement は仮説として述べる1文にし、断定を避けた語尾にしてください。",
+    "statement は、資料の事実項目が示す数や変化についての仮説を述べる1文にしてください。",
+    endings === ""
+      ? "statement は、断定を避けた語尾にしてください。"
+      : `statement の文末(最後の句点「。」の直前)は、次のどれかにしてください: ${endings}。これ以外の語尾は使わないでください。`,
+    ...(causalWords === "" ? [] : [`statement、factSummary、background に、次の言い方を使わないでください: ${causalWords}。`]),
+    "原因、理由、影響、結果など、事実と事実の間の因果関係を述べないでください。",
+    "statement、factSummary、background には、資料の事実項目にない人、場所、出来事、制度、理由を書かないでください。資料から分からないことは、notDeterminable に書いてください。",
+    "factSummary と background には、資料の事実項目の文に書かれていることだけを書いてください。",
+    "2つの事実を比べる文は、groundFactIds に両方の事実項目のIDを入れ、両方の年を文に書いてください。単位と地域が同じ事実だけを比べてください。",
     "判断できないこと(notDeterminable)と、追加で確認すべきこと(additionalChecks)を、それぞれ1件以上書いてください。",
     "responseDirections は参考であり、肯定的な表現で書いてください。他方の方向を否定する書き方にしないでください。",
     `themeId は ${THEME_LIST} のいずれか、決められないときは UNCLASSIFIED にしてください。`,
@@ -41,7 +93,10 @@ const SYSTEM_BY_TASK: Readonly<Record<Exclude<DraftTask, "QUESTION_DRAFT">, stri
       '"background": 同じ形(0〜4件), "notDeterminable": [60文字以内の文](1〜5件), "additionalChecks": [60文字以内の文](1〜5件), ' +
       '"decisionScenes": [60文字以内の文](0〜3件), ' +
       '"responseDirections": [{"label": 30文字以内, "description": 60文字以内, "category": "CHANGE"|"CONTINUE"|"NEUTRAL", "status": "REFERENCE_ONLY"}](0〜4件)}',
-  ].join("\n"),
+  ].join("\n");
+}
+
+const SYSTEM_BY_TASK: Readonly<Record<Exclude<DraftTask, "QUESTION_DRAFT" | "ISSUE_CANDIDATE">, string>> = {
   ISSUE_SUMMARY: [
     "資料の引用だけを根拠に、課題の要点を書いてください。すべての文に、根拠にした資料のIDを付けてください。",
     `JSONの形: {"sentences": [${SENTENCE_SHAPE}](1〜4件)}`,
@@ -96,11 +151,6 @@ function questionSystem(request: DraftRequest, premiseTemplates: readonly string
   ].join("\n");
 }
 
-export type PromptOptions = Readonly<{
-  /** The fixed forms of the premise of a trade-off question (`neutrality.json`). */
-  premiseTemplates: readonly string[];
-}>;
-
 export type BuiltPrompt = Readonly<{
   system: string;
   text: string;
@@ -145,7 +195,12 @@ function materialsOf(request: DraftRequest): string[] {
 
 /** Builds the instruction and the body of a request. The same request and options give the same text. */
 export function buildPrompt(request: DraftRequest, options: PromptOptions): BuiltPrompt {
-  const task = request.task === "QUESTION_DRAFT" ? questionSystem(request, options.premiseTemplates) : SYSTEM_BY_TASK[request.task];
+  const task =
+    request.task === "QUESTION_DRAFT"
+      ? questionSystem(request, options.premiseTemplates)
+      : request.task === "ISSUE_CANDIDATE"
+        ? issueCandidateSystem(options)
+        : SYSTEM_BY_TASK[request.task];
   const system = `${COMMON_RULES}\n${task}`;
   const materials = materialsOf(request);
   const text = [DATA_OPEN, ...materials, DATA_CLOSE, "上の資料だけを根拠に、指定の形のJSONを1つ出力してください。"].join("\n");

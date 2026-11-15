@@ -10,7 +10,7 @@ import { loadBuildConfig, loadNeutralityConfig } from "../../../apps/api/src/reg
 import { factNumeralsOf, runDraftChecks } from "../../../apps/api/src/regional-values/draft/checks.js";
 import { createDraftStore, draftIdOf, makeDraftEvent } from "../../../apps/api/src/regional-values/draft/draftStore.js";
 import type { DraftStore } from "../../../apps/api/src/regional-values/draft/draftStore.js";
-import { buildPrompt, PROMPT_VERSION } from "../../../apps/api/src/regional-values/draft/prompts/index.js";
+import { buildPrompt, promptOptionsOf, PROMPT_VERSION } from "../../../apps/api/src/regional-values/draft/prompts/index.js";
 import { DraftRequestSchema } from "../../../apps/api/src/regional-values/draft/request.js";
 import { adoptDraft, approveTarget } from "../../../apps/api/src/regional-values/draft/review.js";
 import type { RecordRoot } from "../../../apps/api/src/regional-values/draft/types.js";
@@ -202,7 +202,7 @@ async function saveFictionalDraft(
   clock: () => Date,
 ): Promise<string> {
   const request = DraftRequestSchema.parse({ task: "ISSUE_CANDIDATE", dataKind: "FIXTURE", facts, evidence: [], sources: [] });
-  const prompt = buildPrompt(request, { premiseTemplates: settings.checks.neutrality.premiseTemplates });
+  const prompt = buildPrompt(request, promptOptionsOf(settings.checks));
   const inputHash = Sha256Schema.parse(sha256Hex(encodeCanonicalJson({ system: prompt.system, text: prompt.text, inputSources: [] })));
   const key = { task: "ISSUE_CANDIDATE" as const, promptVersion: PROMPT_VERSION, modelId: FIXTURE_DRAFT_MODELS.generation, inputHash };
   const draftId = draftIdOf(key);

@@ -15,6 +15,7 @@ export * from "./content/aggregate.js";
 export * from "./content/deriveFact.js";
 export * from "./content/factComparison.js";
 export * from "./content/factGroundingText.js";
+export * from "./content/factSentence.js";
 export * from "./content/inspectFixedTexts.js";
 export * from "./gate/applyIssueValidity.js";
 export * from "./gate/checkIssueLinks.js";

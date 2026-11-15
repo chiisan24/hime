@@ -15,6 +15,10 @@ import {
   HOME_NAVIGATION_STATE,
 } from "../../app/navigation.js";
 import { projectVisitorPresentation } from "../../app/public/visitorPresentation.js";
+import {
+  getElectionDataSource,
+  projectAvailableElectionDestinations,
+} from "../../services/electionData.js";
 import { BrandLogo } from "./BrandLogo.js";
 
 const DATA_KIND_LABELS = {
@@ -49,7 +53,14 @@ const PUBLIC_NAV_ITEMS = [
   { to: "/venue", label: "会場閲覧", end: true, icon: Eye },
 ] as const;
 
-export const VISITOR_NAV_ITEMS = projectVisitorPresentation(PUBLIC_NAV_ITEMS);
+/**
+ * 利用者向けの共通ナビゲーション。表示できるデータがない選挙関連ページ
+ * （モックデータが未提供の選挙日程・候補者・政策比較・会場閲覧）の項目は、一時的に外す。
+ * ルートは残してあり、データが提供されると項目が戻る（services/electionData.ts）。
+ */
+export const VISITOR_NAV_ITEMS = projectAvailableElectionDestinations(
+  projectVisitorPresentation(PUBLIC_NAV_ITEMS),
+);
 
 /** 選挙に依存しない画面（価値観診断）。2022年選挙専用の表示を出さない */
 const ELECTION_INDEPENDENT_PATH = "/values";
@@ -141,9 +152,12 @@ export function AppShell({
   dataKind = "REAL_AI",
   navigationItems,
 }: AppShellProps) {
-  // 価値観診断（/values）では、2022年選挙専用の表示（過去選挙表示・データ種別・フッター）を出さない。
+  // 2022年選挙専用の表示（過去選挙表示・データ種別・フッター）は、次のときに出さない。
+  // - 価値観診断（/values）。選挙に依存しない画面のため。
+  // - 過去の選挙データを使わない設定（モックデータ）のとき。どの画面にも過去の選挙のデータを出さないため。
   // デモ版の表示は、公開形態についての表示のため、どの画面でも残す。
-  const electionIndependent = useIsElectionIndependentRoute();
+  const electionIndependent =
+    useIsElectionIndependentRoute() || getElectionDataSource() !== "PAST_REAL";
 
   return (
     // スマホでは、下部固定ナビの高さ分だけ下に余白を取り、フッターが隠れないようにする

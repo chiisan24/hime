@@ -1,4 +1,5 @@
 import type { FixtureFact } from "@ehime-vote-navigator/contracts";
+import { sha256Hex } from "@ehime-vote-navigator/domain";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { FIXTURE_FACTS, FICTIONAL_SOURCE_ID, realFact, realSource, testCheckConfig } from "../../../../../tests/harness/regional-values/draftSupport.js";
@@ -112,11 +113,82 @@ describe("loadIssueSnapshot: fictional data", () => {
     expect(renewed.issues[0]).toMatchObject({ issueId: "issue-1", version: 2, issueHash: hashOf(second), title: "架空市のバス路線の見直し" });
   });
 
-  it("withdraws an issue whose fact is not among the facts (FACT_UNVERIFIED)", async () => {
-    await world.setFixtureFacts([FACT_1]);
+  it("does not count an approval that did not record the facts it rests on, and does not fill them in from the facts of today", async () => {
+    await world.addIssue(fixtureIssue());
+    await world.approveWithoutBasis("issue-1", 1, "approver-a", T1);
+    const legacy = await snapshotOf(world);
+    expect(legacy.issues).toEqual([]);
+    expect(reasonsOf(legacy)).toEqual(["issue-1:1:CONTENT_CHANGED"]);
+    expect(legacy.reasons.get("issue-1")).toEqual(["CONTENT_CHANGED", "APPROVAL_INSUFFICIENT"]);
+
+    // Reading it again does not change it: the old approval is not written over, and stays what it was.
+    const before = await world.treeText();
+    expect(reasonsOf(await snapshotOf(world))).toEqual(["issue-1:1:CONTENT_CHANGED"]);
+    expect(await world.treeText()).toBe(before);
+
+    // A person approves the same version again, now on the facts that are there: it is valid, and the old record is still in the ledger.
+    await world.approve("issue-1", 1, "approver-a", T2);
+    const renewed = await snapshotOf(world);
+    expect(renewed.withdrawn).toEqual([]);
+    expect(renewed.issues[0]?.approval).toEqual({ status: "APPROVED", approverId: "approver-a", approvedAt: T2, approverCount: 1 });
+  });
+
+  it("does not give an approval back to fact items that were made again (CONTENT_CHANGED), with the same record of the issue, until the version is approved again", async () => {
     await world.addIssue(fixtureIssue());
     await world.approve("issue-1", 1, "approver-a", T1);
+    expect((await snapshotOf(world)).issues).toHaveLength(1);
+
+    // The fact item that the issue rests on is made again: the same ID, the same value, from another fictional source.
+    const again = { ...FACT_3, fictionalSourceId: "fictional-doc-2" };
+    await world.setFixtureFacts([FACT_1, again]);
+    const stale = await snapshotOf(world);
+    expect(stale.issues).toEqual([]);
+    expect(reasonsOf(stale)).toEqual(["issue-1:1:CONTENT_CHANGED"]);
+    expect(stale.reasons.get("issue-1")).toEqual(["CONTENT_CHANGED", "APPROVAL_INSUFFICIENT"]);
+
+    // The facts go back to what they were: the approval is for them, and counts again.
+    await world.setFixtureFacts([FACT_1, FACT_3]);
+    expect((await snapshotOf(world)).withdrawn).toEqual([]);
+
+    // Made again, and approved again on the new facts: valid. The earlier approval does not count for the new facts.
+    await world.setFixtureFacts([FACT_1, again]);
+    await world.approve("issue-1", 1, "approver-b", T3);
+    const renewed = await snapshotOf(world);
+    expect(renewed.withdrawn).toEqual([]);
+    expect(renewed.issues[0]?.approval).toEqual({ status: "APPROVED", approverId: "approver-b", approvedAt: T3, approverCount: 1 });
+
+    // The facts go back again: the first approval is the one that was made on them, and it is the one that counts.
+    await world.setFixtureFacts([FACT_1, FACT_3]);
+    const back = await snapshotOf(world);
+    expect(back.withdrawn).toEqual([]);
+    expect(back.issues[0]?.approval).toEqual({ status: "APPROVED", approverId: "approver-a", approvedAt: T1, approverCount: 1 });
+  });
+
+  it("counts only the approvers who approved the facts that are there: of two approvers, one approved before the facts changed", async () => {
+    const settings = settingsWith({ requiredApprovers: 2 });
+    await world.addIssue(fixtureIssue());
+    await world.approve("issue-1", 1, "approver-a", T1);
+    const again = { ...FACT_3, fictionalSourceId: "fictional-doc-2" };
+    await world.setFixtureFacts([FACT_1, again]);
+    await world.approve("issue-1", 1, "approver-b", T2);
+    const one = await snapshotOf(world, settings);
+    expect(reasonsOf(one)).toEqual(["issue-1:1:APPROVAL_INSUFFICIENT"]);
+
+    await world.approve("issue-1", 1, "approver-a", T3);
+    const both = await snapshotOf(world, settings);
+    expect(both.withdrawn).toEqual([]);
+    expect(both.issues[0]?.approval).toEqual({ status: "APPROVED", approverId: "approver-b", approvedAt: T2, approverCount: 2 });
+  });
+
+  it("withdraws an issue whose fact is not among the facts (FACT_UNVERIFIED)", async () => {
+    await world.addIssue(fixtureIssue());
+    await world.approve("issue-1", 1, "approver-a", T1);
+    // The fact item is taken away after the approval, which named it.
+    await world.setFixtureFacts([FACT_1]);
     expect(reasonsOf(await snapshotOf(world))).toEqual(["issue-1:1:FACT_UNVERIFIED"]);
+    // The same fact item is there again: it is the same facts, and the approval counts again.
+    await world.setFixtureFacts([FACT_1, FACT_3]);
+    expect((await snapshotOf(world)).withdrawn).toEqual([]);
   });
 
   it("runs the checks of a draft again with the words now, and withdraws an issue that does not pass (CHECK_FAILED)", async () => {
@@ -131,10 +203,10 @@ describe("loadIssueSnapshot: fictional data", () => {
   });
 
   it("gives every reason that holds in the order of precedence, and the first one as the reason", async () => {
-    await world.setFixtureFacts([FACT_1]);
     await world.addIssue(fixtureIssue());
     await world.approve("issue-1", 1, "approver-a", T1);
     await world.revoke("issue-1", 1, "approver-a", T2);
+    await world.setFixtureFacts([FACT_1]);
     const causal = settingsWith({ checks: { ...testCheckConfig(), words: { ...testCheckConfig().words, causalWords: ["利用"] } } });
     const snapshot = await snapshotOf(world, causal);
     expect(snapshot.reasons.get("issue-1")).toEqual(["REVOKED", "APPROVAL_INSUFFICIENT", "FACT_UNVERIFIED", "CHECK_FAILED"]);
@@ -255,6 +327,50 @@ describe("loadIssueSnapshot: real data", () => {
     } finally {
       await missing.remove();
     }
+  });
+
+  it("does not give the approval back when the original changed, a new revision was taken in, the fact item was made again and verified, and the record of the issue is the same", async () => {
+    await prepare();
+    expect((await snapshotOf(world)).issues).toHaveLength(1);
+
+    // 1. The original changes: the issue is withdrawn for the source.
+    const newBytes = new TextEncoder().encode("name,count\nfacility,13\n");
+    await world.setOriginal(material.source, newBytes);
+    expect(reasonsOf(await snapshotOf(world))).toEqual(["issue-r1:1:SOURCE_CHANGED"]);
+
+    // 2. A new revision is taken in, and the fact item is made again from it and verified by a person. The record of the issue is not touched.
+    const newSha = sha256Hex(newBytes);
+    const renewedMaterial = realMaterial({
+      fact: { sha256: newSha, retrievedAt: "2026-11-20T00:00:00Z", verification: { status: "VERIFIED", verifierId: "tester-2", verifiedAt: "2026-11-20T01:00:00Z" } },
+      source: { sha256: newSha, revision: "rev-2", retrievedAt: "2026-11-20T00:00:00Z" },
+    });
+    await world.setRealSource(renewedMaterial.source);
+    await world.setOriginal(renewedMaterial.source, newBytes);
+    await world.setRealFact(renewedMaterial.fact);
+
+    // Everything under the issue is in order again, and the old approval is of the old facts: the issue is not valid until it is approved again.
+    const stale = await snapshotOf(world);
+    expect(stale.issues).toEqual([]);
+    expect(reasonsOf(stale)).toEqual(["issue-r1:1:CONTENT_CHANGED"]);
+    expect(stale.reasons.get("issue-r1")).toEqual(["CONTENT_CHANGED", "APPROVAL_INSUFFICIENT"]);
+
+    // 3. A person approves the version again on the new fact item. The first approval stays in the ledger and does not count.
+    await world.approve("issue-r1", 1, "approver-a", T3);
+    const renewed = await snapshotOf(world);
+    expect(renewed.withdrawn).toEqual([]);
+    expect(renewed.issues[0]).toMatchObject({ issueId: "issue-r1", version: 1, approval: { approverId: "approver-a", approvedAt: T3 }, basisFacts: [{ factId: "rf-1", sha256: newSha }] });
+  });
+
+  it("does not count an approval of real data that did not record its facts (an approval made before the basis was recorded)", async () => {
+    const { fact, source } = realMaterial();
+    await world.setRealFact(fact);
+    await world.setRealSource(source);
+    await world.setOriginal(source, ORIGINAL_BYTES);
+    await world.addIssue(realIssue());
+    await world.approveWithoutBasis("issue-r1", 1, "approver-a", T1);
+    expect(reasonsOf(await snapshotOf(world))).toEqual(["issue-r1:1:CONTENT_CHANGED"]);
+    await world.approve("issue-r1", 1, "approver-a", T2);
+    expect((await snapshotOf(world)).issues).toHaveLength(1);
   });
 
   it("withdraws the issue when a fact is not verified any more (FACT_UNVERIFIED)", async () => {

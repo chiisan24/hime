@@ -2,16 +2,20 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   ALLOWED_BEDROCK_MODEL_IDS,
+  CONVERSE_EFFORTS,
   CONVERSE_MAX_CALLS_PER_WINDOW,
   CONVERSE_MAX_TOKENS,
   CONVERSE_RATE_WINDOW_MS,
   CONVERSE_TIMEOUT_MS,
   MAX_CONVERSE_INPUT_CHARS,
+  THINKING_DISABLED_MODEL_IDS,
   createBedrockConverseClient,
+  thinkingLabelOf,
   type BedrockConverseOptions,
   type ConverseFetch,
   type ConverseHttpResponse,
   type ConverseRequestInit,
+  type ConverseThinking,
 } from "./bedrockConverse.js";
 
 const TOKEN = "test-token";
@@ -70,9 +74,10 @@ describe("request shape", () => {
 
     const result = await createClient(fakeFetch).converse(request);
 
+    // The fake reply names the reason that the model stopped (`end_turn`), which the result passes on; it has no token counts.
     expect(result).toEqual({
       ok: true,
-      value: { text: "こんにちは。", status: 200, elapsedMs: 0 },
+      value: { text: "こんにちは。", status: 200, elapsedMs: 0, stopReason: "end_turn" },
     });
     expect(calls).toHaveLength(1);
     const [call] = calls;
@@ -112,6 +117,60 @@ describe("request shape", () => {
     expect(result.ok && result.value.text).toBe("二番目");
   });
 
+  it("reports the token counts and the stop reason that the service gives, and nothing else of the response", async () => {
+    const { fakeFetch } = createFakeFetch(
+      () =>
+        new Response(
+          JSON.stringify({
+            output: { message: { content: [{ text: "答え" }] } },
+            stopReason: "max_tokens",
+            usage: { inputTokens: 1234, outputTokens: 56, totalTokens: 1290, cacheReadInputTokens: 0 },
+            metrics: { latencyMs: 900 },
+          }),
+          { status: 200 },
+        ),
+    );
+
+    const result = await createClient(fakeFetch).converse(request);
+
+    expect(result).toEqual({
+      ok: true,
+      value: { text: "答え", status: 200, elapsedMs: 0, usage: { inputTokens: 1234, outputTokens: 56 }, stopReason: "max_tokens" },
+    });
+  });
+
+  it.each([
+    ["a missing count", { inputTokens: 10 }],
+    ["a count that is not a number", { inputTokens: "10", outputTokens: 5 }],
+    ["a negative count", { inputTokens: -1, outputTokens: 5 }],
+    ["a count that is not whole", { inputTokens: 10.5, outputTokens: 5 }],
+    ["a count that is too large to be exact", { inputTokens: Number.MAX_SAFE_INTEGER + 1, outputTokens: 5 }],
+    ["usage that is not an object", "many"],
+  ])("leaves the token counts out of the result for %s", async (_label, usage) => {
+    const { fakeFetch } = createFakeFetch(
+      () => new Response(JSON.stringify({ output: { message: { content: [{ text: "答え" }] } }, usage }), { status: 200 }),
+    );
+
+    const result = await createClient(fakeFetch).converse(request);
+
+    expect(result.ok && "usage" in result.value).toBe(false);
+  });
+
+  it.each([
+    ["upper case", "END_TURN"],
+    ["a sentence", "the model said this"],
+    ["a long value", "a".repeat(33)],
+    ["a number", 7],
+  ])("drops a stop reason that is %s instead of passing it on", async (_label, stopReason) => {
+    const { fakeFetch } = createFakeFetch(
+      () => new Response(JSON.stringify({ output: { message: { content: [{ text: "答え" }] } }, stopReason }), { status: 200 }),
+    );
+
+    const result = await createClient(fakeFetch).converse(request);
+
+    expect(result.ok && "stopReason" in result.value).toBe(false);
+  });
+
   it.each([
     ["not JSON", "<html>"],
     ["no output", "{}"],
@@ -133,6 +192,163 @@ describe("request shape", () => {
 
     expect(CONVERSE_TIMEOUT_MS).toBe(30_000);
     expect(timeout.mock.calls.map(([ms]) => ms)).toEqual([30_000, 30_000, 5_000]);
+  });
+});
+
+/** The body that the client posted on its first call. */
+function postedBody(calls: readonly FetchCall[]): Record<string, unknown> {
+  return JSON.parse(calls[0]?.init.body ?? "null") as Record<string, unknown>;
+}
+
+describe("thinking", () => {
+  it("sends no extra field without the option, so the request is the one that was always sent", async () => {
+    const { calls, fakeFetch } = createFakeFetch();
+
+    await createClient(fakeFetch).converse(request);
+
+    expect(postedBody(calls)).not.toHaveProperty("additionalModelRequestFields");
+    expect(Object.keys(postedBody(calls))).toEqual(["system", "messages", "inferenceConfig"]);
+  });
+
+  it("turns thinking off for Haiku with the field of the model, and leaves the limit of the output as it is", async () => {
+    const { calls, fakeFetch } = createFakeFetch();
+
+    const result = await createClient(fakeFetch).converse({ ...request, thinking: { mode: "DISABLED" } });
+
+    expect(result.ok).toBe(true);
+    expect(postedBody(calls)).toEqual({
+      system: [{ text: SYSTEM }],
+      messages: [{ role: "user", content: [{ text: "こんにちは" }] }],
+      inferenceConfig: { maxTokens: CONVERSE_MAX_TOKENS },
+      additionalModelRequestFields: { thinking: { type: "disabled" } },
+    });
+  });
+
+  it.each(CONVERSE_EFFORTS.flatMap((effort) => [HAIKU, OPUS].map((modelId) => [effort, modelId] as const)))(
+    "thinks less at the effort %s on %s: the effort is in output_config, not in thinking",
+    async (effort, modelId) => {
+      const { calls, fakeFetch } = createFakeFetch();
+
+      const result = await createClient(fakeFetch).converse({ ...request, modelId, thinking: { mode: "ADAPTIVE", effort } });
+
+      expect(result.ok).toBe(true);
+      expect(postedBody(calls)["additionalModelRequestFields"]).toEqual({
+        thinking: { type: "adaptive" },
+        output_config: { effort },
+      });
+      expect(postedBody(calls)["inferenceConfig"]).toEqual({ maxTokens: CONVERSE_MAX_TOKENS });
+      expect(calls[0]?.url).toContain(`/model/${modelId}/converse`);
+    },
+  );
+
+  it("refuses to turn thinking off for the model that cannot, before any fetch", async () => {
+    const { calls, fakeFetch } = createFakeFetch();
+
+    const result = await createClient(fakeFetch).converse({ ...request, modelId: OPUS, thinking: { mode: "DISABLED" } });
+
+    expect(result).toEqual({ ok: false, error: { code: "INPUT_INVALID" } });
+    expect(calls).toHaveLength(0);
+  });
+
+  it("lists as the models that can turn thinking off only models that the client allows, and not Opus", () => {
+    expect([...THINKING_DISABLED_MODEL_IDS]).toEqual([HAIKU]);
+    for (const modelId of THINKING_DISABLED_MODEL_IDS) {
+      expect(ALLOWED_BEDROCK_MODEL_IDS).toContain(modelId);
+    }
+  });
+
+  it("judges the model before the thinking: a model that is not allowed is refused as such", async () => {
+    const { calls, fakeFetch } = createFakeFetch();
+
+    const result = await createClient(fakeFetch).converse({ ...request, modelId: "jp.anthropic.claude-sonnet-5-5", thinking: { mode: "DISABLED" } });
+
+    expect(result).toEqual({ ok: false, error: { code: "MODEL_NOT_ALLOWED" } });
+    expect(calls).toHaveLength(0);
+  });
+
+  it.each([
+    ["null", null],
+    ["a word", "disabled"],
+    ["an empty object", {}],
+    ["a mode in lower case", { mode: "disabled" }],
+    ["a mode of the older kind, with a budget", { mode: "ENABLED", budgetTokens: 1000 }],
+    ["DISABLED with an effort", { mode: "DISABLED", effort: "low" }],
+    ["ADAPTIVE without an effort", { mode: "ADAPTIVE" }],
+    ["ADAPTIVE with an effort of another name", { mode: "ADAPTIVE", effort: "LOW" }],
+    ["ADAPTIVE with xhigh, which only raises the cost", { mode: "ADAPTIVE", effort: "xhigh" }],
+    ["ADAPTIVE with max, which only raises the cost", { mode: "ADAPTIVE", effort: "max" }],
+    ["ADAPTIVE with a key that is not listed", { mode: "ADAPTIVE", effort: "low", display: "summarized" }],
+    ["an array", [{ mode: "DISABLED" }]],
+  ])("refuses a thinking setting that is %s, before any fetch", async (_label, thinking) => {
+    const { calls, fakeFetch } = createFakeFetch();
+
+    const result = await createClient(fakeFetch).converse({ ...request, thinking } as unknown as typeof request);
+
+    expect(result).toEqual({ ok: false, error: { code: "INPUT_INVALID" } });
+    expect(calls).toHaveLength(0);
+  });
+
+  it("sends a copy of the setting that it checked, not what the caller changes afterwards", async () => {
+    const { calls, fakeFetch } = createFakeFetch();
+    const thinking = { mode: "ADAPTIVE", effort: "low" } as { mode: "ADAPTIVE"; effort: "low" | "high" };
+    const client = createClient(fakeFetch);
+
+    const pending = client.converse({ ...request, thinking });
+    thinking.effort = "high";
+    await pending;
+
+    expect(postedBody(calls)["additionalModelRequestFields"]).toEqual({ thinking: { type: "adaptive" }, output_config: { effort: "low" } });
+  });
+
+  it("skips the block of the thinking in the response and never returns its text", async () => {
+    const { fakeFetch } = createFakeFetch(
+      () =>
+        new Response(
+          JSON.stringify({
+            output: {
+              message: {
+                content: [{ reasoningContent: { reasoningText: { text: "secret-reasoning", signature: "sig" } } }, { text: "答え" }],
+              },
+            },
+            stopReason: "end_turn",
+            usage: { inputTokens: 100, outputTokens: 300 },
+          }),
+          { status: 200 },
+        ),
+    );
+
+    const result = await createClient(fakeFetch).converse({ ...request, thinking: { mode: "ADAPTIVE", effort: "low" } });
+
+    expect(result).toEqual({
+      ok: true,
+      value: { text: "答え", status: 200, elapsedMs: 0, usage: { inputTokens: 100, outputTokens: 300 }, stopReason: "end_turn" },
+    });
+    expect(JSON.stringify(result)).not.toContain("secret-reasoning");
+  });
+
+  it("reports a response that has only the thinking as invalid, without echoing it", async () => {
+    const { fakeFetch } = createFakeFetch(
+      () =>
+        new Response(
+          JSON.stringify({ output: { message: { content: [{ reasoningContent: { reasoningText: { text: "secret-reasoning" } } }] } }, stopReason: "max_tokens" }),
+          { status: 200 },
+        ),
+    );
+
+    const result = await createClient(fakeFetch).converse(request);
+
+    expect(result).toEqual({ ok: false, error: { code: "RESPONSE_INVALID" } });
+    expect(JSON.stringify(result)).not.toContain("secret-reasoning");
+  });
+
+  it.each<[ConverseThinking | undefined, string]>([
+    [undefined, "DEFAULT"],
+    [{ mode: "DISABLED" }, "DISABLED"],
+    [{ mode: "ADAPTIVE", effort: "low" }, "ADAPTIVE_LOW"],
+    [{ mode: "ADAPTIVE", effort: "medium" }, "ADAPTIVE_MEDIUM"],
+    [{ mode: "ADAPTIVE", effort: "high" }, "ADAPTIVE_HIGH"],
+  ])("names the setting %j as %s", (thinking, label) => {
+    expect(thinkingLabelOf(thinking)).toBe(label);
   });
 });
 
@@ -386,6 +602,52 @@ describe("secret-free failures", () => {
     expect(JSON.stringify(result)).not.toContain(TOKEN);
     expect(JSON.stringify(result)).not.toContain("echoed");
     expect(calls).toHaveLength(1);
+  });
+
+  it("adds the name that the service gives to the error, from the header only", async () => {
+    const { fakeFetch } = createFakeFetch(
+      () =>
+        new Response(`{"message":"denied for Bearer ${TOKEN}"}`, {
+          status: 403,
+          headers: { "x-amzn-errortype": "AccessDeniedException:http://internal.amazon.com/coral/com.amazon.bedrock/" },
+        }),
+    );
+
+    const result = await createClient(fakeFetch).converse(request);
+
+    expect(result).toEqual({ ok: false, error: { code: "HTTP_ERROR", status: 403, errorType: "AccessDeniedException" } });
+    expect(JSON.stringify(result)).not.toContain(TOKEN);
+  });
+
+  it.each([
+    ["a message", "Bearer test-token is not valid"],
+    ["a name that is too long", "A".repeat(65)],
+    ["a name that starts with a digit", "4xxException"],
+    ["a value with a symbol", "Access-Denied"],
+    ["an empty value", ""],
+  ])("drops an error type that is %s instead of passing it on", async (_label, header) => {
+    const { fakeFetch } = createFakeFetch(() => new Response("{}", { status: 400, headers: { "x-amzn-errortype": header } }));
+
+    const result = await createClient(fakeFetch).converse(request);
+
+    expect(result).toEqual({ ok: false, error: { code: "HTTP_ERROR", status: 400 } });
+  });
+
+  it("does not fail when the headers of the failure cannot be read", async () => {
+    const { fakeFetch } = createFakeFetch(() => ({
+      ok: false,
+      status: 503,
+      json: () => Promise.reject(new Error("not read")),
+      headers: {
+        get: () => {
+          throw new Error(`broken header Bearer ${TOKEN}`);
+        },
+      },
+    }));
+
+    const result = await createClient(fakeFetch).converse(request);
+
+    expect(result).toEqual({ ok: false, error: { code: "HTTP_ERROR", status: 503 } });
   });
 
   it("never returns or prints the key, prompt, or reply across every outcome", async () => {

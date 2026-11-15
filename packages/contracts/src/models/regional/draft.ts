@@ -354,6 +354,18 @@ const ledgerTarget = {
   targetHash: Sha256Schema,
 } as const;
 
+/**
+ * One fact item that an issue rested on when it was approved: the SHA-256 of the canonical JSON of the fact item as the
+ * person saw it. The value, the original that it was computed from and the record of its verification are all in that
+ * JSON, so a fact item that was made again, from a new revision of the original or by another person, is another SHA-256.
+ */
+export const ApprovalBasisFactSchema = z
+  .object({
+    factId: IdSchema,
+    sha256: Sha256Schema,
+  })
+  .strict();
+
 const ApproveRecordSchema = z
   .object({
     type: z.literal("APPROVE"),
@@ -364,6 +376,13 @@ const ApproveRecordSchema = z
     approvedAt: ISOInstantSchema,
     /** Only an approval of an issue has it, and it is required there. */
     issueChecks: IssueConfirmationSchema.optional(),
+    /**
+     * What the approval of an issue rested on: the fact items that the version names (`basisFactIds`), in the same order, each
+     * with its SHA-256 at the time. Only an approval of an issue has it. An approval that has none was made before the
+     * basis was recorded: it is never taken as an approval of the facts that are there now (the reader decides, and does not
+     * guess), so the issue has to be approved again. The field is optional so that the records of the ledger that exist stay valid.
+     */
+    basisFacts: z.array(ApprovalBasisFactSchema).min(1).max(10).optional(),
   })
   .strict()
   .superRefine((record, context) => {
@@ -376,6 +395,12 @@ const ApproveRecordSchema = z
           path: [field],
         });
       }
+    }
+    if (!issue && record.basisFacts !== undefined) {
+      context.addIssue({ code: "custom", message: "Only an approval of an issue has basisFacts", path: ["basisFacts"] });
+    }
+    if (record.basisFacts !== undefined && new Set(record.basisFacts.map((fact) => fact.factId)).size !== record.basisFacts.length) {
+      context.addIssue({ code: "custom", message: "basisFacts must not list a fact item twice", path: ["basisFacts"] });
     }
   });
 
@@ -415,3 +440,4 @@ export type DraftEvent = z.infer<typeof DraftEventSchema>;
 export type ApprovalTargetKind = z.infer<typeof ApprovalTargetKindSchema>;
 export type IssueConfirmation = z.infer<typeof IssueConfirmationSchema>;
 export type ApprovalLedgerRecord = z.infer<typeof ApprovalLedgerRecordSchema>;
+export type ApprovalBasisFact = z.infer<typeof ApprovalBasisFactSchema>;

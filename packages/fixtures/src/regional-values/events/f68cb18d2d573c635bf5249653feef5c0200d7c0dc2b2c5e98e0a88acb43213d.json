@@ -1,8 +1,8 @@
 {
   "at": "2026-01-04T08:00:05.000Z",
   "dataKind": "FIXTURE",
-  "draftId": "4f481dce437575006bb3dc681e4135484984894d0406b759bf58f13e48969047",
-  "eventId": "737a3f0037cfa4dcb6c82533f0c49aa913a1314fd9ee99a8aad126035a77ef6b",
+  "draftId": "732292c378777f9ec1fb29b1959a66bc46afe98200dd57948ec969cd423b53f6",
+  "eventId": "f68cb18d2d573c635bf5249653feef5c0200d7c0dc2b2c5e98e0a88acb43213d",
   "kind": "HUMAN_ADOPTED",
   "reviewerId": "fixture-issue-reviewer-v1",
   "target": {

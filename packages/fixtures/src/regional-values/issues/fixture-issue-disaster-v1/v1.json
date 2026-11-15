@@ -34,11 +34,11 @@
   ],
   "provenance": {
     "aiInvolvement": "AI_DRAFT",
-    "draftId": "5fb01f6b6ca94c33094a126664c1094a3a021c5553ebf397c5ac7131e441c8bd",
+    "draftId": "d8322f62112cd997be41753f732a1de03cf8a4de487fd14f82e553e53a0ca051",
     "generatedAt": "2026-01-04T08:00:02.000Z",
     "humanEdited": false,
     "modelId": "fixture-draft-model-v1",
-    "promptVersion": "rv-draft-1"
+    "promptVersion": "rv-draft-2"
   },
   "responseDirections": [
     {
