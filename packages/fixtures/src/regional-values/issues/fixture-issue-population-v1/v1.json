@@ -1,0 +1,69 @@
+{
+  "additionalChecks": [
+    "年度ごとの開催回数を確かめる必要があります。",
+    "参加者の数え方が年度で同じかどうかを確かめる必要があります。"
+  ],
+  "background": [
+    {
+      "groundFactIds": [
+        "fixture-fact-population-v1"
+      ],
+      "text": "地域活動は、2025年4月1日時点で12件あります。"
+    }
+  ],
+  "basisFactIds": [
+    "fixture-fact-population-2023-v1",
+    "fixture-fact-population-2024-v1",
+    "fixture-fact-population-v1"
+  ],
+  "dataKind": "FIXTURE",
+  "decisionScenes": [
+    "地域の集まりを続けるための支え方を考える場面",
+    "地域の外の人とのつながりを考える場面"
+  ],
+  "factSummary": [
+    {
+      "groundFactIds": [
+        "fixture-fact-population-2023-v1"
+      ],
+      "text": "架空市あおばの地域の集まりの参加者は、2023年度が延べ480人です。"
+    },
+    {
+      "groundFactIds": [
+        "fixture-fact-population-2024-v1"
+      ],
+      "text": "架空市あおばの地域の集まりの参加者は、2024年度が延べ420人です。"
+    }
+  ],
+  "issueId": "fixture-issue-population-v1",
+  "notDeterminable": [
+    "参加者が減った理由は、この資料からは分かりません。",
+    "参加者の年齢や地区ごとの違いは、この資料からは分かりません。"
+  ],
+  "provenance": {
+    "aiInvolvement": "AI_DRAFT",
+    "draftId": "df190de24889ad3c166b9c35041978f4d52c7b3b49308273e923d53e85e02741",
+    "generatedAt": "2026-01-04T08:00:00.000Z",
+    "humanEdited": false,
+    "modelId": "fixture-draft-model-v1",
+    "promptVersion": "rv-draft-1"
+  },
+  "responseDirections": [
+    {
+      "category": "CHANGE",
+      "description": "参加しやすい新しい場や機会を用意する取り組みです。",
+      "label": "新しい集まりの場をつくる",
+      "status": "REFERENCE_ONLY"
+    },
+    {
+      "category": "CONTINUE",
+      "description": "今ある集まりを続けるための運営を支える取り組みです。",
+      "label": "今ある集まりを続ける",
+      "status": "REFERENCE_ONLY"
+    }
+  ],
+  "statement": "架空市あおばでは、地域の集まりへの参加が減っている可能性があります。",
+  "themeId": "POPULATION_REVITALIZATION",
+  "title": "地域の集まりへの参加の変化",
+  "version": 1
+}

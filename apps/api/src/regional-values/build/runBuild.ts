@@ -13,9 +13,11 @@ import type {
   NeutralityConfig,
 } from "@ehime-vote-navigator/contracts";
 import {
+  applyIssueValidity,
   assembleBundleBody,
   checkCardCoverage,
   checkFixtureIssueCard,
+  checkIssueLinks,
   confirmFixtureFallback,
   finalizeBundle,
   inspectFixedTexts,
@@ -27,6 +29,7 @@ import {
   type AssemblyInput,
   type DataModeDecision,
   type FixtureIssueCard,
+  type IssueSnapshotView,
 } from "@ehime-vote-navigator/domain";
 
 import type { SafeLogger } from "../../logging/safeLogger.js";
@@ -93,12 +96,25 @@ export type BuildRequest = Readonly<{
   generatedAt: string;
 }>;
 
+/**
+ * Where the build gets the issues that are valid now (Req 13.7, 13.8). It is the same judgment that
+ * `issues export` makes (`loadIssueSnapshot`), asked of the records and not of the file
+ * `issues.json`: the build does not read that file, and its failure does not stop the build. `null`
+ * means that the issues cannot be read, which fails the build. It only reads.
+ */
+export type IssueSource = (context: Readonly<{ dataKind: "FIXTURE" | "REAL_AI" }>) => Promise<IssueSnapshotView | null>;
+
+/** The source that is used when none is given: there are no issues. */
+export const NO_ISSUES: IssueSource = () => Promise.resolve({ issues: [], withdrawn: [] });
+
 export type BuildDependencies = Readonly<{
   /** The clock for the start and the end of the build in the report. A test injects it. */
   now: () => string;
   logger: SafeLogger;
   realDataLoader?: RealDataLoader;
   outputOperations?: OutputOperations;
+  /** The valid issues, for the record of links and for the numbers that a question must not state. Without it, there are none. */
+  issueSource?: IssueSource;
 }>;
 
 export type BuildResult = Readonly<{
@@ -109,6 +125,9 @@ export type BuildResult = Readonly<{
 const NO_AI: AiContribution = { drafted: 0, rejectedByChecks: 0, humanEdited: 0, humanRejected: 0 };
 
 const SKIPPED: BuildChecks = { dataBoundary: "SKIPPED", questionBank: "SKIPPED", issueCards: "SKIPPED", contentHash: "SKIPPED" };
+
+/** The record of links when the file is not there: no question and no card rests on an issue. */
+const EMPTY_LINKS = { schemaVersion: 1, dataKind: "FIXTURE", links: [] } as const;
 
 function configFinding(file: string): GateFinding {
   return { code: "CONFIG_UNREADABLE", class: GATE_REASON_CLASS.CONFIG_UNREADABLE, targetKind: "CONFIG", targetId: file };
@@ -130,15 +149,21 @@ function refusalFindings(decision: DataModeDecision, known: readonly GateFinding
 
 /**
  * The numbers and years of the fact items, as they would be written in a sentence, for the check
- * `NO_FACT_NUMBERS`: the amount of each fact and its survey year.
+ * `NO_FACT_NUMBERS`: the amount of each fact and its survey year. The facts of the issues that are
+ * valid now count too: a question does not state a number that an issue rests on (Req 13.8).
  */
-function factNumeralsOf(cards: readonly FixtureData["cards"][number][]): ReadonlySet<string> {
+function factNumeralsOf(cards: readonly FixtureData["cards"][number][], issues: IssueSnapshotView["issues"]): ReadonlySet<string> {
   const numerals = new Set<string>();
+  const facts: { value: { amount: number }; surveyDate: string | number }[] = [];
   for (const card of cards) {
-    for (const fact of card.facts) {
-      numerals.add(String(fact.value.amount));
-      numerals.add(typeof fact.surveyDate === "number" ? String(fact.surveyDate) : fact.surveyDate.slice(0, 4));
-    }
+    facts.push(...card.facts);
+  }
+  for (const issue of issues) {
+    facts.push(...issue.basisFacts);
+  }
+  for (const fact of facts) {
+    numerals.add(String(fact.value.amount));
+    numerals.add(typeof fact.surveyDate === "number" ? String(fact.surveyDate) : fact.surveyDate.slice(0, 4));
   }
   return numerals;
 }
@@ -148,16 +173,31 @@ type CheckedFixture = Readonly<{
   checks: BuildChecks;
 }>;
 
-/** Checks the fictional data (steps 5 and 7): the question bank, the cards with the coverage, and the texts. */
+/**
+ * Checks the fictional data (steps 5 and 7): the question bank, the cards with the coverage, the texts,
+ * and the record of the issues that the questions and the cards rest on. A finding about a question
+ * counts with the question bank, and the others with the cards.
+ */
 function checkFixtureData(
   data: FixtureData,
   neutrality: NeutralityConfig,
   buildConfig: BuildConfig,
+  issues: IssueSnapshotView,
 ): CheckedFixture {
   const themes = [...new Set(data.bank.diagnosticSets.flatMap((set) => set.themeIds))];
 
-  const bankResult = inspectQuestionBank(data.bank, { config: neutrality, factNumerals: factNumeralsOf(data.cards) });
-  const bankFindings = bankResult.ok ? [] : bankResult.error.violations.map(toGateFinding);
+  const linkFindings = checkIssueLinks({
+    links: data.issueLinks ?? EMPTY_LINKS,
+    dataKind: "FIXTURE",
+    questions: data.bank.questions,
+    cards: data.cards,
+    snapshot: issues,
+  });
+  const bankResult = inspectQuestionBank(data.bank, { config: neutrality, factNumerals: factNumeralsOf(data.cards, issues.issues) });
+  const bankFindings = [
+    ...(bankResult.ok ? [] : bankResult.error.violations.map(toGateFinding)),
+    ...linkFindings.filter((finding) => finding.targetKind === "QUESTION"),
+  ];
 
   const fixtureCards = data.cards.filter((card): card is FixtureIssueCard => card.dataKind === "FIXTURE");
   const cardConfig = {
@@ -169,6 +209,7 @@ function checkFixtureData(
   const cardFindings = [
     ...fixtureCards.flatMap((card) => checkFixtureIssueCard(card, { config: cardConfig, sourceText: (id) => data.sourceTexts.get(id) })),
     ...checkCardCoverage(data.cards, themes),
+    ...linkFindings.filter((finding) => finding.targetKind !== "QUESTION"),
   ];
   const textFindings = [
     ...inspectFixedTexts(data.fixedTexts, neutrality),
@@ -279,7 +320,16 @@ export async function runBuild(request: BuildRequest, dependencies: BuildDepende
     };
     return fail([unreadable], { ...SKIPPED, dataBoundary: "FAILED" }, "FIXTURE", switchReasonCodes);
   }
-  const checked = checkFixtureData(fixture.value, neutrality.value, buildConfig.value);
+  // The issues that are valid now. A card whose issue is not valid is taken as not approved (a copy: the card on the disk is not changed).
+  const issues = await (dependencies.issueSource ?? NO_ISSUES)({ dataKind: "FIXTURE" });
+  if (issues === null) {
+    return fail([configFinding("issues")], { ...SKIPPED, dataBoundary: "FAILED" }, "FIXTURE", switchReasonCodes);
+  }
+  const data: FixtureData = {
+    ...fixture.value,
+    cards: applyIssueValidity(fixture.value.cards, fixture.value.issueLinks ?? EMPTY_LINKS, issues),
+  };
+  const checked = checkFixtureData(data, neutrality.value, buildConfig.value, issues);
   if (!confirmFixtureFallback(decision, checked.findings).ok) {
     return fail(checked.findings, checked.checks, "FIXTURE", switchReasonCodes);
   }
@@ -296,11 +346,11 @@ export async function runBuild(request: BuildRequest, dependencies: BuildDepende
       generatedAt: request.generatedAt,
       dataVersion: buildConfig.value.dataVersion,
     },
-    bank: fixture.value.bank,
-    cards: fixture.value.cards,
-    resultTexts: fixture.value.resultTexts,
-    fixedTexts: fixture.value.fixedTexts,
-    guidance: fixture.value.guidance,
+    bank: data.bank,
+    cards: data.cards,
+    resultTexts: data.resultTexts,
+    fixedTexts: data.fixedTexts,
+    guidance: data.guidance,
     mapConfig: mapConfig.value,
     aiContribution: NO_AI,
   } satisfies AssemblyInput);

@@ -7,8 +7,12 @@ import { verifyBundleText } from "@ehime-vote-navigator/domain";
 
 import { createSafeLogger, type SafeLogger } from "../logging/safeLogger.js";
 import { loadBuildConfig } from "./build/loadConfig.js";
+import { runDraftCommand } from "./draftCli.js";
+import type { DraftCommandSeams } from "./draftCli.js";
+import { createIssueSource, loadIssueSettings, runIssuesCommand } from "./issuesCli.js";
+import type { IssuesCommandSeams } from "./issuesCli.js";
 import { failedReport } from "./build/report.js";
-import { runBuild, type BuildRequest, type RealDataLoader } from "./build/runBuild.js";
+import { runBuild, type BuildRequest, type IssueSource, type RealDataLoader } from "./build/runBuild.js";
 import {
   BUNDLE_FILE_NAME,
   relativeOutputPath,
@@ -27,6 +31,8 @@ import {
 /** Terminal boundary of the CLI; tests replace it with a fake. */
 export type RegionalValuesCliIo = Readonly<{
   write: (line: string) => void;
+  /** Asks a yes/no question (the approval of an issue). Anything but an explicit yes must resolve false. */
+  confirm?: (question: string) => Promise<boolean>;
 }>;
 
 export type RegionalValuesCliOptions = Readonly<{
@@ -40,6 +46,10 @@ export type RegionalValuesCliOptions = Readonly<{
   /** Test seams. */
   realDataLoader?: RealDataLoader;
   outputOperations?: OutputOperations;
+  /** Test seams of the commands of the draft process (`draft ...`, `approve ...`). */
+  draft?: DraftCommandSeams;
+  /** Test seams of the commands of the approved issues (`issues ...`). */
+  issues?: IssuesCommandSeams;
 }>;
 
 /** The stable codes that the CLI prints. It never prints more than a code. */
@@ -48,12 +58,19 @@ export const CLI_ERROR_CODES = ["USAGE", "ARGUMENT_INVALID", "BUILD_FAILED", "SE
 const USAGE_LINES: readonly string[] = [
   "Usage: npm run regional-values -- build --kind demo|public",
   "         [--data-mode REAL|FIXTURE|REAL_PREFERRED]",
-  "         [--generated-at <ISO 8601 time>] [--config-dir <path>]",
+  "         [--generated-at <ISO 8601 time>] [--config-dir <path>] [--draft-settings <settings.json>]",
   "  demo   uses REAL_PREFERRED unless --data-mode is given",
   "  public uses REAL and accepts no other mode",
+  "  --draft-settings gives the lists of words that the issues are judged with; without it the build sees no issue",
 ];
 
-type Parsed = Readonly<{ kind: BuildKind; dataMode: DataMode; generatedAt: string | null; configDir: string | null }>;
+type Parsed = Readonly<{
+  kind: BuildKind;
+  dataMode: DataMode;
+  generatedAt: string | null;
+  configDir: string | null;
+  draftSettings: string | null;
+}>;
 
 const DATA_MODES: readonly DataMode[] = ["REAL", "FIXTURE", "REAL_PREFERRED"];
 
@@ -73,7 +90,10 @@ function readOptions(args: readonly string[]): Map<string, string> | null {
 
 function parseArguments(args: readonly string[]): Parsed | null {
   const options = readOptions(args);
-  if (options === null || [...options.keys()].some((name) => !["--kind", "--data-mode", "--generated-at", "--config-dir"].includes(name))) {
+  if (
+    options === null ||
+    [...options.keys()].some((name) => !["--kind", "--data-mode", "--generated-at", "--config-dir", "--draft-settings"].includes(name))
+  ) {
     return null;
   }
   const kindText = options.get("--kind");
@@ -95,7 +115,13 @@ function parseArguments(args: readonly string[]): Parsed | null {
   if (generatedAt !== null && !ISOInstantSchema.safeParse(generatedAt).success) {
     return null;
   }
-  return { kind, dataMode: resolvedMode, generatedAt, configDir: options.get("--config-dir") ?? null };
+  return {
+    kind,
+    dataMode: resolvedMode,
+    generatedAt,
+    configDir: options.get("--config-dir") ?? null,
+    draftSettings: options.get("--draft-settings") ?? null,
+  };
 }
 
 async function selfCheck(workspaceRoot: string, request: BuildRequest, dataVersion: string): Promise<boolean> {
@@ -115,6 +141,24 @@ async function selfCheck(workspaceRoot: string, request: BuildRequest, dataVersi
 export async function runRegionalValuesCli(argv: readonly string[], options: RegionalValuesCliOptions): Promise<number> {
   const { io } = options;
   const [command, ...rest] = argv;
+  if (command === "draft" || command === "approve") {
+    return runDraftCommand(argv, {
+      io,
+      workspaceRoot: options.workspaceRoot,
+      ...(options.now === undefined ? {} : { now: options.now }),
+      ...(options.logWriter === undefined ? {} : { logWriter: options.logWriter }),
+      ...(options.draft === undefined ? {} : { draft: options.draft }),
+    });
+  }
+  if (command === "issues") {
+    // A process of its own, apart from the build: the build does not read its output, and its failure does not stop the build.
+    return runIssuesCommand(argv, {
+      io,
+      workspaceRoot: options.workspaceRoot,
+      ...(options.now === undefined ? {} : { now: options.now }),
+      ...(options.issues === undefined ? {} : { issues: options.issues }),
+    });
+  }
   if (command !== "build") {
     for (const line of USAGE_LINES) {
       io.write(line);
@@ -139,11 +183,25 @@ export async function runRegionalValuesCli(argv: readonly string[], options: Reg
     generatedAt: parsed.generatedAt ?? now().toISOString(),
   };
 
+  // The issues that are valid now, judged with the lists of words that a person gives (Req 13.7, 13.8).
+  // The build does not read `issues.json`, and `issues export` does not need the build.
+  let issueSource: IssueSource | undefined;
+  if (parsed.draftSettings !== null) {
+    const context = { workspaceRoot: options.workspaceRoot, ...(options.issues === undefined ? {} : { issues: options.issues }) };
+    const settings = await loadIssueSettings(context, parsed.draftSettings, parsed.configDir ?? join("config", "regional-values"));
+    if (settings === null) {
+      io.write("code=CONFIG_UNREADABLE");
+      return 1;
+    }
+    issueSource = createIssueSource(context, settings);
+  }
+
   const result = await runBuild(request, {
     now: () => now().toISOString(),
     logger,
     ...(options.realDataLoader === undefined ? {} : { realDataLoader: options.realDataLoader }),
     ...(options.outputOperations === undefined ? {} : { outputOperations: options.outputOperations }),
+    ...(issueSource === undefined ? {} : { issueSource }),
   });
   if (result.exitCode !== 0) {
     io.write("code=BUILD_FAILED");

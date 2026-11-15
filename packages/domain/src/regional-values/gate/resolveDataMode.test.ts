@@ -32,6 +32,23 @@ function decide(mode: DataMode, findings: readonly GateFinding[], kind: BuildKin
   return resolveDataMode(mode, kind, findings);
 }
 
+describe("resolveDataMode: QUESTION_ISSUE_INVALID is a shortage (Req 13.7)", () => {
+  const invalid = [finding("QUESTION_ISSUE_INVALID", "question-1")];
+
+  it("makes REAL fail and REAL_PREFERRED fall back to FIXTURE with the code named", () => {
+    expect(decide("REAL", invalid)).toEqual(refused(["QUESTION_ISSUE_INVALID"]));
+    expect(decide("REAL_PREFERRED", invalid)).toEqual(adopted("FIXTURE", true, ["QUESTION_ISSUE_INVALID"]));
+  });
+
+  it("makes a public build fail, because a shortage has nothing to fall back to", () => {
+    expect(decide("REAL", invalid, "PUBLIC")).toEqual(refused(["QUESTION_ISSUE_INVALID"]));
+  });
+
+  it("does not concern FIXTURE, which does not read the real data", () => {
+    expect(decide("FIXTURE", invalid)).toEqual(adopted("FIXTURE"));
+  });
+});
+
 describe("resolveDataMode: the table of the demo build", () => {
   describe("A. the real data satisfies every condition", () => {
     it("REAL uses the real data without a switch", () => {

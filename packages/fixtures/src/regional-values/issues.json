@@ -1,0 +1,346 @@
+{
+  "coverage": [
+    {
+      "issueCount": 0,
+      "themeId": "TRANSPORT"
+    },
+    {
+      "issueCount": 1,
+      "themeId": "EDUCATION_CHILDCARE"
+    },
+    {
+      "issueCount": 0,
+      "themeId": "ECONOMY_EMPLOYMENT"
+    },
+    {
+      "issueCount": 0,
+      "themeId": "HEALTHCARE_WELFARE"
+    },
+    {
+      "issueCount": 1,
+      "themeId": "DISASTER_PREVENTION"
+    },
+    {
+      "issueCount": 1,
+      "themeId": "POPULATION_REVITALIZATION"
+    }
+  ],
+  "issues": [
+    {
+      "additionalChecks": [
+        "避難場所ごとの災害の種類を確かめる必要があります。",
+        "避難場所までの道のりの状況を確かめる必要があります。"
+      ],
+      "approval": {
+        "approvedAt": "2026-01-04T09:00:00.000Z",
+        "approverCount": 1,
+        "approverId": "fixture-issue-approver-v1",
+        "status": "APPROVED"
+      },
+      "background": [],
+      "basisFacts": [
+        {
+          "area": "架空町みなと",
+          "dataKind": "FIXTURE",
+          "factId": "fixture-fact-disaster-v1",
+          "fictionalSourceId": "fixture-source-disaster-v1",
+          "sentence": "架空町みなとの避難場所は8か所です。",
+          "surveyDate": 2025,
+          "value": {
+            "amount": 8,
+            "unit": "か所"
+          }
+        },
+        {
+          "area": "架空町みなと",
+          "dataKind": "FIXTURE",
+          "factId": "fixture-fact-disaster-hills-v1",
+          "fictionalSourceId": "fixture-source-disaster-v1",
+          "sentence": "架空町みなとの高台にある避難場所は3か所です。",
+          "surveyDate": 2025,
+          "value": {
+            "amount": 3,
+            "unit": "か所"
+          }
+        }
+      ],
+      "dataKind": "FIXTURE",
+      "decisionScenes": [
+        "日ごろの避難の備えを考える場面",
+        "避難場所の整え方を考える場面"
+      ],
+      "factSummary": [
+        {
+          "groundFactIds": [
+            "fixture-fact-disaster-v1"
+          ],
+          "text": "架空町みなとの避難場所は、2025年時点で8か所です。"
+        },
+        {
+          "groundFactIds": [
+            "fixture-fact-disaster-hills-v1"
+          ],
+          "text": "架空町みなとの高台にある避難場所は、2025年時点で3か所です。"
+        }
+      ],
+      "issueHash": "096f6ac72c8a252960a33c8ce812673a3070837191a514ba9957d73b408a7f64",
+      "issueId": "fixture-issue-disaster-v1",
+      "notDeterminable": [
+        "高台にない避難場所の安全性は、この資料からは分かりません。",
+        "避難場所に避難できる人数は、この資料からは分かりません。"
+      ],
+      "provenance": {
+        "aiInvolvement": "AI_DRAFT",
+        "draftId": "5fb01f6b6ca94c33094a126664c1094a3a021c5553ebf397c5ac7131e441c8bd",
+        "generatedAt": "2026-01-04T08:00:02.000Z",
+        "humanEdited": false,
+        "modelId": "fixture-draft-model-v1",
+        "promptVersion": "rv-draft-1"
+      },
+      "responseDirections": [
+        {
+          "category": "CHANGE",
+          "description": "避難場所の場所や設備を整える取り組みです。",
+          "label": "避難場所の整備を進める",
+          "status": "REFERENCE_ONLY"
+        },
+        {
+          "category": "CONTINUE",
+          "description": "避難に必要な情報を伝える取り組みを広げます。",
+          "label": "避難の情報を広める",
+          "status": "REFERENCE_ONLY"
+        }
+      ],
+      "sources": [
+        {
+          "dataKind": "FIXTURE",
+          "sourceId": "fixture-source-disaster-v1"
+        }
+      ],
+      "statement": "架空町みなとの避難場所の立地を、確かめる必要があるかもしれません。",
+      "themeId": "DISASTER_PREVENTION",
+      "title": "避難場所の立地の確認",
+      "version": 1
+    },
+    {
+      "additionalChecks": [
+        "相談の開催時間帯を確かめる必要があります。",
+        "利用者の年齢や世帯の状況を確かめる必要があります。"
+      ],
+      "approval": {
+        "approvedAt": "2026-01-04T09:00:00.000Z",
+        "approverCount": 1,
+        "approverId": "fixture-issue-approver-v1",
+        "status": "APPROVED"
+      },
+      "background": [],
+      "basisFacts": [
+        {
+          "area": "架空村ひなた",
+          "dataKind": "FIXTURE",
+          "factId": "fixture-fact-education-v1",
+          "fictionalSourceId": "fixture-source-education-v1",
+          "sentence": "架空村ひなたの子育て相談は6回です。",
+          "surveyDate": "2025-09-01",
+          "value": {
+            "amount": 6,
+            "unit": "回"
+          }
+        },
+        {
+          "area": "架空村ひなた",
+          "dataKind": "FIXTURE",
+          "factId": "fixture-fact-education-users-v1",
+          "fictionalSourceId": "fixture-source-education-v1",
+          "sentence": "架空村ひなたの子育て相談の利用は延べ54人です。",
+          "surveyDate": "2025-09-01",
+          "value": {
+            "amount": 54,
+            "unit": "人"
+          }
+        }
+      ],
+      "dataKind": "FIXTURE",
+      "decisionScenes": [
+        "子育てを支える機会の持ち方を考える場面",
+        "子どもの学びを支える方法を考える場面"
+      ],
+      "factSummary": [
+        {
+          "groundFactIds": [
+            "fixture-fact-education-v1"
+          ],
+          "text": "架空村ひなたの子育て相談は、2025年9月1日時点で6回です。"
+        },
+        {
+          "groundFactIds": [
+            "fixture-fact-education-users-v1"
+          ],
+          "text": "架空村ひなたの子育て相談の利用は、2025年9月1日時点で延べ54人です。"
+        }
+      ],
+      "issueHash": "af38466c24a740be22c7179a21d1a82994a0e347e2ec7c910ec6cb1527de3d04",
+      "issueId": "fixture-issue-education-v1",
+      "notDeterminable": [
+        "利用した人が相談に満足したかどうかは、この資料からは分かりません。",
+        "相談を必要とする人の数は、この資料からは分かりません。"
+      ],
+      "provenance": {
+        "aiInvolvement": "AI_DRAFT",
+        "draftId": "4f481dce437575006bb3dc681e4135484984894d0406b759bf58f13e48969047",
+        "generatedAt": "2026-01-04T08:00:04.000Z",
+        "humanEdited": false,
+        "modelId": "fixture-draft-model-v1",
+        "promptVersion": "rv-draft-1"
+      },
+      "responseDirections": [
+        {
+          "category": "CHANGE",
+          "description": "相談できる時間や場所を増やす取り組みです。",
+          "label": "相談の機会を増やす",
+          "status": "REFERENCE_ONLY"
+        },
+        {
+          "category": "CONTINUE",
+          "description": "今ある相談の機会を続ける取り組みです。",
+          "label": "今ある相談を続ける",
+          "status": "REFERENCE_ONLY"
+        }
+      ],
+      "sources": [
+        {
+          "dataKind": "FIXTURE",
+          "sourceId": "fixture-source-education-v1"
+        }
+      ],
+      "statement": "架空村ひなたの子育て相談の利用状況を、確かめる必要があるかもしれません。",
+      "themeId": "EDUCATION_CHILDCARE",
+      "title": "子育て相談の機会と利用",
+      "version": 1
+    },
+    {
+      "additionalChecks": [
+        "年度ごとの開催回数を確かめる必要があります。",
+        "参加者の数え方が年度で同じかどうかを確かめる必要があります。"
+      ],
+      "approval": {
+        "approvedAt": "2026-01-04T09:00:00.000Z",
+        "approverCount": 1,
+        "approverId": "fixture-issue-approver-v1",
+        "status": "APPROVED"
+      },
+      "background": [
+        {
+          "groundFactIds": [
+            "fixture-fact-population-v1"
+          ],
+          "text": "地域活動は、2025年4月1日時点で12件あります。"
+        }
+      ],
+      "basisFacts": [
+        {
+          "area": "架空市あおば",
+          "dataKind": "FIXTURE",
+          "factId": "fixture-fact-population-2023-v1",
+          "fictionalSourceId": "fixture-source-population-v1",
+          "sentence": "架空市あおばの地域の集まりの参加者は、2023年度が延べ480人です。",
+          "surveyDate": 2023,
+          "value": {
+            "amount": 480,
+            "unit": "人"
+          }
+        },
+        {
+          "area": "架空市あおば",
+          "dataKind": "FIXTURE",
+          "factId": "fixture-fact-population-2024-v1",
+          "fictionalSourceId": "fixture-source-population-v1",
+          "sentence": "架空市あおばの地域の集まりの参加者は、2024年度が延べ420人です。",
+          "surveyDate": 2024,
+          "value": {
+            "amount": 420,
+            "unit": "人"
+          }
+        },
+        {
+          "area": "架空市あおば",
+          "dataKind": "FIXTURE",
+          "factId": "fixture-fact-population-v1",
+          "fictionalSourceId": "fixture-source-population-v1",
+          "sentence": "架空市あおばの地域活動は12件です。",
+          "surveyDate": "2025-04-01",
+          "value": {
+            "amount": 12,
+            "unit": "件"
+          }
+        }
+      ],
+      "dataKind": "FIXTURE",
+      "decisionScenes": [
+        "地域の集まりを続けるための支え方を考える場面",
+        "地域の外の人とのつながりを考える場面"
+      ],
+      "factSummary": [
+        {
+          "groundFactIds": [
+            "fixture-fact-population-2023-v1"
+          ],
+          "text": "架空市あおばの地域の集まりの参加者は、2023年度が延べ480人です。"
+        },
+        {
+          "groundFactIds": [
+            "fixture-fact-population-2024-v1"
+          ],
+          "text": "架空市あおばの地域の集まりの参加者は、2024年度が延べ420人です。"
+        }
+      ],
+      "issueHash": "a99b55850e705c6de00aa34da807bcf9d67605ac7c0d95163e01d2fab760219a",
+      "issueId": "fixture-issue-population-v1",
+      "notDeterminable": [
+        "参加者が減った理由は、この資料からは分かりません。",
+        "参加者の年齢や地区ごとの違いは、この資料からは分かりません。"
+      ],
+      "provenance": {
+        "aiInvolvement": "AI_DRAFT",
+        "draftId": "df190de24889ad3c166b9c35041978f4d52c7b3b49308273e923d53e85e02741",
+        "generatedAt": "2026-01-04T08:00:00.000Z",
+        "humanEdited": false,
+        "modelId": "fixture-draft-model-v1",
+        "promptVersion": "rv-draft-1"
+      },
+      "responseDirections": [
+        {
+          "category": "CHANGE",
+          "description": "参加しやすい新しい場や機会を用意する取り組みです。",
+          "label": "新しい集まりの場をつくる",
+          "status": "REFERENCE_ONLY"
+        },
+        {
+          "category": "CONTINUE",
+          "description": "今ある集まりを続けるための運営を支える取り組みです。",
+          "label": "今ある集まりを続ける",
+          "status": "REFERENCE_ONLY"
+        }
+      ],
+      "sources": [
+        {
+          "dataKind": "FIXTURE",
+          "sourceId": "fixture-source-population-v1"
+        }
+      ],
+      "statement": "架空市あおばでは、地域の集まりへの参加が減っている可能性があります。",
+      "themeId": "POPULATION_REVITALIZATION",
+      "title": "地域の集まりへの参加の変化",
+      "version": 1
+    }
+  ],
+  "meta": {
+    "contentHash": "da14899ab0bb734062e93a39f768fc5a55ce673eab4df8f35ef65056779fc0c5",
+    "dataKind": "FIXTURE",
+    "generatedAt": "2026-01-04T09:00:00Z",
+    "inputDigest": "54e7c68b97be213f98cd67058bd7683b660838ad4d91585d923ece9bc9eecccc",
+    "kind": "ISSUES",
+    "schemaVersion": 1
+  },
+  "withdrawn": []
+}

@@ -1,0 +1,13 @@
+{
+  "at": "2026-01-04T08:00:05.000Z",
+  "dataKind": "FIXTURE",
+  "draftId": "4f481dce437575006bb3dc681e4135484984894d0406b759bf58f13e48969047",
+  "eventId": "737a3f0037cfa4dcb6c82533f0c49aa913a1314fd9ee99a8aad126035a77ef6b",
+  "kind": "HUMAN_ADOPTED",
+  "reviewerId": "fixture-issue-reviewer-v1",
+  "target": {
+    "targetId": "fixture-issue-education-v1",
+    "targetKind": "ISSUE"
+  },
+  "task": "ISSUE_CANDIDATE"
+}

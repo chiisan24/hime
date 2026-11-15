@@ -1,0 +1,17 @@
+{
+  "approvedAt": "2026-01-04T09:00:00.000Z",
+  "approverId": "fixture-issue-approver-v1",
+  "issueChecks": {
+    "factAndHypothesisSeparated": true,
+    "factsMatch": true,
+    "noCausalClaim": true,
+    "noRecommendation": true,
+    "sourcesShown": true,
+    "unknownsStated": true
+  },
+  "targetHash": "af38466c24a740be22c7179a21d1a82994a0e347e2ec7c910ec6cb1527de3d04",
+  "targetId": "fixture-issue-education-v1",
+  "targetKind": "ISSUE",
+  "targetVersion": 1,
+  "type": "APPROVE"
+}

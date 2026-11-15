@@ -175,6 +175,18 @@ describe("gate reason codes and findings", () => {
     expect(Object.values(GATE_REASON_CLASS).every((value) => value === "SHORTAGE" || value === "DEFECT")).toBe(true);
   });
 
+  it("has QUESTION_ISSUE_INVALID as a shortage, and CONTRACT_VIOLATION stays a defect (Req 13.7)", () => {
+    expect(GATE_REASON_CODES).toContain("QUESTION_ISSUE_INVALID");
+    expect(GATE_REASON_CLASS.QUESTION_ISSUE_INVALID).toBe("SHORTAGE");
+    expect(GATE_REASON_CLASS.CONTRACT_VIOLATION).toBe("DEFECT");
+    expect(GateFindingSchema.safeParse({ code: "QUESTION_ISSUE_INVALID", class: "SHORTAGE", targetKind: "QUESTION", targetId: "question-1" }).success).toBe(
+      true,
+    );
+    expect(GateFindingSchema.safeParse({ code: "QUESTION_ISSUE_INVALID", class: "DEFECT", targetKind: "QUESTION", targetId: "question-1" }).success).toBe(
+      false,
+    );
+  });
+
   it("accepts a stable ID only and rejects a class that does not fit its code", () => {
     expect(GateFindingSchema.safeParse({ code: "FACT_NOT_VERIFIED", class: "SHORTAGE", targetKind: "FACT_ITEM", targetId: "fact-1" }).success).toBe(
       true,

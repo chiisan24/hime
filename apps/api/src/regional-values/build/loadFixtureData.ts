@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import {
@@ -32,6 +32,8 @@ export const FIXTURE_FILE_NAMES = {
   resultTexts: "result-texts.json",
   fixedTexts: "fixed-texts.json",
   guidance: "guidance.json",
+  /** The record of the issues that the questions and the cards rest on (Req 13.7). It may be absent: then there is no link. */
+  issueLinks: "issue-links.json",
 } as const;
 
 export type FixtureDataUnreadable = Readonly<{ code: "FIXTURE_DATA_UNREADABLE"; file: string }>;
@@ -45,6 +47,12 @@ export type FixtureData = Readonly<{
   guidance: readonly GuidanceQuestion[];
   /** The text of a fictional source by its ID, for the check of the quotations. */
   sourceTexts: ReadonlyMap<string, string>;
+  /**
+   * The record of links as it was read, not yet checked against the contract (`checkIssueLinks` does
+   * that, and a record that does not satisfy it is a defect of the data). `undefined` when the file is
+   * not there. It is not a part of the bundle, and it does not reach the calculation of the map.
+   */
+  issueLinks: unknown;
 }>;
 
 function unreadable(file: string): Result<never, FixtureDataUnreadable> {
@@ -76,6 +84,16 @@ async function readSourceTexts(directory: string, cards: readonly IssueCard[]): 
   return texts;
 }
 
+/** The record of links: `undefined` when the file is not there, and a failure when it cannot be read as JSON. */
+async function readIssueLinks(directory: string): Promise<Result<unknown, FixtureDataUnreadable>> {
+  try {
+    await access(join(directory, FIXTURE_FILE_NAMES.issueLinks));
+  } catch {
+    return { ok: true, value: undefined };
+  }
+  return readJson(directory, FIXTURE_FILE_NAMES.issueLinks);
+}
+
 /**
  * Reads and checks the fictional data of `directory`. Every file is read even after the first
  * problem is known, but the first unreadable file is the one that is reported.
@@ -86,12 +104,14 @@ export async function loadFixtureData(directory: string): Promise<Result<Fixture
   const resultTexts = await readJson(directory, FIXTURE_FILE_NAMES.resultTexts);
   const fixedTexts = await readJson(directory, FIXTURE_FILE_NAMES.fixedTexts);
   const guidance = await readJson(directory, FIXTURE_FILE_NAMES.guidance);
+  const issueLinks = await readIssueLinks(directory);
 
   if (!bank.ok) return bank;
   if (!cards.ok) return cards;
   if (!resultTexts.ok) return resultTexts;
   if (!fixedTexts.ok) return fixedTexts;
   if (!guidance.ok) return guidance;
+  if (!issueLinks.ok) return issueLinks;
 
   const parsedBank = QuestionBankSchema.safeParse(bank.value);
   if (!parsedBank.success) return unreadable(FIXTURE_FILE_NAMES.questionBank);
@@ -113,6 +133,7 @@ export async function loadFixtureData(directory: string): Promise<Result<Fixture
       fixedTexts: parsedFixed.data,
       guidance: parsedGuidance.data,
       sourceTexts: await readSourceTexts(directory, parsedCards.data),
+      issueLinks: issueLinks.value,
     },
   };
 }

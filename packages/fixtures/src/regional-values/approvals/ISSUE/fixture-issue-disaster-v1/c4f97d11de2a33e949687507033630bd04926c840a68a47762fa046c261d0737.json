@@ -1,0 +1,17 @@
+{
+  "approvedAt": "2026-01-04T09:00:00.000Z",
+  "approverId": "fixture-issue-approver-v1",
+  "issueChecks": {
+    "factAndHypothesisSeparated": true,
+    "factsMatch": true,
+    "noCausalClaim": true,
+    "noRecommendation": true,
+    "sourcesShown": true,
+    "unknownsStated": true
+  },
+  "targetHash": "096f6ac72c8a252960a33c8ce812673a3070837191a514ba9957d73b408a7f64",
+  "targetId": "fixture-issue-disaster-v1",
+  "targetKind": "ISSUE",
+  "targetVersion": 1,
+  "type": "APPROVE"
+}

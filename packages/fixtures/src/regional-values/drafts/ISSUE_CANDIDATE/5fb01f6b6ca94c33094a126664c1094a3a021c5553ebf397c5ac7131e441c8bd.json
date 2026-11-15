@@ -1,0 +1,64 @@
+{
+  "aiClass": "AI_DRAFT",
+  "dataKind": "FIXTURE",
+  "draftId": "5fb01f6b6ca94c33094a126664c1094a3a021c5553ebf397c5ac7131e441c8bd",
+  "generatedAt": "2026-01-04T08:00:02.000Z",
+  "inputSources": [],
+  "key": {
+    "inputHash": "5bf24c7036624ffce655ebf73098eab73d06244d046b10b73b25f321c574cb69",
+    "modelId": "fixture-draft-model-v1",
+    "promptVersion": "rv-draft-1",
+    "task": "ISSUE_CANDIDATE"
+  },
+  "modelId": "fixture-draft-model-v1",
+  "output": {
+    "additionalChecks": [
+      "避難場所ごとの災害の種類を確かめる必要があります。",
+      "避難場所までの道のりの状況を確かめる必要があります。"
+    ],
+    "background": [],
+    "basisFactIds": [
+      "fixture-fact-disaster-v1",
+      "fixture-fact-disaster-hills-v1"
+    ],
+    "decisionScenes": [
+      "日ごろの避難の備えを考える場面",
+      "避難場所の整え方を考える場面"
+    ],
+    "factSummary": [
+      {
+        "groundFactIds": [
+          "fixture-fact-disaster-v1"
+        ],
+        "text": "架空町みなとの避難場所は、2025年時点で8か所です。"
+      },
+      {
+        "groundFactIds": [
+          "fixture-fact-disaster-hills-v1"
+        ],
+        "text": "架空町みなとの高台にある避難場所は、2025年時点で3か所です。"
+      }
+    ],
+    "notDeterminable": [
+      "高台にない避難場所の安全性は、この資料からは分かりません。",
+      "避難場所に避難できる人数は、この資料からは分かりません。"
+    ],
+    "responseDirections": [
+      {
+        "category": "CHANGE",
+        "description": "避難場所の場所や設備を整える取り組みです。",
+        "label": "避難場所の整備を進める",
+        "status": "REFERENCE_ONLY"
+      },
+      {
+        "category": "CONTINUE",
+        "description": "避難に必要な情報を伝える取り組みを広げます。",
+        "label": "避難の情報を広める",
+        "status": "REFERENCE_ONLY"
+      }
+    ],
+    "statement": "架空町みなとの避難場所の立地を、確かめる必要があるかもしれません。",
+    "themeId": "DISASTER_PREVENTION",
+    "title": "避難場所の立地の確認"
+  }
+}

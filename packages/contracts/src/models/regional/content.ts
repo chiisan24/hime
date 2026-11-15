@@ -250,7 +250,45 @@ const DocumentIdReferenceSchema = z.object({ kind: z.literal("document-id"), doc
 /** The data set in a public data catalog that a source comes from (Req 7.5 j). Only such a source has it. */
 export const CatalogRefSchema = z.object({ name: NonEmptyStringSchema, datasetId: NonEmptyStringSchema }).strict();
 
-const RealSourceSchema = z
+/** A plain file name: no path separator and not a relative path (the same rule as the placement of an original). */
+const SimpleFileNameSchema = NonEmptyStringSchema.refine(
+  (name) => !/[\\/]/u.test(name) && name !== "." && name !== "..",
+  "Must be a plain file name",
+);
+
+/**
+ * The record of a conversion by a person from the format that the publisher offers (for example
+ * xlsx) to the format that is taken in (CSV) (Req 7.24). A conversion is the work of a person and
+ * cannot be reproduced by a machine, so the record names the person and the procedure.
+ * Only a conversion that keeps every row is recorded: one row of the original is one row of the
+ * result.
+ */
+export const SourceConversionSchema = z
+  .object({
+    originalFileName: SimpleFileNameSchema,
+    originalSha256: Sha256Schema,
+    /** The SHA-256 of the file that is taken in. It equals the `sha256` of the source. */
+    convertedSha256: Sha256Schema,
+    procedureId: IdSchema,
+    procedureDocSha256: Sha256Schema,
+    convertedBy: IdSchema,
+    convertedAt: ISOInstantSchema,
+    correspondence: z.literal("ROWS_PRESERVED"),
+    originalRowCount: z.number().int().nonnegative(),
+    convertedRowCount: z.number().int().nonnegative(),
+  })
+  .strict()
+  .superRefine((conversion, context) => {
+    if (conversion.originalRowCount !== conversion.convertedRowCount) {
+      context.addIssue({
+        code: "custom",
+        message: "The number of rows must be the same before and after the conversion",
+        path: ["convertedRowCount"],
+      });
+    }
+  });
+
+export const RealSourceSchema = z
   .object({
     dataKind: z.literal("REAL_AI"),
     sourceId: SourceIdSchema,
@@ -267,46 +305,129 @@ const RealSourceSchema = z
     transmission: TransmissionReviewSchema,
     license: LicenseSchema,
     catalog: CatalogRefSchema.optional(),
+    /** Only a source that was converted by a person has it. */
+    conversion: SourceConversionSchema.optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((source, context) => {
+    if (source.conversion !== undefined && source.conversion.convertedSha256 !== source.sha256) {
+      context.addIssue({
+        code: "custom",
+        message: "conversion.convertedSha256 must equal the sha256 of the source",
+        path: ["conversion", "convertedSha256"],
+      });
+    }
+  });
 
 /** A fictional source has a fictional document ID only: no URL and no real publisher name (Req 7.17). */
-const FixtureSourceSchema = z.object({ dataKind: z.literal("FIXTURE"), sourceId: IdSchema }).strict();
+export const FixtureSourceSchema = z.object({ dataKind: z.literal("FIXTURE"), sourceId: IdSchema }).strict();
 
 /** No election ID and no candidate ID: the strict objects reject them as unknown keys (Req 7.7). */
 export const RegionalSourceSchema = z.discriminatedUnion("dataKind", [RealSourceSchema, FixtureSourceSchema]);
 
+export const COMPUTED_AGGREGATIONS = ["COUNT_ROWS", "COUNT_ROWS_WHERE", "SUM_COLUMN"] as const;
+
+/**
+ * A value that a fixed rule computes from the rows of a table (Req 7.18 m, 7.25, 7.27).
+ *
+ *  - COUNT_ROWS: counts the rows. It has no `column`, no `equals` and no `whereColumn`.
+ *  - COUNT_ROWS_WHERE: counts the rows in which `column` equals `equals`. It has no `whereColumn`.
+ *  - SUM_COLUMN: adds the numbers of `column`. The rows can be limited to those in which
+ *    `whereColumn` equals `equals`; `whereColumn` and `equals` are both null, or both set.
+ *    `whereColumn` is written in this aggregation, and in no other.
+ *
+ * `sheet` is for a table that has sheets; a CSV has none. `dedupeColumns` names the columns that
+ * decide that two rows are the same row (Req 7.27 c). Without it no row is dropped, and two
+ * identical rows make the computation fail. It is never null: absent means no columns, so one
+ * method has one form (the hash of the method is the hash of this form).
+ */
 const ComputedMethodSchema = z
   .object({
     kind: z.literal("COMPUTED"),
-    aggregation: z.enum(["COUNT_ROWS", "COUNT_ROWS_WHERE"]),
-    sheet: NonEmptyStringSchema,
+    aggregation: z.enum(COMPUTED_AGGREGATIONS),
+    sheet: NonEmptyStringSchema.optional(),
     column: z.string().nullable(),
+    whereColumn: z.string().nullable().optional(),
     equals: z.string().nullable(),
+    dedupeColumns: z.array(NonEmptyStringSchema).min(1).optional(),
     description: NonEmptyStringSchema,
   })
   .strict();
 
 const QuotedMethodSchema = z.object({ kind: z.literal("QUOTED"), description: NonEmptyStringSchema }).strict();
 
-/** How the value was taken: counted by a fixed rule, or quoted as it stands in the original. */
+export const DERIVED_OPERATIONS = ["RATIO", "DIFFERENCE", "PERCENT_CHANGE"] as const;
+
+/**
+ * A value that is derived from two fact items that were verified (Req 7.25). The order of the two
+ * operands means something: RATIO is numerator then denominator, and DIFFERENCE and PERCENT_CHANGE
+ * are the later value then the earlier value. Only a fact of real data has a method, so only a
+ * fact of real data can be derived. The unit pair is the units of the numerator and the
+ * denominator of a ratio. An operand is never a derived fact (the MVP does not derive from a
+ * derived value).
+ */
+const DerivedMethodSchema = z
+  .object({
+    kind: z.literal("DERIVED"),
+    operation: z.enum(DERIVED_OPERATIONS),
+    operandFactIds: z.tuple([IdSchema, IdSchema]),
+    unitPair: z.object({ numerator: NonEmptyStringSchema, denominator: NonEmptyStringSchema }).strict().optional(),
+    description: NonEmptyStringSchema,
+  })
+  .strict();
+
+/** How the value was taken: counted or summed by a fixed rule, derived from verified facts, or quoted as it stands in the original. */
 export const FactMethodSchema = z
-  .discriminatedUnion("kind", [ComputedMethodSchema, QuotedMethodSchema])
+  .discriminatedUnion("kind", [ComputedMethodSchema, QuotedMethodSchema, DerivedMethodSchema])
   .superRefine((method, context) => {
+    if (method.kind === "DERIVED") {
+      const [first, second] = method.operandFactIds;
+      if (first === second) {
+        context.addIssue({ code: "custom", message: "The two operands must be different facts", path: ["operandFactIds", 1] });
+      }
+      if (method.unitPair !== undefined && method.operation !== "RATIO") {
+        context.addIssue({ code: "custom", message: "Only a RATIO has a unit pair", path: ["unitPair"] });
+      }
+      return;
+    }
     if (method.kind !== "COMPUTED") {
       return;
     }
-    const conditional = method.aggregation === "COUNT_ROWS_WHERE";
-    for (const field of ["column", "equals"] as const) {
-      if ((method[field] !== null) !== conditional) {
+    const { aggregation } = method;
+    const sum = aggregation === "SUM_COLUMN";
+    const conditional = aggregation === "COUNT_ROWS_WHERE";
+    // The rule of the two counts is the one that it was before SUM_COLUMN: set or null. A sum
+    // names its columns, so an empty name is not accepted there.
+    const need = (field: "column" | "equals", expected: boolean, nonBlank = false): void => {
+      const value = method[field];
+      const missing = expected ? value === null || (nonBlank && value.trim() === "") : value !== null;
+      if (missing) {
         context.addIssue({
           code: "custom",
-          message: conditional
-            ? `COUNT_ROWS_WHERE needs ${field}`
-            : `COUNT_ROWS has no ${field}`,
+          message: expected ? `${aggregation} needs ${field}` : `${aggregation} has no ${field}`,
           path: [field],
         });
       }
+    };
+    if (sum) {
+      need("column", true, true);
+      // The condition of a sum: whereColumn is written, and it is set exactly when equals is set.
+      const where = method.whereColumn;
+      if (where === undefined) {
+        context.addIssue({ code: "custom", message: "SUM_COLUMN needs whereColumn (null for no condition)", path: ["whereColumn"] });
+      } else if ((where !== null) !== (method.equals !== null) || (where !== null && where.trim() === "")) {
+        context.addIssue({
+          code: "custom",
+          message: "whereColumn and equals must both be set, or both be null",
+          path: ["whereColumn"],
+        });
+      }
+      return;
+    }
+    need("column", conditional);
+    need("equals", conditional);
+    if (method.whereColumn !== undefined) {
+      context.addIssue({ code: "custom", message: `${aggregation} has no whereColumn`, path: ["whereColumn"] });
     }
   });
 
@@ -335,7 +456,7 @@ const factCommonShape = {
   area: NonEmptyStringSchema,
 } as const;
 
-const RealFactSchema = z
+export const RealFactSchema = z
   .object({
     dataKind: z.literal("REAL_AI"),
     ...factCommonShape,
@@ -349,10 +470,21 @@ const RealFactSchema = z
     method: FactMethodSchema,
     verification: VerificationSchema,
   })
-  .strict();
+  .strict()
+  .superRefine((fact, context) => {
+    // A derived value is never derived from itself. (A derived value of a derived value is
+    // refused where two facts are seen together: checkFactComparison, deriveFact.)
+    if (fact.method.kind === "DERIVED" && fact.method.operandFactIds.includes(fact.factId)) {
+      context.addIssue({
+        code: "custom",
+        message: "A derived fact must not be its own operand",
+        path: ["method", "operandFactIds"],
+      });
+    }
+  });
 
 /** A fictional fact has the sentence, the value, the date, the area and a fictional document ID only. */
-const FixtureFactSchema = z
+export const FixtureFactSchema = z
   .object({ dataKind: z.literal("FIXTURE"), ...factCommonShape, fictionalSourceId: IdSchema })
   .strict();
 
@@ -411,10 +543,21 @@ export const IssueCardSchema = z
     }
   });
 
+/**
+ * The license and the survey date, for the contracts of the data set ledger and the issues. They
+ * are exported under names of this feature, so the barrel does not gain the generic names.
+ */
+export { LicenseSchema as RegionalLicenseSchema, SurveyDateSchema as RegionalSurveyDateSchema };
+
 export type TransmissionReview = z.infer<typeof TransmissionReviewSchema>;
 export type DatasetNoteReview = z.infer<typeof DatasetNoteReviewSchema>;
 export type CatalogRef = z.infer<typeof CatalogRefSchema>;
 export type RegionalSource = z.infer<typeof RegionalSourceSchema>;
+export type RealSource = z.infer<typeof RealSourceSchema>;
+export type FixtureSource = z.infer<typeof FixtureSourceSchema>;
+export type SourceConversion = z.infer<typeof SourceConversionSchema>;
 export type FactMethod = z.infer<typeof FactMethodSchema>;
 export type FactItem = z.infer<typeof FactItemSchema>;
+export type RealFact = z.infer<typeof RealFactSchema>;
+export type FixtureFact = z.infer<typeof FixtureFactSchema>;
 export type IssueCard = z.infer<typeof IssueCardSchema>;
