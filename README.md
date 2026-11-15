@@ -56,6 +56,26 @@ Remove-Item Env:RUN_BEDROCK_SMOKE
 
 入力は2万文字以下、最大出力は2,000トークン、同時実行は1件、呼出しは毎分10回以下に制限し、自動再試行はしません。Bedrockを呼ぶHTTPの窓口は作りません。
 
+### 地域課題のAI下書きの実Bedrock確認（任意・承認制）
+
+`packages/fixtures/`の架空の事実項目だけを、`draft run`と同じ処理で実際のBedrockに通して確認します。公式データ、個人情報、秘密は送りません。次のコマンドは、リージョン、モデル、キーのアカウント（下4桁だけ）、送る内容の大きさとSHA-256、上限、費用の最悪値と、その計画のダイジェストを表示するだけで、何も送りません。
+
+```powershell
+npm run bedrock:draft-check
+```
+
+計画を確認して承認する場合だけ、表示されたダイジェストを指定して実行します。計画が1文字でも変わるとダイジェストが変わり、何も送りません。
+
+```powershell
+$env:BEDROCK_LIVE_CHECK_APPROVAL = "<表示されたダイジェスト>"
+npm run bedrock:draft-check
+Remove-Item Env:BEDROCK_LIVE_CHECK_APPROVAL
+```
+
+上限は、呼出し4回以内（キーを受け付けないことの確認1回を含む。`--no-auth-probe`で除ける）、費用の最悪値5セント以内（`--max-cost-usd`で下げられ、1ドルを超える値は指定できません）、最初の失敗で停止、自動再試行なしです。結果は、固定の符号、ID、件数、トークン数、費用だけを表示し、キー、入力の文、応答の文は表示しません。下書きは`dist/bedrock-live-check/`（Git管理外）へ`PENDING`で保存し、承認はしません。検査用の語の一覧は、承認前の試験専用のもの（`tests/harness/regional-values/test-config/`）です。
+
+モデルが考える量は、`--thinking disabled|low|medium|high`で変えられます（指定しなければ、これまでと同じ要求です）。`disabled`は`jp.anthropic.claude-haiku-5-5`だけが受け付け、Opusでは計画の段階で拒否します。出力の上限（2,000トークン）は、どの設定でも変わりません。設定は計画のダイジェストに入るので、設定を変えると別の承認が要ります。結果には、呼出しごとの`headroom=`（上限までの余裕）、出力が上限で途切れた失敗の`truncated=true`、`summary tokens`の行（合計、1回の最大、最小の余裕）が出ます。
+
 ### 選挙レジストリ（ローカルCLI）
 
 選挙は`config/election/elections.json`にデータとして登録します（現在は2022年の選挙を登録済みです）。2026年の候補者は、公式資料で確認できるまで登録しません。

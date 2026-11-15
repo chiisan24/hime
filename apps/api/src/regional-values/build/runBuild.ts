@@ -1,4 +1,3 @@
-import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 
 import { GATE_REASON_CLASS } from "@ehime-vote-navigator/contracts";
@@ -36,6 +35,7 @@ import type { SafeLogger } from "../../logging/safeLogger.js";
 import { logBuildDone, logBuildStart, logDataModeSwitched, logRealDataInsufficient } from "./buildLog.js";
 import { loadBuildConfig, loadMapConfig, loadNeutralityConfig } from "./loadConfig.js";
 import { loadFixtureData, type FixtureData } from "./loadFixtureData.js";
+import { createRealDataLoader } from "./realData.js";
 import { failedReport, successfulReport, type BuildChecks } from "./report.js";
 import { removeOldBundle, writeBundle, writeReport, type OutputOperations } from "./writeOutputs.js";
 
@@ -43,9 +43,9 @@ import { removeOldBundle, writeBundle, writeReport, type OutputOperations } from
  * The build of a regional values bundle (design: "ビルドパイプライン", steps 1 to 10).
  *
  * This version builds from the fictional data (`FIXTURE`). The real data is read through a
- * `RealDataLoader`, which is replaced when the real data is implemented (13.12). The default loader
- * reports that there is no real data (a shortage) or, if there is something in the directory, that
- * reading it is not implemented; the build then fails. It never falls back to the fictional data
+ * `RealDataLoader` (`realData.ts`, which judges the sources and the fact items that the intake writes). While there is no card of real data
+ * (13.16), the real data is absent (a shortage), and `REAL_PREFERRED` builds the fictional data and says why. If there is something in the directory that the
+ * loader cannot read yet, reading it is not implemented, and the build fails. It never falls back to the fictional data
  * without saying so.
  */
 
@@ -62,28 +62,6 @@ export type RealDataOutcome =
 
 /** Reads and checks the real data. A test replaces it. */
 export type RealDataLoader = (realDataDirectory: string) => Promise<RealDataOutcome>;
-
-const REAL_DATA_ABSENT: GateFinding = {
-  code: "REAL_DATA_ABSENT",
-  class: GATE_REASON_CLASS.REAL_DATA_ABSENT,
-  targetKind: "BUNDLE",
-  targetId: null,
-};
-
-/**
- * The default loader. A missing directory, or an empty one, is `REAL_DATA_ABSENT`, a shortage that
- * can be supplied. A directory with something in it is real data that this build cannot read yet, so
- * it is a failure, and not a reason to build the fictional data instead.
- */
-export const defaultRealDataLoader: RealDataLoader = async (realDataDirectory) => {
-  let entries: string[];
-  try {
-    entries = await readdir(realDataDirectory);
-  } catch {
-    return { kind: "FINDINGS", findings: [REAL_DATA_ABSENT] };
-  }
-  return entries.length === 0 ? { kind: "FINDINGS", findings: [REAL_DATA_ABSENT] } : { kind: "NOT_IMPLEMENTED" };
-};
 
 export type BuildRequest = Readonly<{
   /** The root of the repository. The files are read and written below it. */
@@ -285,7 +263,9 @@ export async function runBuild(request: BuildRequest, dependencies: BuildDepende
   // Steps 3 to 5: the real data is read only when the mode can use it.
   let realFindings: readonly GateFinding[] = [];
   if (request.dataMode !== "FIXTURE") {
-    const outcome = await (dependencies.realDataLoader ?? defaultRealDataLoader)(join(request.workspaceRoot, ...REAL_DATA_DIRECTORY));
+    // The loader that is not given is the one of `realData.ts`, with the lists of words of the settings (the check of a sentence of a fact item reads them).
+    const loader = dependencies.realDataLoader ?? createRealDataLoader({ properNouns: buildConfig.value.properNouns, numeralExemptWords: neutrality.value.numeralExemptWords });
+    const outcome = await loader(join(request.workspaceRoot, ...REAL_DATA_DIRECTORY));
     if (outcome.kind === "NOT_IMPLEMENTED") {
       // Real data exists, but it cannot be read yet. That is not a shortage to fall back from.
       return fail([], SKIPPED);

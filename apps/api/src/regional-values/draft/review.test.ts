@@ -1,4 +1,4 @@
-import { access, readdir, readFile } from "node:fs/promises";
+import { access, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { IssueSourceRecordSchema } from "@ehime-vote-navigator/contracts";
@@ -12,6 +12,7 @@ import {
   createFakeClient,
   createTempRoot,
   createTestDeps,
+  FIXTURE_FACTS,
   passingCandidate,
   passingQuestionDraft,
   passingSummary,
@@ -22,6 +23,7 @@ import type { TempRoot } from "../../../../../tests/harness/regional-values/draf
 import { countValidApprovals, hashOf, readLedger } from "./approvalLedger.js";
 import { readAiContribution } from "./contribution.js";
 import { deriveDisposition } from "./disposition.js";
+import { PROMPT_VERSION } from "./prompts/index.js";
 import { adoptDraft, approveTarget, rejectDraft, revokeApproval } from "./review.js";
 import type { ReviewDeps } from "./review.js";
 import type { DraftRequest } from "./request.js";
@@ -104,7 +106,7 @@ describe("adoptDraft: an issue candidate", () => {
       themeId: "TRANSPORT",
       dataKind: "FIXTURE",
       basisFactIds: ["fx-1", "fx-3"],
-      provenance: { aiInvolvement: "AI_DRAFT", draftId, modelId: "jp.anthropic.claude-haiku-5-5", promptVersion: "rv-draft-1", humanEdited: false },
+      provenance: { aiInvolvement: "AI_DRAFT", draftId, modelId: "jp.anthropic.claude-haiku-5-5", promptVersion: PROMPT_VERSION, humanEdited: false },
     });
     expect(adopted.value.issueRecord).toEqual(record);
 
@@ -246,6 +248,8 @@ describe("the approval of an issue", () => {
     const state = await setup();
     const draftId = await draftOf(state, candidateRequest());
     expect((await adoptDraft(state.review, { task: "ISSUE_CANDIDATE", draftId, reviewerId: "reviewer-1", target: ISSUE })).ok).toBe(true);
+    // The fictional facts that the issue rests on (`fx-1`, `fx-3`): an approval names them, so they have to be there.
+    await writeFile(join(state.temp.root.rootDir, "facts.json"), JSON.stringify(FIXTURE_FACTS));
     return state;
   }
 
@@ -268,6 +272,27 @@ describe("the approval of an issue", () => {
     });
     const ledger = await readLedger(state.temp.root);
     expect(ledger.ok && ledger.value).toHaveLength(1);
+  });
+
+  it("records the SHA-256 of each fact item that the version names, in the order of the version (the basis that the approval rests on)", async () => {
+    const state = await adoptedIssue();
+    const approved = await approveTarget(state.review, { ...ISSUE, version: 1, approverId: "approver-1", issueChecks: ALL_CHECKS });
+    const record = approved.ok ? approved.value : null;
+    const named = ["fx-1", "fx-3"].map((factId) => FIXTURE_FACTS.find((fact) => fact.factId === factId));
+    expect(record !== null && record.type === "APPROVE" ? record.basisFacts : undefined).toEqual(named.map((fact) => ({ factId: fact?.factId, sha256: hashOf(fact) })));
+    // The record on the disk is the one that was returned.
+    const ledger = await readLedger(state.temp.root);
+    expect(ledger.ok && ledger.value[0]).toEqual(record);
+  });
+
+  it("does not approve an issue whose fact items are not all there, and writes nothing", async () => {
+    const state = await adoptedIssue();
+    await writeFile(join(state.temp.root.rootDir, "facts.json"), JSON.stringify(FIXTURE_FACTS.filter((fact) => fact.factId !== "fx-3")));
+    expect(await approveTarget(state.review, { ...ISSUE, version: 1, approverId: "approver-1", issueChecks: ALL_CHECKS })).toEqual({
+      ok: false,
+      error: { code: "BASIS_FACT_NOT_FOUND", factIds: ["fx-3"] },
+    });
+    expect(await readLedger(state.temp.root)).toEqual({ ok: true, value: [] });
   });
 
   it("does not make an approval without the confirmations, or with one that is not made", async () => {

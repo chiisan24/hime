@@ -4,7 +4,7 @@ import { encodeCanonicalJson, sha256Hex } from "@ehime-vote-navigator/domain";
 
 import type { Pacer } from "../../analysis/pacer.js";
 import { ALLOWED_BEDROCK_MODEL_IDS } from "../../aws/bedrockConverse.js";
-import type { BedrockConverseClient, BedrockConverseError } from "../../aws/bedrockConverse.js";
+import type { BedrockConverseClient, BedrockConverseError, ConverseThinking } from "../../aws/bedrockConverse.js";
 import type { SafeLogger } from "../../logging/safeLogger.js";
 import { factNumeralsOf, runDraftChecks } from "./checks.js";
 import type { DraftCheckConfig, DraftCheckViolation } from "./checks.js";
@@ -12,7 +12,7 @@ import { checkDraftInput, inputSourcesOf } from "./checkDraftInput.js";
 import type { DraftInputContext, DraftInputMaterial, DraftInputReason } from "./checkDraftInput.js";
 import { draftIdOf, makeDraftEvent } from "./draftStore.js";
 import type { DraftStore, StoreErrorCode } from "./draftStore.js";
-import { buildPrompt, PROMPT_VERSION } from "./prompts/index.js";
+import { buildPrompt, promptOptionsOf, PROMPT_VERSION } from "./prompts/index.js";
 import { DraftRequestSchema } from "./request.js";
 import { fail, succeed } from "./types.js";
 import type { Outcome } from "./types.js";
@@ -34,12 +34,23 @@ export type DraftModels = Readonly<{
   verification: string;
 }>;
 
+/**
+ * How the model is asked, apart from the prompt. Nothing is set by default, and then the request is the one that was always
+ * sent. The limit of the output (`CONVERSE_MAX_TOKENS`) is not a setting here: it is a hard limit of the client.
+ */
+export type DraftInference = Readonly<{
+  /** How much the model thinks before it answers (see `ConverseThinking`). It is a part of the key of a draft, because it changes the answer. */
+  thinking?: ConverseThinking;
+}>;
+
 export type DraftDeps = Readonly<{
   client: BedrockConverseClient;
   store: DraftStore;
   pacer: Pacer;
   now: () => Date;
   models: DraftModels;
+  /** Without it the model is asked with the defaults of the service. */
+  inference?: DraftInference;
   /** The limits of an input, and how to find the current SHA-256 of an original if it is known. */
   gate: Omit<DraftInputContext, "bulletinSha256s">;
   /**
@@ -67,7 +78,11 @@ export type DraftError =
   | Readonly<{ code: "INPUT_REFUSED"; reasons: readonly DraftInputReason[] }>
   | Readonly<{ code: "REVIEW_MODEL_SAME_AS_DRAFT" }>
   | Readonly<{ code: "MODEL_NOT_ALLOWED" | "RATE_LIMITED" | "TIMEOUT" | "AUTH" | "SERVICE_ERROR" | "INPUT_TOO_LONG" | "INPUT_INVALID" }>
-  | Readonly<{ code: "CHECK_FAILED"; violations: readonly DraftCheckViolation[] }>
+  /**
+   * `truncated` is set (to `true`) only when the model stopped at the limit of the output (`max_tokens`): the output is cut
+   * off, so a failure of the checks says "the limit was too small for what the model spent", not "the model wrote it wrongly".
+   */
+  | Readonly<{ code: "CHECK_FAILED"; violations: readonly DraftCheckViolation[]; truncated?: true }>
   | Readonly<{ code: "STORE_READ_FAILED" | "STORE_WRITE_FAILED"; cause: StoreErrorCode }>;
 
 export type DraftOutcome = Outcome<DraftSuccess, DraftError>;
@@ -127,7 +142,7 @@ export async function runDraft(deps: DraftDeps, rawRequest: unknown): Promise<Dr
   }
 
   // 2. The gate of the input.
-  const prompt = buildPrompt(request, { premiseTemplates: deps.checks.neutrality.premiseTemplates });
+  const prompt = buildPrompt(request, promptOptionsOf(deps.checks));
   const material: DraftInputMaterial = {
     task,
     dataKind: request.dataKind,
@@ -163,9 +178,12 @@ export async function runDraft(deps: DraftDeps, rawRequest: unknown): Promise<Dr
     return done(fail({ code: "INPUT_REFUSED", reasons }));
   }
 
-  // 3. The key.
+  // 3. The key. A setting of the inference is in it only when it is set, so the key of a run with the defaults is what it always was.
+  const thinking = deps.inference?.thinking;
   const inputSources = inputSourcesOf(material);
-  const inputHash = Sha256Schema.parse(sha256Hex(encodeCanonicalJson({ system: prompt.system, text: prompt.text, inputSources })));
+  const inputHash = Sha256Schema.parse(
+    sha256Hex(encodeCanonicalJson({ system: prompt.system, text: prompt.text, inputSources, ...(thinking === undefined ? {} : { thinking }) })),
+  );
   const key: DraftRunKey = { task, promptVersion: PROMPT_VERSION, modelId, inputHash };
   const draftId = draftIdOf(key);
 
@@ -193,7 +211,12 @@ export async function runDraft(deps: DraftDeps, rawRequest: unknown): Promise<Dr
 
   // 5. The pace and the call.
   await deps.pacer.wait();
-  const response = await deps.client.converse({ modelId, system: prompt.system, text: prompt.text });
+  const response = await deps.client.converse({
+    modelId,
+    system: prompt.system,
+    text: prompt.text,
+    ...(thinking === undefined ? {} : { thinking }),
+  });
   if (!response.ok) {
     return done(fail(mapClientError(response.error)));
   }
@@ -221,7 +244,8 @@ export async function runDraft(deps: DraftDeps, rawRequest: unknown): Promise<Dr
         return done(fail({ code: "STORE_WRITE_FAILED", cause: appended.error.code }));
       }
     }
-    return done(fail({ code: "CHECK_FAILED", violations: checked.violations }));
+    const truncated = response.value.stopReason === "max_tokens";
+    return done(fail({ code: "CHECK_FAILED", violations: checked.violations, ...(truncated ? { truncated: true as const } : {}) }));
   }
 
   // 7. The draft is saved as it is, and the call is recorded. A draft has no field of its fate.

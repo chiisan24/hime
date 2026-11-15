@@ -15,7 +15,7 @@ import { effectiveVerification, encodeCanonicalJson, sha256Hex } from "@ehime-vo
 import type { EffectiveVerification } from "@ehime-vote-navigator/domain";
 
 import { approvalsOf, hashOf, readLedger } from "../draft/approvalLedger.js";
-import type { LedgerError } from "../draft/approvalLedger.js";
+import type { ApprovalEntry, LedgerError } from "../draft/approvalLedger.js";
 import { factNumeralsOf, runDraftChecks } from "../draft/checks.js";
 import type { DraftCheckConfig, DraftCheckContext } from "../draft/checks.js";
 import { readRecords } from "../draft/recordReader.js";
@@ -69,6 +69,27 @@ const REASON_ORDER: readonly WithdrawnReason[] = [
 /** The date that the checks of an issue are given. It is not used: only the checks of a question read it. */
 const NOT_USED_DATE = "2000-01-01";
 
+/**
+ * Whether an approval was made on the facts that the version of the issue rests on now: it recorded the SHA-256 of each fact
+ * item that the version names, and no fact item that is there is another one. An approval that recorded none (it was made before
+ * the basis was recorded) is not taken to be one that did: the reader does not fill in the SHA-256 from the facts of today, which
+ * would give the approval back to facts that nobody approved. The issue is approved again.
+ *
+ * A fact item that is not there cannot be compared, and it does not make the approval count: the issue is withdrawn for the fact
+ * (`FACT_UNVERIFIED`), and if the same fact item is there again, the approval counts again, because it is the same facts.
+ */
+function restsOnFactsNow(entry: ApprovalEntry, record: IssueSourceRecord, facts: ReadonlyMap<string, FactItem>): boolean {
+  const basis = entry.basisFacts;
+  if (basis === undefined || basis.length !== record.basisFactIds.length) {
+    return false;
+  }
+  return record.basisFactIds.every((factId, index) => {
+    const recorded = basis[index];
+    const fact = facts.get(factId);
+    return recorded !== undefined && recorded.factId === factId && (fact === undefined || recorded.sha256 === hashOf(fact));
+  });
+}
+
 function byKey<T>(items: readonly T[], key: (item: T) => string): T[] {
   return [...items].sort((first, second) => {
     const left = key(first);
@@ -86,7 +107,7 @@ function isRealSource(source: RegionalSource): source is RealSource {
 }
 
 /** The source that a fact item rests on: the one with its SHA-256, and the latest one if more than one has it. */
-function sourceOf(fact: RealFact, sources: readonly RealSource[]): RealSource | undefined {
+export function sourceOf(fact: RealFact, sources: readonly RealSource[]): RealSource | undefined {
   const holders = sources.filter((source) => source.sha256 === fact.sha256);
   return byKey(holders, (source) => `${source.retrievedAt}\u0000${source.sourceId}\u0000${source.revision}`).at(-1);
 }
@@ -213,7 +234,8 @@ function candidateOutputOf(record: IssueSourceRecord): string {
   });
 }
 
-function currentShaOf(source: RealSource, hashes: readonly string[] | null): string | undefined {
+/** The SHA-256 of the original of a source as it is now: the recorded one if a file has it, another one if the files changed, `undefined` if there is none to look at. */
+export function currentShaOf(source: RealSource, hashes: readonly string[] | null): string | undefined {
   if (hashes === null || hashes.length === 0) {
     return undefined;
   }
@@ -310,7 +332,9 @@ export async function loadIssueSnapshot(inputs: IssueInputs, settings: IssueSett
     }
 
     const here = approvalsOf(ledger, { targetKind: "ISSUE", targetId: issueId, targetHash: hashOf(current) });
-    const approverIds = [...new Set(here.valid.map((entry) => entry.approverId))].sort();
+    // An approval counts for the facts that it was made on. One that was made on other facts, or that did not record them, does not count again.
+    const counted = here.valid.filter((entry) => restsOnFactsNow(entry, current, judge.facts));
+    const approverIds = [...new Set(counted.map((entry) => entry.approverId))].sort();
     const insufficient = approverIds.length < settings.requiredApprovers;
 
     const basisFacts = current.basisFactIds.map((factId) => judge.facts.get(factId)).filter((fact): fact is FactItem => fact !== undefined);
@@ -329,7 +353,8 @@ export async function loadIssueSnapshot(inputs: IssueInputs, settings: IssueSett
 
     const holds = new Set<WithdrawnReason>();
     if (insufficient && here.revoked.length > 0) holds.add("REVOKED");
-    if (here.all.length === 0) holds.add("CONTENT_CHANGED");
+    // The content that was approved is the record of the version and the facts under it: either one changed.
+    if (here.all.length === 0 || (here.valid.length > 0 && counted.length === 0)) holds.add("CONTENT_CHANGED");
     if (insufficient) holds.add("APPROVAL_INSUFFICIENT");
     if (judged.sourceChanged) holds.add("SOURCE_CHANGED");
     if (judged.unverified) holds.add("FACT_UNVERIFIED");
@@ -344,7 +369,7 @@ export async function loadIssueSnapshot(inputs: IssueInputs, settings: IssueSett
       continue;
     }
 
-    const earliest = byKey(here.valid, (entry) => `${entry.approvedAt}\u0000${entry.approverId}`)[0];
+    const earliest = byKey(counted, (entry) => `${entry.approvedAt}\u0000${entry.approverId}`)[0];
     if (earliest === undefined) {
       return fail({ code: "CONTRACT_INVALID" });
     }

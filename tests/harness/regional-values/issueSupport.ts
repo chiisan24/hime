@@ -2,10 +2,11 @@ import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promis
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { IssueSourceRecordSchema } from "@ehime-vote-navigator/contracts";
+import { ApprovalLedgerRecordSchema, IssueSourceRecordSchema } from "@ehime-vote-navigator/contracts";
 import type { DataKind, FactItem, FixtureFact, IssueConfirmation, IssueSourceRecord, RealFact, RealSource } from "@ehime-vote-navigator/contracts";
 import { encodeCanonicalJson, sha256Hex } from "@ehime-vote-navigator/domain";
 
+import { appendLedgerRecord, hashOf } from "../../../apps/api/src/regional-values/draft/approvalLedger.js";
 import { createDraftStore, writeImmutableRecord } from "../../../apps/api/src/regional-values/draft/draftStore.js";
 import { approveTarget, revokeApproval } from "../../../apps/api/src/regional-values/draft/review.js";
 import { createFileIssueInputs } from "../../../apps/api/src/regional-values/issues/inputs.js";
@@ -118,6 +119,11 @@ export type IssueWorld = Readonly<{
   setOriginal: (source: RealSource, bytes: Uint8Array) => Promise<void>;
   addIssue: (record: IssueSourceRecord) => Promise<void>;
   approve: (issueId: string, version: number, approverId: string, at: string) => Promise<void>;
+  /**
+   * An approval as the ledger had it before the facts that an approval rests on were recorded: it names the record of the version and
+   * has the six confirmations, and no `basisFacts`. The records of the ledger that exist are of this form.
+   */
+  approveWithoutBasis: (issueId: string, version: number, approverId: string, at: string) => Promise<void>;
   revoke: (issueId: string, version: number, revokerId: string, at: string) => Promise<void>;
   load: (settings?: IssueSettings) => ReturnType<typeof loadIssueSnapshot>;
   /** The whole tree of files, to see that a read changed nothing. */
@@ -163,6 +169,7 @@ export async function createIssueWorld(dataKind: DataKind): Promise<IssueWorld> 
     await writeFile(path, encodeCanonicalJson(value));
   };
   const clockAt = (at: string) => (): Date => new Date(at);
+  const added = new Map<string, IssueSourceRecord>();
 
   return {
     root,
@@ -180,6 +187,29 @@ export async function createIssueWorld(dataKind: DataKind): Promise<IssueWorld> 
       const written = await writeImmutableRecord(root, `issues/${record.issueId}/v${record.version}.json`, record);
       if (!written.ok) {
         throw new Error(`The record of an issue was not written: ${written.error.code}`);
+      }
+      added.set(`${record.issueId}@${record.version}`, record);
+    },
+    approveWithoutBasis: async (issueId, version, approverId, at) => {
+      const record = added.get(`${issueId}@${version}`);
+      if (record === undefined) {
+        throw new Error("The issue of the approval was not added");
+      }
+      const written = await appendLedgerRecord(
+        root,
+        ApprovalLedgerRecordSchema.parse({
+          type: "APPROVE",
+          targetKind: "ISSUE",
+          targetId: issueId,
+          targetHash: hashOf(record),
+          targetVersion: version,
+          approverId,
+          approvedAt: new Date(at).toISOString(),
+          issueChecks: ALL_CONFIRMED,
+        }),
+      );
+      if (!written.ok) {
+        throw new Error(`The approval was not written: ${written.error.code}`);
       }
     },
     approve: async (issueId, version, approverId, at) => {

@@ -11,6 +11,10 @@ import { runDraftCommand } from "./draftCli.js";
 import type { DraftCommandSeams } from "./draftCli.js";
 import { createIssueSource, loadIssueSettings, runIssuesCommand } from "./issuesCli.js";
 import type { IssuesCommandSeams } from "./issuesCli.js";
+import { runRealCommand } from "./realCli.js";
+import type { RealCommandSeams } from "./realCli.js";
+import { runVerifyFactCommand } from "./verifyFactCli.js";
+import type { VerifyFactCommandSeams } from "./verifyFactCli.js";
 import { failedReport } from "./build/report.js";
 import { runBuild, type BuildRequest, type IssueSource, type RealDataLoader } from "./build/runBuild.js";
 import {
@@ -50,6 +54,10 @@ export type RegionalValuesCliOptions = Readonly<{
   draft?: DraftCommandSeams;
   /** Test seams of the commands of the approved issues (`issues ...`). */
   issues?: IssuesCommandSeams;
+  /** Test seams of the command that a person verifies a fact item with (`verify-fact ...`). */
+  verifyFact?: VerifyFactCommandSeams;
+  /** Test seams of the commands of real data (`real ...`). */
+  real?: RealCommandSeams;
 }>;
 
 /** The stable codes that the CLI prints. It never prints more than a code. */
@@ -62,6 +70,8 @@ const USAGE_LINES: readonly string[] = [
   "  demo   uses REAL_PREFERRED unless --data-mode is given",
   "  public uses REAL and accepts no other mode",
   "  --draft-settings gives the lists of words that the issues are judged with; without it the build sees no issue",
+  "       npm run regional-values -- real dataset|intake|original|fact ...   (real data: the ledger, the intake of a CSV, the originals, the fact items)",
+  "       npm run regional-values -- verify-fact <factId> --verifier <id>   (a person verifies a fact item)",
 ];
 
 type Parsed = Readonly<{
@@ -157,6 +167,24 @@ export async function runRegionalValuesCli(argv: readonly string[], options: Reg
       workspaceRoot: options.workspaceRoot,
       ...(options.now === undefined ? {} : { now: options.now }),
       ...(options.issues === undefined ? {} : { issues: options.issues }),
+    });
+  }
+  if (command === "verify-fact") {
+    // A person verifies a fact item against its original (13.11). Nothing is verified without the answers of the person.
+    return runVerifyFactCommand(argv, {
+      io,
+      workspaceRoot: options.workspaceRoot,
+      ...(options.now === undefined ? {} : { now: options.now }),
+      ...(options.verifyFact === undefined ? {} : { verifyFact: options.verifyFact }),
+    });
+  }
+  if (command === "real") {
+    // What a person does with real data: the ledger of the data sets, the intake of a CSV, the originals, the fact items (13.10, 13.11, 13.15).
+    return runRealCommand(argv, {
+      io,
+      workspaceRoot: options.workspaceRoot,
+      ...(options.now === undefined ? {} : { now: options.now }),
+      ...(options.real === undefined ? {} : { real: options.real }),
     });
   }
   if (command !== "build") {

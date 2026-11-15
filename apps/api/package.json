@@ -21,6 +21,7 @@
     "test": "vitest run --root ../.. apps/api/src",
     "build": "tsc -p tsconfig.json",
     "bedrock:smoke": "tsc -p tsconfig.json && node --env-file-if-exists=../../.env.local dist/aws/smoke.js",
+    "bedrock:draft-check": "tsc -p tsconfig.json && node --env-file-if-exists=../../.env.local dist/regional-values/draftLiveCheckMain.js",
     "analysis": "tsc -p tsconfig.json && node dist/analysis/main.js",
     "regional-values": "tsc -p tsconfig.json && node dist/regional-values/main.js"
   },

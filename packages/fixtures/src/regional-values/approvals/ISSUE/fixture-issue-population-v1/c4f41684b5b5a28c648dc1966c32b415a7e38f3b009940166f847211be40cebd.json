@@ -1,0 +1,31 @@
+{
+  "approvedAt": "2026-01-04T09:00:00.000Z",
+  "approverId": "fixture-issue-approver-v1",
+  "basisFacts": [
+    {
+      "factId": "fixture-fact-population-2023-v1",
+      "sha256": "a3cff45f7b9672ec80118c136af0b938c3e643ce880331c162052a13adf783fe"
+    },
+    {
+      "factId": "fixture-fact-population-2024-v1",
+      "sha256": "c69f463aab46811c2e0440834e6a677eb933c1a07a437e7c9cb10538c846e966"
+    },
+    {
+      "factId": "fixture-fact-population-v1",
+      "sha256": "25d32fc5191b7c9e99432a7a2b5223679517c7d460d1d52ffe5872803d5b8605"
+    }
+  ],
+  "issueChecks": {
+    "factAndHypothesisSeparated": true,
+    "factsMatch": true,
+    "noCausalClaim": true,
+    "noRecommendation": true,
+    "sourcesShown": true,
+    "unknownsStated": true
+  },
+  "targetHash": "0037b2709424195c8e42caa2cfe37a57fa07357fbbddf69935376e3a0524e3e7",
+  "targetId": "fixture-issue-population-v1",
+  "targetKind": "ISSUE",
+  "targetVersion": 1,
+  "type": "APPROVE"
+}

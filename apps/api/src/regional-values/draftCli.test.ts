@@ -19,6 +19,7 @@ import {
 } from "../../../../tests/harness/regional-values/draftSupport.js";
 import type { FakeClient } from "../../../../tests/harness/regional-values/draftSupport.js";
 import { runRegionalValuesCli } from "./cli.js";
+import type { DraftInference } from "./draft/runDraft.js";
 import { ISSUE_CONFIRMATION_QUESTIONS } from "./draftCli.js";
 
 let workspace: BuildWorkspace | undefined;
@@ -53,7 +54,7 @@ async function put(base: BuildWorkspace, name: string, value: unknown): Promise<
   await writeFile(join(base.root, name), JSON.stringify(value), "utf8");
 }
 
-type Options = Readonly<{ fake?: FakeClient; answers?: readonly boolean[]; noConfirm?: boolean }>;
+type Options = Readonly<{ fake?: FakeClient; answers?: readonly boolean[]; noConfirm?: boolean; inference?: DraftInference }>;
 
 async function run(argv: readonly string[], base: BuildWorkspace, options: Options = {}): Promise<Run> {
   const lines: string[] = [];
@@ -82,6 +83,7 @@ async function run(argv: readonly string[], base: BuildWorkspace, options: Optio
       pacer: { wait: () => Promise.resolve() },
       models: TEST_MODELS,
       isElectionBulletin: () => Promise.resolve(false),
+      ...(options.inference === undefined ? {} : { inference: options.inference }),
     },
   });
   return { exitCode, lines, asked };
@@ -154,6 +156,41 @@ describe("draft run", () => {
     const base = await prepare();
     const result = await run(RUN_ARGS, base, { fake: createFakeClient([{ code: "TIMEOUT" }]) });
     expect(result).toMatchObject({ exitCode: 1, lines: ["code=DRAFT_FAILED reason=TIMEOUT"] });
+  });
+
+  it("prints that the output was cut off when the model stopped at the limit of the output, and prints nothing of the kind for another reason", async () => {
+    const base = await prepare();
+    const stopped = (stopReason: string): FakeClient => ({
+      calls: [],
+      client: {
+        converse: () =>
+          Promise.resolve({ ok: true, value: { text: JSON.stringify(passingCandidate()).slice(0, 120), status: 200, elapsedMs: 1, stopReason } }),
+      },
+    });
+
+    const cut = await run(RUN_ARGS, base, { fake: stopped("max_tokens") });
+    const ended = await run(RUN_ARGS, base, { fake: stopped("end_turn") });
+
+    expect(cut).toMatchObject({ exitCode: 1, lines: ["code=DRAFT_FAILED reason=CHECK_FAILED", "violation=DR_JSON:output", "truncated=true"] });
+    expect(ended).toMatchObject({ exitCode: 1, lines: ["code=DRAFT_FAILED reason=CHECK_FAILED", "violation=DR_JSON:output"] });
+  });
+
+  it("asks the model with the thinking that the seam gives, and with no setting without it; no argument of the command sets it", async () => {
+    const base = await prepare();
+    const byDefault = createFakeClient([JSON.stringify(passingCandidate())]);
+    const off = createFakeClient([JSON.stringify(passingCandidate())]);
+
+    await run(RUN_ARGS, base, { fake: byDefault });
+    // The draft of the default setting is saved; the other setting has another key, so it is asked and not taken from the saved one.
+    await run(RUN_ARGS, base, { fake: off, inference: { thinking: { mode: "DISABLED" } } });
+
+    expect(byDefault.calls).toHaveLength(1);
+    expect(byDefault.calls[0]).not.toHaveProperty("thinking");
+    expect(off.calls).toHaveLength(1);
+    expect(off.calls[0]?.thinking).toEqual({ mode: "DISABLED" });
+    expect(await readdir(join(base.root, "packages", "fixtures", "src", "regional-values", "drafts", "ISSUE_CANDIDATE"))).toHaveLength(2);
+    // `--thinking` is not an argument of `draft run`: the command takes only what its usage lists.
+    expect((await run([...RUN_ARGS, "--thinking", "disabled"], base)).lines).toEqual(["code=ARGUMENT_INVALID"]);
   });
 
   it("exits with 1 and a code for a wrong argument, a file that cannot be read and settings that cannot be used", async () => {
@@ -349,9 +386,13 @@ describe("draft review and draft counts", () => {
 describe("approve", () => {
   const approve = (...rest: string[]): string[] => ["approve", "ISSUE", "issue-1", "--data-kind", "FIXTURE", "--approver", "approver-1", ...rest];
 
+  const FACTS_FILE = ["packages", "fixtures", "src", "regional-values", "facts.json"] as const;
+
   async function adoptedIssue(base: BuildWorkspace): Promise<void> {
     const draftId = draftIdOf(await run(RUN_ARGS, base));
     await run(["draft", "review", draftId, "--task", "ISSUE_CANDIDATE", "--data-kind", "FIXTURE", "--reviewer", "reviewer-1", "--adopt", "--target-kind", "ISSUE", "--target-id", "issue-1"], base);
+    // An approval names the fact items that the issue rests on (`fx-1`, `fx-3`), so the registry of this workspace has the fictional facts of the test.
+    await writeFile(join(base.root, ...FACTS_FILE), JSON.stringify(FIXTURE_FACTS));
   }
 
   async function ledgerFiles(base: BuildWorkspace): Promise<string[]> {
@@ -374,6 +415,20 @@ describe("approve", () => {
     const record = JSON.parse(await readFile(join(base.root, "packages", "fixtures", "src", "regional-values", "approvals", "ISSUE", "issue-1", files[0] as string), "utf8"));
     expect(record).toMatchObject({ type: "APPROVE", targetKind: "ISSUE", targetVersion: 1, approverId: "approver-1" });
     expect(Object.values(record.issueChecks)).toEqual([true, true, true, true, true, true]);
+    // The approval names the fact items that it rests on, with their SHA-256 (the order of the version).
+    expect(record.basisFacts.map((fact: { factId: string }) => fact.factId)).toEqual(["fx-1", "fx-3"]);
+    for (const fact of record.basisFacts as { sha256: string }[]) {
+      expect(fact.sha256).toMatch(/^[0-9a-f]{64}$/u);
+    }
+  });
+
+  it("fails with a code, and writes nothing, when the fact items that the issue rests on are not there", async () => {
+    const base = await prepare();
+    await adoptedIssue(base);
+    await writeFile(join(base.root, ...FACTS_FILE), JSON.stringify(FIXTURE_FACTS.filter((fact) => fact.factId !== "fx-3")));
+    const result = await run(approve("--version", "1"), base);
+    expect(result).toMatchObject({ exitCode: 1, lines: ["code=APPROVE_FAILED reason=BASIS_FACT_NOT_FOUND"] });
+    expect(await ledgerFiles(base)).toEqual([]);
   });
 
   it("stops at the first answer that is not yes, and writes nothing", async () => {

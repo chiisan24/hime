@@ -1,6 +1,16 @@
 {
   "approvedAt": "2026-01-04T09:00:00.000Z",
   "approverId": "fixture-issue-approver-v1",
+  "basisFacts": [
+    {
+      "factId": "fixture-fact-disaster-v1",
+      "sha256": "56c90825f32a25d123828921ca2ee37db78d5a27578d4e1724eb632f821c3dbf"
+    },
+    {
+      "factId": "fixture-fact-disaster-hills-v1",
+      "sha256": "07dd5ed72b2dc3ae6d779baaf6706f2547ffefd9ca43030275576e40316d6f60"
+    }
+  ],
   "issueChecks": {
     "factAndHypothesisSeparated": true,
     "factsMatch": true,
@@ -9,7 +19,7 @@
     "sourcesShown": true,
     "unknownsStated": true
   },
-  "targetHash": "096f6ac72c8a252960a33c8ce812673a3070837191a514ba9957d73b408a7f64",
+  "targetHash": "99324c64db907f9619fd27b45dfb0492162435c4b670f6f5235d9a0a060e7b65",
   "targetId": "fixture-issue-disaster-v1",
   "targetKind": "ISSUE",
   "targetVersion": 1,

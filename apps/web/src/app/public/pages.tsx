@@ -14,8 +14,17 @@ import {
 import { useId, useState, type ReactNode } from "react";
 import { useParams } from "react-router-dom";
 
+import type { MockCandidate } from "../../data/mock/types.js";
 import type { PolicyTheme } from "../../data/visitorDisplayData.js";
 import { formatJapaneseDate } from "../../services/dateLabel.js";
+import {
+  candidateDetailPath,
+  getElectionDataSource,
+  getMockElectionData,
+  isElectionPageAvailable,
+  listActiveCandidates,
+  type ElectionPageId,
+} from "../../services/electionData.js";
 import { ELECTION_PHASE_LABELS, electionPhaseAt } from "../../services/electionPhase.js";
 import {
   findCandidate,
@@ -219,6 +228,248 @@ export function FeatureLinkGrid({ links }: Readonly<{ links: readonly FeatureLin
   );
 }
 
+/*
+ * 選挙関連ページ（選挙日程・候補者・政策比較・会場閲覧）の表示データの切り替え。
+ * 使うデータの種類は data/electionDataSource.ts の設定で決まる（services/electionData.ts）。
+ * - PAST_REAL: 過去の選挙（2022年）の既存の画面（下の PastXxxPage）を表示する。
+ * - MOCK     : モックデータが提供された項目のページだけ、モックデータの画面（MockXxxPage）を表示する。
+ *              提供されていないページは、空状態（ElectionEmptyPage）を表示する。過去の選挙のデータは出さない。
+ */
+
+/** モックデータで表示していることを示す。モックデータを表示する画面には必ず置く */
+function MockDataNotice() {
+  return (
+    <div data-mock-data-notice="true">
+      <NoticeBar>
+        モックデータ（試作用の仮データ）で表示しています。公式の情報ではありません。
+      </NoticeBar>
+    </div>
+  );
+}
+
+/** 表示できるデータがない選挙関連ページの空状態。見出しは、そのページ本来の見出しのままにする */
+function ElectionEmptyPage({ title }: Readonly<{ title: string }>) {
+  return (
+    <div className="flex flex-col gap-5">
+      <PageIntro description="この画面に表示する情報は、まだ提供されていません。" title={title} />
+      <StatusPanel className="" statusCode="no-data" title="表示できる情報はまだありません">
+        <p>情報が提供されるまで、この画面には何も表示しません。</p>
+        <AppLink className={`${SECONDARY_LINK_CLASS} mt-4`} to="/values">
+          価値観診断をはじめる
+          <ChevronRight aria-hidden="true" className="size-4" />
+        </AppLink>
+      </StatusPanel>
+    </div>
+  );
+}
+
+type ElectionPageGateProps = Readonly<{
+  page: ElectionPageId;
+  /** 空状態の見出し（そのページ本来の h1） */
+  title: string;
+  /** 設定が PAST_REAL のときの、過去の選挙の既存の画面 */
+  past: ReactNode;
+  /** 設定が MOCK で、そのページのモックデータが提供されているときの画面 */
+  mock: ReactNode;
+}>;
+
+function ElectionPageGate({ page, title, past, mock }: ElectionPageGateProps) {
+  if (getElectionDataSource() === "PAST_REAL") {
+    return past;
+  }
+
+  return isElectionPageAvailable(page) ? mock : <ElectionEmptyPage title={title} />;
+}
+
+function MockSchedulePage() {
+  const schedule = getMockElectionData().schedule;
+  if (schedule === undefined) {
+    return <ElectionEmptyPage title="選挙日程" />;
+  }
+
+  const items: InfoListItem[] = [];
+  if (schedule.votingHours !== undefined) {
+    items.push({ label: "投票時間", value: schedule.votingHours });
+  }
+  if (schedule.earlyVoting !== undefined) {
+    items.push({ label: "期日前投票", value: schedule.earlyVoting });
+  }
+
+  return (
+    <div className="flex flex-col gap-5">
+      <PageIntro description="選挙の日程です。" title="選挙日程" />
+      <MockDataNotice />
+      <SectionCard icon={CalendarDays} title="この選挙">
+        <p className="font-bold text-ink">{schedule.election.name}</p>
+        <p className="mt-2 text-2xl font-black text-primary-dark">
+          {formatJapaneseDate(schedule.election.electionDate)}
+        </p>
+        <p className="mt-1 text-sm text-ink-soft">投票日</p>
+        {items.length === 0 ? null : (
+          <div className="mt-4">
+            <InfoList items={items} />
+          </div>
+        )}
+        {schedule.note === undefined ? null : (
+          <p className="mt-4 text-sm leading-6 text-ink">{schedule.note}</p>
+        )}
+      </SectionCard>
+    </div>
+  );
+}
+
+function mockCandidateItems(candidate: MockCandidate): readonly InfoListItem[] {
+  const items: InfoListItem[] = [{ label: "氏名", value: candidate.name }];
+  if (candidate.party !== undefined) {
+    items.push({ label: "党派", value: candidate.party });
+  }
+  if (candidate.profile !== undefined) {
+    items.push({ label: "経歴", value: candidate.profile });
+  }
+  if (candidate.summary !== undefined) {
+    items.push({ label: "政策の要約", value: candidate.summary });
+  }
+  return items;
+}
+
+function MockCandidatesPage() {
+  const candidates = getMockElectionData().candidates ?? [];
+
+  return (
+    <div className="flex flex-col gap-5">
+      <PageIntro description="候補者を、同じ形式で表示します。" title="候補者一覧" />
+      <MockDataNotice />
+      <section aria-labelledby="mock-candidate-grid-heading">
+        <h2
+          className="text-lg font-bold text-primary-dark sm:text-xl"
+          id="mock-candidate-grid-heading"
+        >
+          候補者（{candidates.length}名）
+        </h2>
+        <div className="mt-3 grid items-stretch gap-5 md:grid-cols-2">
+          {candidates.map((candidate) => {
+            const titleId = `mock-candidate-${candidate.candidateId}-title`;
+
+            return (
+              <article
+                aria-labelledby={titleId}
+                className="flex h-full flex-col rounded-[var(--radius-card)] border border-line bg-white p-4 shadow-[var(--shadow-card)] sm:p-6"
+                data-candidate-card="true"
+                key={candidate.candidateId}
+              >
+                <h3 className="text-xl font-black text-primary-dark md:text-2xl" id={titleId}>
+                  {candidate.name}
+                </h3>
+                <div className="mt-5">
+                  <InfoList items={mockCandidateItems(candidate)} />
+                </div>
+                <div className="mt-auto pt-6">
+                  <AppLink
+                    aria-label={`${candidate.name}の候補者詳細へ移動`}
+                    className={PRIMARY_LINK_CLASS}
+                    to={candidateDetailPath(candidate.candidateId)}
+                  >
+                    {candidate.name}の詳細を見る
+                    <ChevronRight aria-hidden="true" className="size-5" />
+                  </AppLink>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function MockCandidateDetailPage() {
+  const { candidateId } = useParams<{ candidateId: string }>();
+  const candidate = (getMockElectionData().candidates ?? []).find(
+    (entry) => entry.candidateId === candidateId,
+  );
+
+  return (
+    <div className="flex flex-col gap-5">
+      <PageIntro description="候補者の情報を表示します。" title="候補者詳細" />
+      <MockDataNotice />
+      {candidate === undefined ? (
+        <StatusPanel className="" statusCode="no-data" title="この候補者の情報はありません">
+          <p>この候補者IDに対応する候補者はいません。一覧から選び直してください。</p>
+          <AppLink className={`${SECONDARY_LINK_CLASS} mt-4`} to="/candidates">
+            候補者一覧を見る
+            <ChevronRight aria-hidden="true" className="size-4" />
+          </AppLink>
+        </StatusPanel>
+      ) : (
+        <SectionCard icon={UserRound} title={candidate.name}>
+          <InfoList items={mockCandidateItems(candidate)} />
+        </SectionCard>
+      )}
+    </div>
+  );
+}
+
+function MockComparisonPage() {
+  const data = getMockElectionData();
+  const comparison = data.comparison;
+  if (comparison === undefined) {
+    return <ElectionEmptyPage title="政策比較" />;
+  }
+
+  const nameOf = (candidateId: string): string =>
+    (data.candidates ?? []).find((entry) => entry.candidateId === candidateId)?.name ?? candidateId;
+
+  return (
+    <div className="flex flex-col gap-5">
+      <PageIntro
+        description="政策を、同じ項目で見比べる画面です。推薦・採点・ランキングはしません。"
+        title="政策比較"
+      />
+      <MockDataNotice />
+      {comparison.themes.map((theme) => {
+        const entries = comparison.entries.filter((entry) => entry.theme === theme);
+
+        return (
+          <SectionCard key={theme} title={theme}>
+            {entries.length === 0 ? (
+              <p className="text-sm text-ink-soft">このテーマの情報は提供されていません。</p>
+            ) : (
+              <InfoList
+                items={entries.map((entry) => ({
+                  label: nameOf(entry.candidateId),
+                  value: entry.summary,
+                }))}
+              />
+            )}
+          </SectionCard>
+        );
+      })}
+    </div>
+  );
+}
+
+function MockVenuePage() {
+  const venue = getMockElectionData().venue;
+  if (venue === undefined) {
+    return <ElectionEmptyPage title="会場閲覧" />;
+  }
+
+  return (
+    <div className="flex flex-col gap-5">
+      <PageIntro
+        description="このデモの展示会場向けのまとめです。投票所の案内ではありません。"
+        title="会場閲覧"
+      />
+      <MockDataNotice />
+      {venue.sections.map((section) => (
+        <SectionCard icon={Eye} key={section.heading} title={section.heading}>
+          <p className="whitespace-pre-line leading-7 text-ink">{section.body}</p>
+        </SectionCard>
+      ))}
+    </div>
+  );
+}
+
 const PUBLIC_HOME_LINKS: readonly FeatureLink[] = [
   {
     to: "/schedule",
@@ -258,7 +509,75 @@ const PUBLIC_HOME_LINKS: readonly FeatureLink[] = [
   },
 ];
 
-export const VISITOR_HOME_LINKS = projectVisitorPresentation(PUBLIC_HOME_LINKS);
+/** モックデータで表示するときのホームの入口。そのページのデータが提供されているものだけが入る */
+const MOCK_HOME_LINK_BASES: readonly Readonly<{ page: ElectionPageId; link: FeatureLink }>[] = [
+  {
+    page: "schedule",
+    link: {
+      to: "/schedule",
+      label: "選挙日程を見る",
+      description: "投票日などの日程を確認します。",
+      icon: CalendarDays,
+    },
+  },
+  {
+    page: "candidates",
+    link: {
+      to: "/candidates",
+      label: "候補者一覧を見る",
+      description: "候補者を同じ画面構造で確認します。",
+      icon: Users,
+    },
+  },
+  {
+    page: "comparison",
+    link: {
+      to: "/comparison",
+      label: "政策比較を見る",
+      description: "政策を同じ項目で見比べます。",
+      icon: Scale,
+    },
+  },
+  {
+    page: "venue",
+    link: {
+      to: "/venue",
+      label: "会場閲覧画面を見る",
+      description: "デモ会場向けのまとめを確認します。",
+      icon: Eye,
+    },
+  },
+];
+
+/** いま選んでいるデータの種類で、ホームに出す入口の一覧（過去の選挙は既存の一覧、モックは提供された分だけ） */
+function homeLinksForActiveSource(): readonly FeatureLink[] {
+  if (getElectionDataSource() === "PAST_REAL") {
+    return PUBLIC_HOME_LINKS;
+  }
+
+  return MOCK_HOME_LINK_BASES.flatMap(({ page, link }): readonly FeatureLink[] => {
+    if (!isElectionPageAvailable(page)) {
+      return [];
+    }
+    if (page !== "candidates") {
+      return [link];
+    }
+
+    return [
+      link,
+      ...listActiveCandidates().map(
+        (candidate): FeatureLink => ({
+          to: candidateDetailPath(candidate.candidateId),
+          label: `${candidate.name}の詳細を見る`,
+          description: "候補者の情報を確認します。",
+          icon: UserRound,
+        }),
+      ),
+    ];
+  });
+}
+
+export const VISITOR_HOME_LINKS = projectVisitorPresentation(homeLinksForActiveSource());
 
 type HomeTileDetail = Readonly<{
   /** カードに出す短い名前。リンク名（VISITOR_HOME_LINKS の label）に含まれる文字にする */
@@ -268,12 +587,20 @@ type HomeTileDetail = Readonly<{
   preparing: boolean;
 }>;
 
-/** ホームのカードに出す名前と説明 */
-const HOME_TILE_DETAILS: Readonly<Record<string, HomeTileDetail>> = {
+/** ホームのカードに出す名前と説明（過去の選挙） */
+const PAST_HOME_TILE_DETAILS: Readonly<Record<string, HomeTileDetail>> = {
   "/schedule": { title: "選挙日程", description: "投票日を確認", preparing: false },
   "/candidates": { title: "候補者一覧", description: "2人の候補者を知る", preparing: false },
   "/comparison": { title: "政策比較", description: "政策の違いを見る", preparing: true },
   "/venue": { title: "会場閲覧", description: "デモ会場向けのまとめ", preparing: true },
+};
+
+/** ホームのカードに出す名前と説明（モックデータ。候補者の人数など、データで変わる内容は書かない） */
+const MOCK_HOME_TILE_DETAILS: Readonly<Record<string, HomeTileDetail>> = {
+  "/schedule": { title: "選挙日程", description: "投票日を確認", preparing: false },
+  "/candidates": { title: "候補者一覧", description: "候補者を知る", preparing: false },
+  "/comparison": { title: "政策比較", description: "政策の違いを見る", preparing: false },
+  "/venue": { title: "会場閲覧", description: "デモ会場向けのまとめ", preparing: false },
 };
 
 const CANDIDATE_DETAIL_PREFIX = "/candidates/";
@@ -287,8 +614,11 @@ const CANDIDATE_LIST_PATH = "/candidates";
 const HOME_MENU_REGION_NAME = "会場閲覧のP0画面";
 
 function homeTileDetail(link: FeatureLink): HomeTileDetail {
+  const details =
+    getElectionDataSource() === "PAST_REAL" ? PAST_HOME_TILE_DETAILS : MOCK_HOME_TILE_DETAILS;
+
   return (
-    HOME_TILE_DETAILS[link.to] ?? {
+    details[link.to] ?? {
       title: link.label,
       description: link.description,
       preparing: false,
@@ -298,9 +628,8 @@ function homeTileDetail(link: FeatureLink): HomeTileDetail {
 
 function candidateNameOf(to: string): string {
   return (
-    CANDIDATE_SKELETONS.find(
-      (candidate) => `${CANDIDATE_DETAIL_PREFIX}${candidate.candidateId}` === to,
-    )?.name ?? to
+    listActiveCandidates().find((candidate) => candidateDetailPath(candidate.candidateId) === to)
+      ?.name ?? to
   );
 }
 
@@ -373,6 +702,9 @@ export function VisitorHomePage() {
   const menuLinks = VISITOR_HOME_LINKS.filter(
     (link) => !link.to.startsWith(CANDIDATE_DETAIL_PREFIX),
   );
+  const pastElection = getElectionDataSource() === "PAST_REAL";
+  const mockSchedule = getMockElectionData().schedule;
+  const hasElectionMenu = menuLinks.length > 0;
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
@@ -395,56 +727,82 @@ export function VisitorHomePage() {
       {/* 価値観診断の入口：主要機能のメニューより上に置く */}
       <ValuesEntryCard />
 
-      {/* メインメニュー：スマホ2列、1024px以上は4列 */}
-      <section aria-label={HOME_MENU_REGION_NAME}>
-        <h2 className="sr-only">メインメニュー</h2>
-        <ul className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4" role="list">
-          {menuLinks.map((link) => {
-            const detail = homeTileDetail(link);
-            return (
-              <li key={link.to}>
-                <HomeTile
-                  description={detail.description}
-                  icon={link.icon}
-                  label={link.label}
-                  preparing={detail.preparing}
-                  subLinks={
-                    link.to === CANDIDATE_LIST_PATH && candidateLinks.length > 0 ? (
-                      <CandidateSubLinks links={candidateLinks} />
-                    ) : undefined
-                  }
-                  title={detail.title}
-                  to={link.to}
-                />
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+      {/* モックデータを表示するときは、そのことを明示する（表示できるページがないときは出さない） */}
+      {pastElection || !(hasElectionMenu || mockSchedule !== undefined) ? null : <MockDataNotice />}
 
-      {/* 選挙情報：今表示できる値だけ */}
-      <SectionCard aside={<ElectionPhaseBadge />} icon={CalendarDays} title="選挙情報">
-        <p className="font-bold text-ink">{ELECTION_NAME}</p>
-        <div className="mt-3">
-          <InfoList
-            items={[
-              { label: "投票日", value: ELECTION_DATE_LABEL },
-              { label: "期日前投票期間", value: SCHEDULE_MISSING_VALUE },
-            ]}
-          />
-        </div>
-      </SectionCard>
+      {/* メインメニュー：スマホ2列、1024px以上は4列。表示できるページがないときは出さない */}
+      {hasElectionMenu ? (
+        <section aria-label={HOME_MENU_REGION_NAME}>
+          <h2 className="sr-only">メインメニュー</h2>
+          <ul className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4" role="list">
+            {menuLinks.map((link) => {
+              const detail = homeTileDetail(link);
+              return (
+                <li key={link.to}>
+                  <HomeTile
+                    description={detail.description}
+                    icon={link.icon}
+                    label={link.label}
+                    preparing={detail.preparing}
+                    subLinks={
+                      link.to === CANDIDATE_LIST_PATH && candidateLinks.length > 0 ? (
+                        <CandidateSubLinks links={candidateLinks} />
+                      ) : undefined
+                    }
+                    title={detail.title}
+                    to={link.to}
+                  />
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
 
-      <StatusPanel className="" statusCode="NOT_READY" title="政策の情報は準備中です">
-        <p>
-          2人の2022年の政策資料がまだそろっていないため、政策の要約と比較は表示しません。
-        </p>
-      </StatusPanel>
+      {/* 選挙情報：今表示できる値だけ。過去の選挙は、設定が PAST_REAL のときだけ出す */}
+      {pastElection ? (
+        <SectionCard aside={<ElectionPhaseBadge />} icon={CalendarDays} title="選挙情報">
+          <p className="font-bold text-ink">{ELECTION_NAME}</p>
+          <div className="mt-3">
+            <InfoList
+              items={[
+                { label: "投票日", value: ELECTION_DATE_LABEL },
+                { label: "期日前投票期間", value: SCHEDULE_MISSING_VALUE },
+              ]}
+            />
+          </div>
+        </SectionCard>
+      ) : mockSchedule === undefined ? null : (
+        <SectionCard icon={CalendarDays} title="選挙情報">
+          <p className="font-bold text-ink">{mockSchedule.election.name}</p>
+          <div className="mt-3">
+            <InfoList
+              items={[
+                { label: "投票日", value: formatJapaneseDate(mockSchedule.election.electionDate) },
+              ]}
+            />
+          </div>
+        </SectionCard>
+      )}
+
+      {pastElection ? (
+        <StatusPanel className="" statusCode="NOT_READY" title="政策の情報は準備中です">
+          <p>
+            2人の2022年の政策資料がまだそろっていないため、政策の要約と比較は表示しません。
+          </p>
+        </StatusPanel>
+      ) : hasElectionMenu || mockSchedule !== undefined ? null : (
+        <StatusPanel className="" statusCode="no-data" title="選挙に関する情報は準備中です">
+          <p>
+            新しい情報が提供されるまで、選挙日程・候補者・政策比較・会場閲覧は表示しません。価値観診断はご利用いただけます。
+          </p>
+        </StatusPanel>
+      )}
     </div>
   );
 }
 
-export function SchedulePage() {
+function PastSchedulePage() {
   return (
     <div className="flex flex-col gap-5">
       <PageIntro
@@ -509,7 +867,7 @@ function candidateListItems(name: string): readonly InfoListItem[] {
   ];
 }
 
-export function CandidatesPage() {
+function PastCandidatesPage() {
   return (
     <div className="flex flex-col gap-5">
       <PageIntro
@@ -587,7 +945,7 @@ function MaterialAmountList() {
   );
 }
 
-export function CandidateDetailPage() {
+function PastCandidateDetailPage() {
   const { candidateId } = useParams<{ candidateId: string }>();
   const candidate = findCandidate(candidateId);
   const name = candidate?.name ?? CANDIDATE_MISSING_VALUE;
@@ -703,7 +1061,7 @@ function ThemeSelector({ themes, selected, onSelect }: ThemeSelectorProps) {
   );
 }
 
-export function ComparisonPage() {
+function PastComparisonPage() {
   const [selectedTheme, setSelectedTheme] = useState<PolicyTheme>(POLICY_THEMES[0] ?? "子育て");
 
   return (
@@ -784,7 +1142,7 @@ export function ComparisonPage() {
   );
 }
 
-export function VenuePage() {
+function PastVenuePage() {
   return (
     <div className="flex flex-col gap-5">
       <PageIntro
@@ -801,6 +1159,66 @@ export function VenuePage() {
         </ul>
       </SectionCard>
     </div>
+  );
+}
+
+/*
+ * 選挙関連ページの公開コンポーネント。ルート（visitor / analyst）とテストはこの名前で参照する。
+ * 設定（data/electionDataSource.ts）に応じて、過去の選挙の画面（PastXxxPage）、モックデータの画面、
+ * 空状態のどれかを表示する。PastXxxPage は削除せず、設定を PAST_REAL にすると元のまま表示できる。
+ */
+export function SchedulePage() {
+  return (
+    <ElectionPageGate
+      mock={<MockSchedulePage />}
+      page="schedule"
+      past={<PastSchedulePage />}
+      title="選挙日程"
+    />
+  );
+}
+
+export function CandidatesPage() {
+  return (
+    <ElectionPageGate
+      mock={<MockCandidatesPage />}
+      page="candidates"
+      past={<PastCandidatesPage />}
+      title="候補者一覧"
+    />
+  );
+}
+
+export function CandidateDetailPage() {
+  return (
+    <ElectionPageGate
+      mock={<MockCandidateDetailPage />}
+      page="candidates"
+      past={<PastCandidateDetailPage />}
+      title="候補者詳細"
+    />
+  );
+}
+
+export function ComparisonPage() {
+  return (
+    <ElectionPageGate
+      mock={<MockComparisonPage />}
+      page="comparison"
+      past={<PastComparisonPage />}
+      title="政策比較"
+    />
+  );
+}
+
+export function VenuePage() {
+  return (
+    <ElectionPageGate
+      mock={<MockVenuePage />}
+      page="venue"
+      past={<PastVenuePage />}
+      title="会場閲覧"
+    />
   );
 }
 

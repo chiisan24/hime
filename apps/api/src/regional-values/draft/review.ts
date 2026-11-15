@@ -6,6 +6,7 @@ import {
   THEME_IDS,
 } from "@ehime-vote-navigator/contracts";
 import type {
+  ApprovalBasisFact,
   ApprovalLedgerRecord,
   ApprovalTargetKind,
   DraftEvent,
@@ -20,6 +21,7 @@ import { appendLedgerRecord, hashOf } from "./approvalLedger.js";
 import { runDraftChecks } from "./checks.js";
 import type { DraftCheckContext, DraftCheckViolation } from "./checks.js";
 import { deriveDisposition } from "./disposition.js";
+import { createFileIssueInputs } from "../issues/inputs.js";
 import { makeDraftEvent, writeImmutableRecord } from "./draftStore.js";
 import type { DraftStore, StoreErrorCode } from "./draftStore.js";
 import { readRecords } from "./recordReader.js";
@@ -37,6 +39,8 @@ export type ReviewError =
   | Readonly<{ code: "RECHECK_CONTEXT_MISSING" | "EDITED_OUTPUT_INVALID" }>
   | Readonly<{ code: "RECHECK_FAILED"; violations: readonly DraftCheckViolation[] }>
   | Readonly<{ code: "ISSUE_RECORD_INVALID" | "ISSUE_RECORD_CONFLICT" | "TARGET_NOT_FOUND" | "TARGET_HASH_REQUIRED" | "TARGET_HASH_MISMATCH" }>
+  /** The fact items that the version names are not all there, so the approval cannot say what it rests on. Nothing is written. */
+  | Readonly<{ code: "BASIS_FACT_NOT_FOUND"; factIds: readonly string[] }>
   | Readonly<{ code: "STORE_READ_FAILED" | "STORE_WRITE_FAILED"; cause: StoreErrorCode }>;
 
 export type ReviewDeps = Readonly<{
@@ -250,7 +254,7 @@ export type LedgerTargetArgs = Readonly<{
 async function resolveTargetHash(
   root: RecordRoot,
   args: LedgerTargetArgs,
-): Promise<Outcome<{ targetHash: string; targetVersion?: number }, ReviewError>> {
+): Promise<Outcome<{ targetHash: string; targetVersion?: number; basisFactIds?: readonly string[] }, ReviewError>> {
   if (args.targetKind !== "ISSUE") {
     return args.targetHash === undefined ? fail({ code: "TARGET_HASH_REQUIRED" }) : succeed({ targetHash: args.targetHash });
   }
@@ -269,7 +273,25 @@ async function resolveTargetHash(
   if (args.targetHash !== undefined && args.targetHash !== hash) {
     return fail({ code: "TARGET_HASH_MISMATCH" });
   }
-  return succeed({ targetHash: hash, targetVersion: args.version });
+  return succeed({ targetHash: hash, targetVersion: args.version, basisFactIds: found.record.basisFactIds });
+}
+
+/**
+ * The fact items that an approval of an issue rests on, as they are now: the SHA-256 of each fact item that the version names,
+ * in the order of `basisFactIds`. The person approves the issue on these facts, so a fact item that is not there is a reason not
+ * to approve, and nothing is written.
+ */
+async function basisFactsOf(root: RecordRoot, basisFactIds: readonly string[]): Promise<Outcome<readonly ApprovalBasisFact[], ReviewError>> {
+  const read = await createFileIssueInputs(root).readFacts();
+  if (!read.ok) {
+    return fail({ code: "STORE_READ_FAILED", cause: read.error.code });
+  }
+  const byId = new Map(read.value.map((fact) => [fact.factId, fact] as const));
+  const missing = basisFactIds.filter((factId) => !byId.has(factId));
+  if (missing.length > 0) {
+    return fail({ code: "BASIS_FACT_NOT_FOUND", factIds: missing });
+  }
+  return succeed(basisFactIds.map((factId) => ({ factId, sha256: hashOf(byId.get(factId)) })));
 }
 
 export type ApproveArgs = LedgerTargetArgs &
@@ -293,10 +315,15 @@ export async function approveTarget(deps: ReviewDeps, args: ApproveArgs): Promis
     approverId: args.approverId,
     approvedAt: deps.now().toISOString(),
   };
-  const candidate =
-    args.targetKind === "ISSUE"
-      ? { ...common, targetVersion: resolved.value.targetVersion, issueChecks: args.issueChecks }
-      : common;
+  let candidate: Record<string, unknown> = common;
+  if (args.targetKind === "ISSUE") {
+    // The approval names the facts that it rests on, with their SHA-256 now. If the facts are made again later, the approval does not come back.
+    const basis = await basisFactsOf(deps.store.root, resolved.value.basisFactIds ?? []);
+    if (!basis.ok) {
+      return fail(basis.error);
+    }
+    candidate = { ...common, targetVersion: resolved.value.targetVersion, issueChecks: args.issueChecks, basisFacts: basis.value };
+  }
   const written = await appendLedgerRecordFrom(deps, candidate);
   return written;
 }

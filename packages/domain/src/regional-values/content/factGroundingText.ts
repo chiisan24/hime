@@ -1,6 +1,15 @@
-import type { FactItem } from "@ehime-vote-navigator/contracts";
-
 import { decimalText, surveyLabel } from "./surveyDate.js";
+
+/**
+ * What the text is made from. A fact item has all of it (`FactItem` is assignable here); a value that is computed again, and a survey
+ * date that is not a branded date yet, can be given without making a fact item.
+ */
+export type FactGroundingSource = Readonly<{
+  sentence: string;
+  value: Readonly<{ amount: number; unit: string }>;
+  area: string;
+  surveyDate: string | number;
+}>;
 
 /**
  * The text that a sentence of an issue candidate rests on, made from one fact item (design:
@@ -17,7 +26,7 @@ import { decimalText, surveyLabel } from "./surveyDate.js";
  * It is deterministic and has no side effect. It is for the build and the draft process, not for
  * the browser.
  */
-export function factGroundingText(fact: FactItem): string {
+export function factGroundingText(fact: FactGroundingSource): string {
   const amount = `${decimalText(fact.value.amount)}${fact.value.unit}`;
   const dates =
     typeof fact.surveyDate === "number"

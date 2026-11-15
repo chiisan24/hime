@@ -1,13 +1,13 @@
 {
   "aiClass": "AI_DRAFT",
   "dataKind": "FIXTURE",
-  "draftId": "5fb01f6b6ca94c33094a126664c1094a3a021c5553ebf397c5ac7131e441c8bd",
+  "draftId": "d8322f62112cd997be41753f732a1de03cf8a4de487fd14f82e553e53a0ca051",
   "generatedAt": "2026-01-04T08:00:02.000Z",
   "inputSources": [],
   "key": {
-    "inputHash": "5bf24c7036624ffce655ebf73098eab73d06244d046b10b73b25f321c574cb69",
+    "inputHash": "143a2a1fb5d1097b891a641a05607eef5a25943febdda71094e32b9af8529150",
     "modelId": "fixture-draft-model-v1",
-    "promptVersion": "rv-draft-1",
+    "promptVersion": "rv-draft-2",
     "task": "ISSUE_CANDIDATE"
   },
   "modelId": "fixture-draft-model-v1",
