@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 import { AppShell, VISITOR_NAV_ITEMS } from "../../../shared/ui/AppShell.js";
 import { SectionCard } from "../../../shared/ui/SectionCard.js";
+import { SAMPLE_AXIS_VALUES } from "../axisAnalysis.js";
 import { ValueAxisRadar } from "../components/ValueAxisRadar.js";
 import { UI_VALUE_AXES } from "../demoDilemmas.js";
 import { ValuesDiagnosisV2 } from "../ValuesDiagnosisV2.js";
@@ -15,6 +16,7 @@ import "../../../styles.css";
  * Vite のビルドは index.html だけを入口にするため、この画面は dist に入らない。
  * 共通の枠は /values と同じ見た目にするため、MemoryRouter の "/values" の上に AppShell を置く。
  * URL の末尾に #radar-sample を付けると、レーダーの表示部品をサンプル値で確かめられる（分析結果ではない）。
+ * 結果画面のレーダーも、計算方法が決まるまでは同じサンプル値で表示する（axisAnalysis.ts）。
  * v2 をルートに登録したら、このフォルダーと values-v2-preview.html は削除してよい。
  */
 
@@ -22,17 +24,7 @@ function RadarSample() {
   return (
     <div className="mt-6">
       <SectionCard title="表示部品の確認用（サンプル値。分析結果ではありません）">
-        <ValueAxisRadar
-          axes={UI_VALUE_AXES}
-          values={[
-            { axisId: "FAIRNESS", state: "DETERMINED", level: 2, usableQuestions: 2 },
-            { axisId: "STABILITY", state: "DETERMINED", level: -1, usableQuestions: 2 },
-            { axisId: "FUTURE", state: "DETERMINED", level: 0, usableQuestions: 2 },
-            { axisId: "OPPORTUNITY", state: "UNDETERMINED" },
-            { axisId: "COMMUNITY", state: "DETERMINED", level: 1, usableQuestions: 1 },
-            { axisId: "INFRASTRUCTURE", state: "DETERMINED", level: -2, usableQuestions: 2 },
-          ]}
-        />
+        <ValueAxisRadar axes={UI_VALUE_AXES} sample values={SAMPLE_AXIS_VALUES} />
       </SectionCard>
     </div>
   );
