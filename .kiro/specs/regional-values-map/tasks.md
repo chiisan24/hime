@@ -490,94 +490,114 @@
     - 焦点テスト: `npx.cmd vitest run tests/regional-values/guideSync.test.ts`
     - _Requirements: 10.9_
 
-- [ ] 11. AI下書き工程（Bedrockのfakeだけ。実Bedrockは呼ばない）を実装する
-  - [ ] 11.1 【A】下書きの契約を追加する
-    - `packages/contracts/src/models/regional/draft.ts`を新規作成し、`EvidenceUnit`、`GroundedSentence`、`IssueCandidateOutput`、`IssueSummaryOutput`、`BackgroundDraftOutput`、`TermGlossOutput`、`QuestionDraftOutput`、`NeutralityReviewOutput`、`ThemeClassifyOutput`、`DraftRunKey`、`DraftRecord`（`disposition`は`PENDING`・`ADOPTED`・`REJECTED`）、`DraftEvent`（`DRAFTED`・`REJECTED_BY_CHECKS`・`HUMAN_EDITED`・`HUMAN_REJECTED`）をstrictで定義する。`regional/index.ts`へ`draft.js`のexportを1行追加する。
-    - テスト`draft.test.ts`: 各出力の合格例と拒否例（根拠IDの欠落、文が61文字、テーマ分類が6テーマと`UNCLASSIFIED`以外、保存時の`disposition`が`PENDING`以外、課題候補の根拠の事実項目IDの欠落、順位・スコア・推奨の項目の混入）。
+- [x] 11. AI下書き工程（Bedrockのfakeだけ。実Bedrockは呼ばない）を実装する
+  - [x] 11.1 【A】下書きの契約を追加する
+    - **仕様変更（2026-11-13、承認方針1・3、整合修正D16）**: `IssueCandidateOutput`は拡張後の形（`FactGroundedSentence { text; groundFactIds }`、`ResponseDirectionCandidate { label; description; category; status: "REFERENCE_ONLY" }`、1回の呼出しで候補1件）で定義する。`DraftRecord`は`disposition`を持たない（採否は`DraftEvent`と承認台帳から導く）。`DraftEvent`に`HUMAN_ADOPTED`（修正なしの採用。AIの貢献を示す4つの数には数えない）と、`reviewerId`、`target`を足す。承認台帳の記録`ApprovalLedgerRecord`（`APPROVE`と`REVOKE`。`ISSUE`の`APPROVE`は`targetVersion`と、確認項目6つ`IssueConfirmation`（リテラル`true`）を持つ）を定義する。
+    - **依存**: なし。ただし16.1、16.2と`regional/index.ts`のexportを書くので、同じ波に置かない（11.1を先に実施する）。
+    - `packages/contracts/src/models/regional/draft.ts`を新規作成し、`EvidenceUnit`、`GroundedSentence`、`FactGroundedSentence`、`ResponseDirectionCandidate`、`IssueCandidateOutput`、`IssueSummaryOutput`、`BackgroundDraftOutput`、`TermGlossOutput`、`QuestionDraftOutput`、`NeutralityReviewOutput`、`ThemeClassifyOutput`、`DraftRunKey`、`DraftRecord`（`disposition`を持たない）、`DraftEvent`（`DRAFTED`・`REJECTED_BY_CHECKS`・`HUMAN_ADOPTED`・`HUMAN_EDITED`・`HUMAN_REJECTED`）、`ApprovalLedgerRecord`（`APPROVE`・`REVOKE`）、`IssueConfirmation`をstrictで定義する。`regional/index.ts`へ`draft.js`のexportを1行追加する。
+    - テスト`draft.test.ts`: 各出力の合格例と拒否例（根拠IDの欠落、文が61文字、テーマ分類が6テーマと`UNCLASSIFIED`以外、`disposition`の項目の混入（余剰項目として拒否）、課題候補の根拠の事実項目IDの欠落、順位・スコア・推奨の項目の混入、`IssueConfirmation`のいずれかが`false`、`ISSUE`の`APPROVE`で`issueChecks`または`targetVersion`がない、`ISSUE`以外の`APPROVE`に`issueChecks`がある）。
     - `npm.cmd run build --workspace @ehime-vote-navigator/contracts`を実行してから焦点テストを実行する。
     - 焦点テスト: `npx.cmd vitest run packages/contracts/src/models/regional/draft.test.ts`
-    - _Requirements: 8.8, 8.9, 8.10, 8.22_
+    - _Requirements: 8.8, 8.9, 8.10, 8.22, 8.24, 8.27_
 
-  - [ ] 11.2 【A】下書きの入力の門（`checkDraftInput`）を実装する（入力長の判定を除く）
+  - [x] 11.2 【A】下書きの入力の門（`checkDraftInput`）を実装する
+    - **仕様変更（2026-11-13）**: 入力の事実項目に`DERIVED`を含む場合、その元の事実項目も`VERIFIED`であること、`DERIVED`自身が人の`verify-fact`で`VERIFIED`になっていることを要求する（Req 7.23〜7.27）。入力に変換物（CSV）を使う場合は、原本と変換物のSHA-256の対応記録（`conversion`）があることを確認する。`REAL_AI`の事実項目は、`sha256`から出典を引き（取り込みの重複拒否（D21）により高々1件）、引けない、または複数の出典に当たる場合は`FACT_SOURCE_MISMATCH`で拒否する。
+    - **依存**: 11.1、16.1（`DERIVED`の算出方法と`conversion`の契約）。
     - `apps/api/src/regional-values/draft/checkDraftInput.ts`に実装する。`FIXTURE`は利用条件と送信可否の確認を要求しない。`REAL_AI`は出典の`usage.status`が`CONFIRMED`、`transmission.status`が`ALLOWED`（記録なしと`UNKNOWN`を拒否）、入力の事実項目がすべて`VERIFIED`でなければ拒否し、満たされなかった条件をすべて理由に並べる。`ISSUE_CANDIDATE`の入力は`VERIFIED`の事実項目に限り（`FIXTURE`の事実項目は検証状態を持たないため、架空の資料IDを持つ事実項目を入力にできる）、`PROVISIONAL`の事実項目、未集計の本文、利用者の回答、最優先テーマ、価値観マップを含めない（`FACT_NOT_VERIFIED`）。共通で、入力に区切り文字列がないこと、種別が1つであること、入力資料のSHA-256が既存の選挙公報の取り込み記録に登録されていないこと（既存の取り込み記録の照会関数を読み取りだけで使う）を確認する。
-    - 入力長（20,000文字）の事前判定は、数え方が【要確認24】で未決のため、このタスクでは実装しない（13.2）。クライアントが実行時に強制する制約は緩めない。
-    - **Property 28: 入力の門**（長さの条件を除く。判定が参照判定と一致し、`REAL_AI`で3条件のどれかを欠くとBedrockのfakeの呼出しが0回で保存が0件、`PROVISIONAL`の事実項目は入力に現れない）
-    - **Validates: Requirements 7.12, 7.19, 8.6, 8.7, 12.5, 12.14**
+    - 入力長の事前判定（`INPUT_TOO_LONG`）を実装する（旧13.2を統合した。決定。D28）。長さは、既存のBedrock Converseクライアントと同じUTF-16コード単位（`system.length + text.length`。基本多言語面の外の文字は2と数える。Req 8.4、8.5）で数え、20,000以下を受け付け、20,001以上を拒否する。クライアントが実行時に強制する制約は緩めない。
+    - **Property 28: 入力の門**（判定が参照判定と一致し、`REAL_AI`で3条件のどれかを欠くとBedrockのfakeの呼出しが0回で保存が0件、`PROVISIONAL`の事実項目は入力に現れない。長さ（UTF-16コード単位）は、20,000以下を受け付け、20,001以上を拒否する。基本多言語面の外の文字を含む入力は、1文字を2と数える）
+    - **Validates: Requirements 7.12, 7.19, 7.24, 7.25, 8.5, 8.6, 8.7, 8.23, 12.5, 12.14**
     - 焦点テスト: `npx.cmd vitest run apps/api/src/regional-values/draft/checkDraftInput.test.ts apps/api/src/regional-values/draft/checkDraftInput.property.test.ts`
 
-  - [ ] 11.3 【A】下書きの決定的検査（`DR_*`）を実装する
+  - [x] 11.3 【A】下書きの決定的検査（`DR_*`）を実装する
+    - **仕様変更（2026-11-13）**: `DR_CANDIDATE_FACTS`は、16.3が実装する`factGroundingText(fact)`（事実の文、値、地域、調査日。日付はISO形式と和文形式の両方）を根拠に`checkGrounding`を行う。`DR_CAUSAL_CLAIMS`、`DR_HEDGE_REQUIRED`、`DR_COMPARISON`（比較の条件は16.3の`checkFactComparison`）、`DR_UNKNOWN_REQUIRED`、`DR_DIRECTION_RULES`を追加する。語の一覧は13.1の承認まで実装者が決めず、設定を引数で受ける（承認の流れは設計の「因果語・仮説語・比較語の承認の流れ」）。Property 60は本タスクで検査する。
+    - **依存**: 11.1、16.3。
     - `draft/checks.ts`に、`DR_JSON`、`DR_GROUND_EXISTS`、`DR_GROUND_MATCH`（8.6の`checkGrounding`を再利用）、`DR_FORBIDDEN_WORDS`（禁止語と誘導語の一覧）、`DR_SENTENCE_LENGTH`、`DR_THEME_RANGE`、`DR_QUESTION_RULES`（質問の下書きに8.3〜8.5の検査を同じ条件で適用し、起案者区分を`AI_DRAFT`にする）、`DR_CANDIDATE_FACTS`（課題候補の根拠の事実項目IDが入力の`VERIFIED`の事実項目に実在し、候補の文の数値・日付が根拠の値と一致する）を実装する。1つでも失敗すれば、失敗した検査の区分と対象の文または項目を返す。
     - **Property 27: 不正な出力の拒否**（存在しない根拠ID、引用にない数値・日付・固有名詞、推奨語、範囲外のテーマ分類、質問の検査の違反、JSON契約の違反のいずれか1つの混入で必ず拒否。混入のない応答は合格）
     - **Validates: Requirements 8.8, 8.9, 8.10, 8.11, 8.18, 12.5**
     - **Property 57: 課題候補の根拠と区別**（根拠の事実項目IDの実在と値の一致。存在しないID、異なる数値、推奨語、順位・スコアの項目、範囲外のテーマ分類の混入は必ず拒否。`PROVISIONAL`の事実項目と送信可否が「可」でない`REAL_AI`の出典を入力にするとBedrockのfakeの呼出しが0回で保存が0件。保存した課題候補が公開バンドルの組立ての出力と事実項目の一覧に現れない）
     - **Validates: Requirements 7.19, 8.7, 8.23, 8.24, 8.25, 12.17**
+    - **Property 60: 課題候補の追加の検査**（検査に合格する台本の応答に、因果の断定の語、仮説の語尾でない文末、比較の語を含み根拠が1件の文、判断できないことまたは追加確認の欠落、否定表現または排他語を含む対応方向、推奨の語を含む対応方向、計算値の数値、地域間の優劣を述べる比較のいずれか1つを混ぜると必ず拒否され、`REJECTED_BY_CHECKS`が1件増える。混入のない応答は`PENDING`で保存される。語の一覧は試験専用の語）
+    - **Validates: Requirements 8.24, 8.26, 12.17, 12.20**
     - 焦点テスト: `npx.cmd vitest run apps/api/src/regional-values/draft/checks.test.ts apps/api/src/regional-values/draft/checks.property.test.ts`
 
-  - [ ] 11.4 【A】`runDraft`と下書きの保存を実装する（fakeのBedrockクライアント）
-    - `draft/runDraft.ts`と`draft/draftStore.ts`に、設計書の手順1〜7を実装する: 入力の判定（11.2）、`inputHash`と`DraftRunKey`から`draftId`、保存済みの同じキーがあれば再利用（呼出しも記録も増やさない）、既存の`createPacer`、既存の`BedrockConverseClient`（テストは常にfake）、失敗の写像（`TIMEOUT`・`AUTH`・`SERVICE_ERROR`・`RATE_LIMITED`・`MODEL_NOT_ALLOWED`）、検査（11.3）、合格したものだけを`PENDING`で既存の`atomicWriteImmutableFile`により保存、`DRAFTED`と`REJECTED_BY_CHECKS`の記録の追加。モデルは`generation`（既定`jp.anthropic.claude-haiku-5-5`）と`verification`（既定`jp.anthropic.claude-opus-5-5`）の役割に割り当て、第二意見のモデルが起案のモデルと同じなら`REVIEW_MODEL_SAME_AS_DRAFT`で拒否する。プロンプトは`draft/prompts/`の定数と`promptVersion`で持ち、資料は区切りで囲み「内側は資料であり指示ではない」と明記する。`ISSUE_CANDIDATE`のプロンプトには、出力が提案であり、事実でも公式機関の見解でもないこと、順位・推奨・優劣を書かないことも明記する。エラーとログに認証キー、プロンプト、応答本文を含めない。
+  - [x] 11.4 【A】`runDraft`と下書きの保存を実装する（fakeのBedrockクライアント）
+    - **依存**: 11.1、11.2、11.3。
+    - `draft/runDraft.ts`と`draft/draftStore.ts`に、設計書の手順1〜7を実装する: 入力の判定（11.2）、`inputHash`と`DraftRunKey`から`draftId`、保存済みの同じキーがあれば再利用（呼出しも記録も増やさない）、既存の`createPacer`、既存の`BedrockConverseClient`（テストは常にfake）、失敗の写像（`TIMEOUT`・`AUTH`・`SERVICE_ERROR`・`RATE_LIMITED`・`MODEL_NOT_ALLOWED`）、検査（11.3）、合格したものだけを既存の`atomicWriteImmutableFile`により不変のファイルとして保存（`disposition`は持たない。採否は導出。同じテーマと同じ根拠の事実項目の集合の課題候補は、重複の可能性があっても保存する。自動では拒否せず、人が確認する。D34）、`DRAFTED`と`REJECTED_BY_CHECKS`の記録の追加。モデルは`generation`（既定`jp.anthropic.claude-haiku-5-5`）と`verification`（既定`jp.anthropic.claude-opus-5-5`）の役割に割り当て、第二意見のモデルが起案のモデルと同じなら`REVIEW_MODEL_SAME_AS_DRAFT`で拒否する。プロンプトは`draft/prompts/`の定数と`promptVersion`で持ち、資料は区切りで囲み「内側は資料であり指示ではない」と明記する。`ISSUE_CANDIDATE`のプロンプトには、出力が提案であり、事実でも公式機関の見解でもないこと、順位・推奨・優劣を書かないことも明記する。エラーとログに認証キー、プロンプト、応答本文を含めない。
     - 設定値（`draft.json`の`maxEvidenceUnits`、`evidenceMaxChars`）は設計書に値がないため、ここでは設定オブジェクトを引数で受け、テストは試験専用の値を渡す。実ファイルの値は13.1で承認を得て作る。
+    - **仕様変更（2026-11-13、D29）**: 下書き、イベント、承認台帳、課題の記録を読む処理は、共通のヘルパ`draft/recordReader.ts`の`readRecords`を通す。`readRecords`は、`validateDataBoundary`（`scope: "RUN"`。`storagePath`は`data/real/regional-values/`または`packages/fixtures/src/regional-values/`の下の相対パス）で、各記録の`dataKind`と保存先を検査し、`DATA_KIND_MIXED`、`STORAGE_ROOT_MISMATCH`、`DATA_KIND_INVALID`、`BOUNDARY_INPUT_INVALID`のいずれかで読込みを失敗させる。`dist`の出力には使わない（保存先の規則の対象外）。11.6と16.4が使う。テスト: 種別が混在する記録、保存先が範囲外の記録、`dataKind`のない記録で読込みが失敗すること。`FIXTURE`だけ、`REAL_AI`だけの記録は読めること。
     - **Property 29: 冪等性**（同じキーの2回目は保存済みを返し、fakeの呼出し回数と`DRAFTED`の記録が増えない。キーのどれかが異なれば再度呼ぶ。失敗した実行はキャッシュにならない）
     - **Validates: Requirements 8.8, 8.16, 8.17**
     - 例示テスト: 失敗の写像の全行、11回目の呼出しと許可モデル以外が呼出し0回で拒否されること、同じ入力資料の既存の下書きと承認状態が変わらないこと。
     - 焦点テスト: `npx.cmd vitest run apps/api/src/regional-values/draft/runDraft.test.ts apps/api/src/regional-values/draft/runDraft.property.test.ts`
 
-  - [ ] 11.5 【A】AIの貢献を示す4つの数を集計する
-    - `draft/contribution.ts`に、`events/`を読んで`drafted`、`rejectedByChecks`、`humanEdited`、`humanRejected`を数える関数を実装する。同じデータ種別の記録だけを数え、呼出しの失敗と入力の拒否は数えない。不変条件（すべて0以上の整数、`rejectedByChecks + humanEdited + humanRejected ≤ drafted`）と、保存済みの下書きの`disposition`（`ADOPTED`の`edited`、`REJECTED`）が記録と対応することを検査する。
-    - **Property 30: AIの貢献を示す4つの数**（事象の列に対して記録から数えた値と一致し、不変条件を満たす）
+  - [x] 11.5 【A】AIの貢献を示す4つの数を集計し、採否を導く
+    - **依存**: 11.1。
+    - `draft/contribution.ts`に、`events/`を読んで`drafted`、`rejectedByChecks`、`humanEdited`、`humanRejected`を数える関数を実装する。同じデータ種別の記録だけを数え、呼出しの失敗と入力の拒否は数えない。不変条件（すべて0以上の整数、`rejectedByChecks + humanEdited + humanRejected ≤ drafted`）を検査する。`HUMAN_ADOPTED`は数えない。あわせて、採否の導出`deriveDisposition`（`draft/disposition.ts`の純関数。`HUMAN_REJECTED`があれば`REJECTED`、`HUMAN_ADOPTED`または`HUMAN_EDITED`があれば`ADOPTED`、なければ`PENDING`）を実装し、`HUMAN_*`の記録の`draftId`が保存済みの下書きに実在すること、1つの`draftId`に付く採否の記録が高々1件であることを検査する。採否は保存しない。
+    - **Property 30: AIの貢献を示す4つの数**（事象の列に対して記録から数えた値と一致し、不変条件を満たす。修正せずに採用した記録（`HUMAN_ADOPTED`）を事象の列に加えても、4つの数は変わらない）
     - **Validates: Requirements 8.22, 12.15**
     - 焦点テスト: `npx.cmd vitest run apps/api/src/regional-values/draft/contribution.test.ts apps/api/src/regional-values/draft/contribution.property.test.ts`
 
-  - [ ] 11.6 【A】承認台帳と、下書きの採用・却下を実装する
-    - `draft/approvalLedger.ts`に、承認台帳（`approvals/<targetKind>/<targetId>.json`）の読込みと`countValidApprovals`を純関数で実装する。現在の内容の`targetHash`（承認の項目を除いた正準JSONのSHA-256）に一致する記録のうち、異なる承認者IDの数が`requiredApprovers`以上でなければ`APPROVER_COUNT_INSUFFICIENT`（不足）。1人目は対象の`approval`の承認者とし、`approval`の型は変えない。
-    - `draft/review.ts`に、採用（修正なしは記録なし、人が直した場合は`HUMAN_EDITED`）、却下（`HUMAN_REJECTED`）、採用した内容への再検査（人が書いたものと同じ条件）、`approve`（承認台帳への追記）を実装する。`approve`は、現在の版の偏り確認が`BIAS_SUSPECTED`の質問を承認せず拒否する（扱いは【要確認23】の決定まで保留し、13.3で実装する）。
+  - [x] 11.6 【A】承認台帳と、下書きの採用・却下を実装する
+    - **仕様変更（2026-11-13、整合修正D16）**: 承認台帳は、記録ごとの不変ファイル（`approvals/<targetKind>/<targetId>/<記録のSHA-256>.json`）とし、`APPROVE`と`REVOKE`の記録を追加する（既存の記録を書き換えない）。`targetKind`に`ISSUE`を追加する。`ISSUE`の`APPROVE`は、確認項目6つ（`factsMatch`、`factAndHypothesisSeparated`、`noCausalClaim`、`noRecommendation`、`unknownsStated`、`sourcesShown`）の全件が確認済みでなければ作れない（契約はリテラル`true`）。`ISSUE`は`approval`を持たないので、承認者数は台帳の記録だけで数える。承認後に根拠が変わった課題の再承認は16.4の無効化規則に従う。
+    - **依存**: 11.1、11.4。
+    - `draft/approvalLedger.ts`に、承認台帳（ディレクトリの列挙）の読込み（11.4の`readRecords`を通し、種別の混在と保存先を検査する。混在があれば読込みを失敗させる）と`countValidApprovals`（純関数）を実装する。有効な承認は、現在の内容の`targetHash`（承認の項目を除いた正準JSONのSHA-256。`ISSUE`は課題の記録のSHA-256）に一致し、同じ`targetHash`の`REVOKE`の記録より後（同時刻は取消しを優先）に付いた`APPROVE`。異なる承認者IDの有効な承認の数が`requiredApprovers`以上でなければ`APPROVER_COUNT_INSUFFICIENT`（不足）。質問、課題カード、結果解説、固定文言では、1人目は対象の`approval`の承認者とし、`approval`の型は変えない。記録の順序は、記録内の日時と記録のSHA-256で決める。
+    - `draft/review.ts`に、採用（修正なしは`HUMAN_ADOPTED`、人が直した場合は`HUMAN_EDITED`。1つの下書きに付く採否の記録は高々1件）、却下（`HUMAN_REJECTED`）、採用した内容への再検査（人が書いたものと同じ条件）、`approve`（承認台帳への`APPROVE`の追記）、承認の取消し（`REVOKE`の追記）を実装する。`ISSUE`の採用では、課題の記録（`issues/<issueId>/v<版>.json`。不変。内容を直すときは課題IDを維持して次の版）も作る。`approve`は、現在の版の偏り確認が`BIAS_SUSPECTED`の質問を承認せず拒否する（扱いは【要確認23】の決定まで保留し、13.3で実装する）。
     - **Property 31: 承認者数**（現在の内容に一致する記録のうち異なる承認者IDの数が`requiredApprovers`以上のときに限り足りる。内容を変えると2人目以降の記録は無効になる）
-    - **Validates: Requirements 3.10, 7.1, 10.5**
+    - **Validates: Requirements 3.10, 7.1, 8.27, 10.5**
     - 焦点テスト: `npx.cmd vitest run apps/api/src/regional-values/draft/approvalLedger.test.ts apps/api/src/regional-values/draft/approvalLedger.property.test.ts apps/api/src/regional-values/draft/review.test.ts`
 
-  - [ ] 11.7 【A】下書き工程のCLIコマンドを配線する
+  - [x] 11.7 【A】下書き工程のCLIコマンドを配線する
+    - **仕様変更（2026-11-13、整合修正）**: `approve ISSUE`（確認項目6つの対話確認を伴う。すべて「はい」と答えたときだけ`APPROVE`を作る）と、`approve --revoke`（`REVOKE`の追記）の配線を含める。`verify-fact`の配線は含めない（`verify-fact`は`aggregate`とともに13.11が実装する）。`draft list`は、同じテーマで根拠の事実項目の集合が同じ課題候補を、重複の可能性として示す（自動では削除も統合もしない。D34）。`issues export`、`issues list`、`issues verify`は16.6で実装し、`build`とは独立した工程とする。
+    - **依存**: 11.4、11.6。`cli.ts`は16.6も書くので、11.7を先に実施する。
     - `apps/api/src/regional-values/cli.ts`（9.5で作成）へ、`draft run`、`draft list`、`draft review`、`draft counts`、`approve`の各コマンドを追記する。`draft run`は`ISSUE_CANDIDATE`を含むすべてのtaskを扱い、`draft list`は課題候補を事実項目とは別の一覧で表示する。`draft run`は実クライアントを組み立てる配線までを実装し、このfeatureの範囲では実行しない（実Bedrockの呼出しは利用者が別途判断する手動の作業）。テストは常にfakeを注入する。
     - 例示テスト: 引数の誤りで終了コード1、`draft list`・`draft counts`・`draft review`の出力、`approve`が承認台帳に追記すること。
     - 焦点テスト: `npx.cmd vitest run apps/api/src/regional-values/draftCli.test.ts`
-    - _Requirements: 8.2, 8.4, 8.21_
+    - _Requirements: 8.2, 8.4, 8.21, 8.27_
 
-  - [ ] 11.8 【A】架空資料でAI下書きの流れを再現する統合テストを追加する
+  - [x] 11.8 【A】架空資料でAI下書きの流れを再現する統合テストを追加する
+    - **仕様変更（2026-11-13）**: 課題候補から課題カードまでの一巡は16.8で確認する。本タスクは質問の下書きの流れを主とし、重複して課題の流れを検査しない。
+    - **依存**: 11.4、11.6、11.7。
     - `tests/regional-values/draftFlow.test.ts`に、架空資料の入力、`ISSUE_CANDIDATE`（`VERIFIED`の事実項目だけを入力にし、公開バンドルに含まれないこと）、`ISSUE_SUMMARY`と`QUESTION_DRAFT`の下書き、検査、`PENDING`での保存、検査に失敗する応答（存在しない根拠ID、資料にない数値、推奨語）が保存されず不合格の件数に加算されること、採用と承認、`assembleBundleBody`への収録（`APPROVED`だけ）、バンドルの`aiContribution`が一時ディレクトリの記録の集計と一致することを、Bedrockのfakeで通しで確認する。`fetch`が1回も呼ばれないこと（既存のネットワーク遮断）も確認する。
     - 焦点テスト: `npx.cmd vitest run tests/regional-values/draftFlow.test.ts`
     - _Requirements: 8.21, 12.5, 12.10, 12.15_
 
-  - [ ] 11.9 【A】AI下書き工程が価値観マップの計算に触れないことを静的に検査する
+  - [x] 11.9 【A】AI下書き工程が価値観マップの計算に触れないことを静的に検査する
+    - **依存**: 3.10（完了済み）、11.4。`issues/`の同じ検査は16.11が、同じテストファイルへ追加する（11.9を先に実施する）。
     - `tests/regional-values/draftIndependence.test.ts`に、`apps/api/src/regional-values/draft/`のモジュールと、それが直接または間接に取り込むすべてのモジュールに、`packages/domain/src/regional-values/`の`map/`、`session/`、`view/`のモジュールの取込みが0件であることを、3.10の`importGraph.ts`で確認する。下書き工程の入力の型（`EvidenceUnit`、課題候補の入力の事実項目）が、`Answers`、`ValuesMap`、`DiagnosticState`を受け取らないことを、`// @ts-expect-error`を使う型のテストで確認する。
     - 焦点テスト: `npx.cmd vitest run tests/regional-values/draftIndependence.test.ts`
     - _Requirements: 8.2, 8.3, 12.18_
 
-- [ ] 12. Checkpoint - 分類A（MVP）の完了確認
-  - [ ] 12.1 【A】既存資産の保全を静的検査と差分で確認する
+- [x] 12. Checkpoint - 分類A（MVP）の完了確認
+  - [x] 12.1 【A】既存資産の保全を静的検査と差分で確認する
+    - **依存**: 11.9、16.12（分類Aの11.x、16.xがすべて完了していること）。
     - `tests/regional-values/preservation.test.ts`を新規作成する。本featureの新規ファイル（`packages/*/src/**/regional*`、`apps/api/src/regional-values/**`、`tests/regional-values/**`）が、旧マッチング機能のモジュール、`apps/api/src/ocr/`、`apps/web`をimportせず、関数を呼び出さないこと、新規テストに`skip`・`todo`・`only`がないことを静的に検査する（Req 10.6、10.7）。画面に一致度・立場記録・候補者比較を出す固定文言のキーがないことも確認する。
     - 読み取りだけの`git status --short`と`git diff --stat`、`git diff --diff-filter=D --name-only`で、次を確認して件数だけ報告する: 追跡済みの既存ファイルの変更が、`packages/contracts/src/models/index.ts`と`packages/domain/src/index.ts`の各1行、ルートと`apps/api`の`package.json`の`scripts`1行ずつ、`packages/contracts`と`packages/domain`の`package.json`の`exports`追記だけであること、削除されたファイルが0件、既存のテストファイルの変更が0件、`apps/web`・`data/`・他のspec・`package-lock.json`の変更が0件であること。
     - 焦点テスト: `npx.cmd vitest run tests/regional-values/preservation.test.ts`
-    - _Requirements: 10.6, 10.7, 10.8, 10.9, 10.10_
+    - **実施記録（完了。利用者の方針に従って確認した）**: 静的検査（`tests/regional-values/preservation.test.ts`、7件）は成功した。差分は、`git diff e6d862a`（`main`の`e6d862a`。PR #11以降の変更の起点）で読んだ。追跡済みの既存ファイルの変更（`M`）は26件で、内訳は次のとおり（`apps/api/package.json`は(1)と(2)の両方が変更したので、重複を除いて26件）。(1)本feature（`7774440`、`81bcf6d`、`6aa998b`）8件: 上の一覧どおりの6件（根と`apps/api`の`package.json`の`scripts`各1行、`packages/contracts`と`packages/domain`の`package.json`の`exports`、`models/index.ts`と`domain/src/index.ts`の各1行）に加え、一覧にない2件（`packages/contracts/tsconfig.json`の`"types": ["node"]`1行、他のspecの`.kiro/specs/visitor-analyst-mode-separation/requirements.md`。後者は14章の案Bの記録が「担当者が別に更新する」としていた範囲）。(2)OCRの統合（`777b8dd`。基準値の測定より前に作られ、基準値の一覧に`apps/api/src/ocr`のテストが入っている）6件: `apps/api/src/analysis/cli.ts`、`inspectCommand.ts`、`main.ts`、`extract/pdfjsTextExtractor.ts`、`package-lock.json`、`apps/api/package.json`の依存3件。(3)共同開発者（`c0a3b0f`。14章の案Bの承認範囲）13件: `apps/web`のうち既存テスト6件を含む。削除行があるテストは2件（`analyst/routes.test.tsx`の−11行、`shellSafety.property.test.tsx`の−10行。`/values`以外の期待値を条件分岐の中へ移したもので、期待値の文言は残っている）。削除されたファイルと名前変更は0件、`data/`の変更は0件、`package-lock.json`の本featureによる変更は0件。上の「だけであること」と合わないのは、(1)の一覧にない2件と、(2)・(3)の他者の変更である。利用者の方針で、次のとおり扱った。(a)`packages/contracts/tsconfig.json`の`"types": ["node"]`は許容する。TypeScript 6.0.3では、これがないと`packages/contracts/src/models/analysis.ts`の既存の`URL`が解決できず、契約パッケージの型検査が`TS2304`で失敗する。起点の`e6d862a`の木を取り出して同じ条件で検査し、同じ2件のエラーが出ることを確かめた（本featureが招いた失敗ではない）。`packages/domain/tsconfig.json`と`apps/api/tsconfig.json`は、すでに同じ指定を持つ。契約パッケージの出力のJavaScriptは変わらず、`node:*`の取込みは契約パッケージの非テストのファイルにない。(b)`visitor-analyst-mode-separation/requirements.md`の変更（`Values_Route`の用語、Req 6.3の限定、Req 6.9と7.11の追加）は、14章の案Bの承認範囲（(1)route、(3)`AppShell`の表示、(4)テストの期待値の追加）と一致する。(c)OCR統合（`777b8dd`）と共同開発者の`apps/web`の変更（`c0a3b0f`）は、本featureとは別の変更として上に記録した。(d)`apps/web`の既存テスト6件を、起点の版と1行ずつ照合した（前後の空白を除き、起点の版にあって今の版にない行を数えた）。ない行は、関数の宣言と呼出しの2種類だけだった（`expectAnalystShell`と`expectPreservedShell`が、`/values`を見分ける引数を受け取る形に変わったため）。アサーションの行はすべて残り、`/values`以外のrouteでは同じ期待値が評価される。`AppShell.tsx`は、`/values`のときだけ2022年選挙の表示を出さず、ほかのrouteの表示は変わらない。テストの削除と弱体化は行っていない。
 
-  - [ ] 12.2 【A】全体のテスト・lint・型検査・ビルドを実行し、開始前と比較する
+  - [x] 12.2 【A】全体のテスト・lint・型検査・ビルドを実行し、開始前と比較する
+    - **依存**: 12.1。分類Aの16.xは、本タスクの前に完了している（整合修正で、12.x より前の波へ移した）。
     - 実行順: `npm.cmd test -- --reporter=json --outputFile=dist/regional-values-records/vitest-after.raw.json`（全体のテストは1.1と本タスクでだけ実行する）、`npm.cmd run lint`、`npm.cmd run typecheck`、`npm.cmd run build`、`npm.cmd run check:build-boundary`。development serverは起動せず、実Bedrockは呼ばない。結果は件数だけ報告する。
     - 1.1の`test-baseline-before.json`と同じ形で`.kiro/specs/regional-values-map/records/test-baseline-after.json`を書き、Req 10.11の判定を行う: (a)失敗数が開始前以下、(b)開始前に成功していたテストがすべて成功（`test-baseline-before.passed.txt`との照合）、(c)実行数が開始前以上、(d)スキップ数が開始前以下。1つでも満たさなければ完了と扱わず、原因を報告して停止する。
     - 分類Aの完了条件（MVP）を確認する: 6.4の使用例のテストと9.5の`FIXTURE`ビルドのテストが成功し、クイック版の価値観マップが架空データ（代替データ）で動くこと。実データでの完了は13.17で確認する。
     - Ensure all tests pass, ask the user if questions arise.
     - 分類Bまたは分類Cのタスクを実施した場合は、その完了後にこのタスクをもう一度実行する。
+    - **実施記録（完了。12.1の完了後に再実行した）**: 指定の順に実行し、すべて成功した（`vitest`は終了コード0、`lint`、`typecheck`、`build`、`check:build-boundary`も0。`BUILD_BOUNDARY_RESULT PASS`）。結果は`records/test-baseline-after.json`と`records/test-baseline-after.passed.txt`に書いた。実行したテストは209ファイル3629件で、成功3629件、失敗0件、スキップ0件、todo 0件。開始前は89ファイル1344件で、すべて成功だった。Req 10.11の判定は、(a)失敗0件で開始前以下、(b)開始前に成功した1344件の名前がすべて成功のまま（欠けた名前0件）、(c)実行数3629件で開始前以上、(d)スキップとtodoが0件で開始前以下。4つとも満たす。6.4の使用例のテスト（`tests/regional-values/fixtureUsage.test.ts`）と9.5の`FIXTURE`ビルドのテスト（`apps/api/src/regional-values/cli.test.ts`）は成功した。12.1の完了後に、同じ手順をもう一度実行し、同じ件数（209ファイル3629件、すべて成功）と、すべて終了コード0を確認した。この再実行の開始時刻（`test-baseline-after.json`の`acquiredAt`）より後に更新されたファイルは、実行が書いた2つの記録（`test-baseline-after.json`と`test-baseline-after.passed.txt`）だけだった。ソース、テスト、設定は、実行の前後で変わっていない。`HEAD`は`424de6a`のままである。分類Bのタスクを実施したあとは、再実行する。
     - _Requirements: 10.11, 12.10, 12.11_
 
 - [ ] 13. 未決事項の解決後に実装する（分類B）
   - [ ] 13.1 【B】検査用の語の一覧を確定し、`neutrality.json`・`build.json`・`draft.json`を作成する
+    - **仕様変更（2026-11-13、整合修正）**: 承認対象に、`neutrality.json`の`causalWords`（因果関係の断定を表す語）、`hedgeEndings`（仮説の語尾）、`comparisonWords`（比較の語）（未決(i-6)）を加える。廃止した16.13の内容（課題の検査用の語の一覧の承認）は、本タスクに統合した。承認の流れは、design.mdの「因果語・仮説語・比較語の承認の流れ」に従う: (1)実装者が案を`records/word-lists-proposal.md`に書く（語、群、理由、検出される例と検出されない例）、(2)利用者が語ごとに採否を決め、承認者名と承認日を本タスクに記録する、(3)承認された語だけを設定へ入れ、3つの一覧の正準JSONのSHA-256を`records/word-lists-approval.json`に記録する、(4)`repoConfigFixtures.test.ts`が設定のSHA-256と記録のSHA-256の一致を検査する。**承認者名: ＿＿、承認日: ＿＿**（語の一覧の承認。記録するまで実ファイルを作らない）。
+    - **依存**: なし（人の承認が先）。16.xの検査（11.3、16.4）は試験専用の語で進められるので、本タスクを待たない。
     - **待つ条件**: 利用者による語の一覧の承認。対象は、design.mdのOpen Decisionsの「(7)(18) 否定表現、前提文の型、排他的な語、予算や賛否の語、施策名の一覧」、「固有名詞の検査用一覧と実在名の設定一覧」、【要確認7】の漢数字の免除語、`wordCategories`（`SUPERIORITY`・`RECOMMENDATION`・`VOTE_URGING`）の語、誘導語（1語以上）、候補者名と政党名の一覧、`guidanceNames`、`dataVersion`の初期値、`draft.json`の`maxEvidenceUnits`と`evidenceMaxChars`。要件に書かれていない語・値は、実装者が決めず、案を作って承認を求める。
-    - 内容: 承認された値で`config/regional-values/neutrality.json`、`build.json`、`draft.json`を作り、8.1の読込み関数で読めること、6.1〜6.3の架空データ（質問、課題カード、固定文言、結果解説、活かし方の問い）がこの設定で8.5・8.7・8.8の検査に通ることを`tests/regional-values/repoConfigFixtures.test.ts`で確認する。通らない場合は架空データの文面を直す（要件の更新ではない）。
+    - 内容: 承認された値で`config/regional-values/neutrality.json`（`causalWords`、`hedgeEndings`、`comparisonWords`を含む）、`build.json`、`draft.json`を作り、8.1の読込み関数で読めること、6.1〜6.3の架空データ（質問、課題カード、固定文言、結果解説、活かし方の問い）がこの設定で8.5・8.7・8.8の検査に通ることを`tests/regional-values/repoConfigFixtures.test.ts`で確認する。通らない場合は架空データの文面を直す（要件の更新ではない）。
     - このタスクが済むまで、リポジトリの設定だけで`regional-values build`は実行できない（`CONFIG_UNREADABLE`で止まる）。共同開発者の動作確認は、9.5の`--config-dir`に試験専用の設定を指定して行える。
     - 焦点テスト: `npx.cmd vitest run tests/regional-values/repoConfigFixtures.test.ts`
-    - _Requirements: 3.3, 3.4, 3.5, 3.12, 3.13, 3.15, 3.16, 7.9, 8.9_
+    - **実施記録（承認待ち）**: 因果語、仮説の語尾、比較語の案を`records/word-lists-proposal.md`に書いた（因果語25件、仮説の語尾6件、比較語14件。語ごとに群、理由、検出される例と検出されない例を付けた）。例は、案の一覧に対して手元で確かめてある。承認者名と承認日は未記録で、実ファイルは作っていない。実装は3つの一覧を`--draft-settings`で渡す設定ファイル（`DraftRunSettingsSchema`）から読むため、設計の`neutrality.json`との置き場所の食い違いを、13.1の前に決める必要がある（案の文書の「承認者に決めてほしい点」4）。
+    - _Requirements: 3.3, 3.4, 3.5, 3.12, 3.13, 3.15, 3.16, 7.9, 8.9, 8.26_
 
-  - [ ] 13.2 【B】下書きの入力長の数え方を確定し、`INPUT_TOO_LONG`の事前判定を実装する
-    - **待つ条件**: 【要確認24】（Req 8.5の「文字」の数え方を、既存クライアントのUTF-16コード単位に合わせるか、コードポイントに合わせるかの要件更新）の決定。
-    - 内容: 決定した数え方で、11.2の`checkDraftInput`に事前判定を追加する。20,000と20,001、基本多言語面の外の文字の境界例を、11.2のProperty 28のテストに追加する。クライアントが実行時に強制する制約は緩めない。
-    - 焦点テスト: `npx.cmd vitest run apps/api/src/regional-values/draft/checkDraftInput.test.ts apps/api/src/regional-values/draft/checkDraftInput.property.test.ts`
-    - _Requirements: 8.5_
+  - 13.2 は廃止した（入力長の数え方をUTF-16コード単位に決定し、事前判定を11.2へ統合した。番号は再利用しない）。
 
   - [ ] 13.3 【B】偏りの疑い（`BIAS_SUSPECTED`）がある質問の承認操作を実装する
     - **待つ条件**: 【要確認23】（偏りの疑いの判定が付いた質問を承認して公開してよいか。設計の既定は、承認を妨げず、承認の操作に「指摘事項を確認した」旨の確認を挟む）についての利用者の判断。
@@ -623,19 +643,25 @@
     - _Requirements: 7.5, 7.6, 7.7, 7.18_
 
   - [ ] 13.10 【B】実データの原本の取り込み（`intake`）を実装する
+    - **仕様変更（2026-11-13、整合修正D21）**: 別の出典IDが同じSHA-256を持つ資料の登録を`DUPLICATE_CONTENT`で拒否する（同じ出典IDの別revisionは許す。既存の`ingest`と同じ規則。13.15が実装する共通部分を使う）。データセット台帳（`DatasetRecord`、16.1の契約）に原本を記録する。
+    - **依存**: 13.15、16.1。
     - **待つ条件**: 13.9の完了（xlsxを扱う場合）。取り込みの共通部分（配置、SHA-256、revision、出典記録）は13.15で実装したものを使い、このタスクはxlsx固有の部分だけを実装する。利用者が実データの取り込みを許可すること（実データの取得・ダウンロードは行わず、既に`data/real/open-data/ehime-catalog/pref-2/shelters.xlsx`にある原本だけを対象にする）、Open Decisionsの「(2) 取得済みの指定緊急避難場所一覧」（取り込み時に、サイズ288,496バイトとSHA-256 `41df5967e75eafd82fee0a2a211bb1fa8699d936011247ef5c4f5b76bce8b3c6`を再照合し、一致しなければ取り込まない）、「(3) 利用条件が未確認の公式データ」（利用条件・個別注記・送信可否は`UNKNOWN`または未確認で始め、推測しない）。
     - 内容: `apps/api/src/regional-values/intake/`に、原本の配置（`data/real/raw/regional-values/<sourceId>/<revision>/`。単純なファイル名のみ、上書きしない）、SHA-256とrevision（同一なら`UNCHANGED`、異なれば`r{n+1}`）、`REAL_AI`の出典記録の作成を実装する。テストは一時ディレクトリと架空の小さなファイルだけを使う。
     - 焦点テスト: `npx.cmd vitest run apps/api/src/regional-values/intake/intake.test.ts`
     - _Requirements: 7.5, 7.14, 10.15_
 
-  - [ ] 13.11 【B】事実項目の集計と人による検証（`aggregate`、`verify-fact`）を実装する
+  - [ ] 13.11 【B】事実項目の作成（`aggregate`の呼出し）と人による検証（`verify-fact`）を実装する
+    - **仕様変更（2026-11-13、最終判断D24）**: `aggregate`（純関数）は、分類Aの16.16が実装する。本タスクは、それを呼ぶ側（原本の読込み、事実項目の作成と保存）と、人による検証を実装する。`DERIVED`（`RATIO`、`DIFFERENCE`、`PERCENT_CHANGE`）の事実項目は、16.3の`deriveFact`で`PROVISIONAL`で作り、人の`verify-fact`で`VERIFIED`にする。原本のSHA-256が変わったときの課題の無効化は、`issues export`とビルドの計算（16.4）で判定し、保存データを書き換えない。Property 59（集計の規則と再現性）は16.16の担当で、本タスクには含めない。
+    - **依存**: 13.10（または13.15）、16.1、16.3、16.16、11.7、16.6（`cli.ts`を書くため、先に完了していること）。
     - **待つ条件**: 13.10または13.15の完了、【要確認8】（原本のSHA-256が変わったときの降格と保存データの書換えの規則を、Req 7.14・7.19に明記する要件更新）、人が原本の値と照合する作業（コードでは代替できない。`PROVISIONAL`から`VERIFIED`への変更は人の操作だけで行う）。
-    - 内容: `aggregate`（`COUNT_ROWS`・`COUNT_ROWS_WHERE`で原本から決定的に集計し、`PROVISIONAL`で作る。AIを使わない）、`verify-fact`（再計算値、保存値、位置情報を表示し、人が`y`を答えたときだけ`VERIFIED`と検証者ID・日時を書く）、8.7へ追加する`REAL_AI`の事実項目の検査（`FACT_VALUE_MISMATCH`、`FACT_SOURCE_MISMATCH`、`SOURCE_CHANGED`）を実装する。
+    - 内容: 取り込んだ原本（13.15の`csv-lines-v1`のテキスト）を読み、`aggregate`（16.16）を呼んで、`PROVISIONAL`の事実項目を作り、集計の記録（`AggregationRecord`。16.1の契約。`data/real/regional-values/aggregations/<factId>.json`に`atomicReplaceFile`で保存）を残す（事実の文は、固定のテンプレートに算出値を差し込む。AIを使わない。算出方法に`dedupeColumns`がなければ、行を除外しない）。`verify-fact`（再計算値、保存値、位置情報、欠損の件数、重複除外の件数を表示し、人が`y`を答えたときだけ`VERIFIED`と検証者ID・日時を書く。`DERIVED`は元の値と計算式も表示する）と、そのCLIへの配線、8.7へ追加する`REAL_AI`の事実項目の検査（`FACT_VALUE_MISMATCH`、`FACT_SOURCE_MISMATCH`、`SOURCE_CHANGED`）を実装する。例示テストで、`verify-fact`の表示に欠損の件数と重複除外の件数が含まれること、`AggregationRecord`の値が`aggregate`の結果と一致することを確認する。
     - **Property 26: 事実の数値**（事実の文の数値が算出値と一致すれば合格し、異なる値に変えると必ず`FACT_VALUE_MISMATCH`で拒否）
     - **Validates: Requirements 7.20, 12.14**
-    - 焦点テスト: `npx.cmd vitest run apps/api/src/regional-values/intake/aggregate.test.ts apps/api/src/regional-values/intake/factValue.property.test.ts`
+    - 焦点テスト: `npx.cmd vitest run apps/api/src/regional-values/intake/factValue.test.ts apps/api/src/regional-values/intake/factValue.property.test.ts`
 
   - [ ] 13.12 【B】実データの読込みと門（G1〜G6）を実装し、`REAL`・`REAL_PREFERRED`のビルドを完成させる
+    - **仕様変更（2026-11-13、整合修正D17）**: `REAL`の`IssueSource`（`loadIssueSnapshot`を`data/real/regional-values/`の記録に対して呼ぶもの）と、対応の記録（`data/real/regional-values/issue-links.json`）の読込みを、`REAL`・`REAL_PREFERRED`のビルドへ配線する（FIXTUREの配線と`checkIssueLinks`は16.9が実装済み）。`build`は`issues.json`の出力ファイルに依存しない。
+    - **依存**: 13.1、13.4、13.11、13.14、13.16、16.9。
     - **待つ条件**: 【要確認2】（項目単位の除外と、バンドル単位の失敗・切替の関係を明記する要件更新）、【要確認16】（承認の不足を`REAL_PREFERRED`の切替の対象にする要件更新）、Open Decisionsの「(3) 利用条件が未確認の公式データ」の確認（人）、13.1・13.4・13.11・13.14・13.16の完了（【要確認1】と【要確認5】は解消済み）。
     - 内容: 9.4の`RealDataLoader`の実装（`data/real/regional-values/`の質問バンク、課題カード、出典記録、結果解説、固定文言）、8.7へ追加する`REAL_AI`のカードの検査（利用条件、個別注記、送信可否、ライセンス情報、引用の実在、原本の変化）、G1〜G6の指摘への変換（G6は`aiInvolvement`が`AI_DRAFT`の課題カードの出典だけに要求し、G2の公開と加工の可否の確認はすべての実データの出典に要求する）、`REAL`・`REAL_PREFERRED`のビルドを実装する。9.4の「実データのディレクトリが空でない場合は未実装で失敗」の暫定動作をこのタスクで置き換える。
     - テスト（fakeのデータだけ。Req 12.13）: `REAL`は5条件（種別が`FIXTURE`、利用条件が`CONFIRMED`でない、個別注記の確認記録がない、ライセンス表示に必要な情報の欠落、検証記録がない、承認記録がない）を1つずつ欠くとビルドが失敗し公開バンドルを出力しない、`FIXTURE`に`REAL_AI`が混じると失敗、`REAL_PREFERRED`は条件をすべて満たすと実データ、1つでも欠くと全体を架空データにして理由を記録、いずれの場合も混在させない。AIが関与した出典で送信可否が`ALLOWED`でないとビルドが失敗し、AIが関与していない出典では送信可否が`UNKNOWN`でも失敗しないことも確認する。
@@ -656,6 +682,8 @@
     - _Requirements: 7.5, 7.8, 10.15_
 
   - [ ] 13.15 【B】CSVの取り込み（`csv-lines-v1`）と出典記録の作成を実装する
+    - **仕様変更（2026-11-13、整合修正）**: 原本と変換物のSHA-256、変換手順の識別子、行数の対応を`conversion`（16.1の契約）に記録する（旧16.13の「変換の記録の確認」は本タスクに含まれる）。Shift_JISは`TextDecoder("shift_jis",{fatal:true})`で復号できることを確認済み（切れたバイト列は`TypeError`）。取り込みの共通部分に、同じSHA-256の別の出典IDでの登録を`DUPLICATE_CONTENT`で拒否する規則（D21。既存の`ingest`と同じ。同じ出典IDの別revisionは許す）を含める。
+    - **依存**: 13.14、16.1。
     - **待つ条件**: 13.14の完了（CSVの候補データセットが決まること）、利用者が実データの取り込みを許可すること（実データの取得・ダウンロードは行わず、利用者が`data/real/raw/regional-values/`へ配置した原本だけを対象にする）。新しい依存は追加しない。
     - 内容: `apps/api/src/regional-values/intake/csvToText.ts`に、文字コード（UTF-8、BOM付きのUTF-8、Shift_JIS）を判定して、UTF-8・LFのテキストへ決定的に展開する関数を実装する（`TextDecoder`だけを使う。判定できない文字コードは取り込まない。展開手順の識別子は`csv-lines-v1`）。`intake/`に、原本の配置、SHA-256とrevision（同一なら`UNCHANGED`、異なれば`r{n+1}`）、`catalog`つきの`REAL_AI`の出典記録の作成（`usage`は`UNKNOWN`、`datasetNote`は`null`、`transmission`は`UNKNOWN`で始め、人が追記する）、位置情報（`text-lines`）を実装する。テストは一時ディレクトリと、架空の小さなCSV（実データを使わない）だけを使う。
     - 焦点テスト: `npx.cmd vitest run apps/api/src/regional-values/intake/csvToText.test.ts apps/api/src/regional-values/intake/intake.test.ts`
@@ -736,6 +764,7 @@
     - _Requirements: 9.1, 9.2, 9.3, 9.8, 12.7, 12.16_
 
   - [ ] 14.8 【C】`check:build-boundary`を拡張し、公開版の成果物の禁止対象とサイズを検査する
+    - **仕様変更（2026-11-13）**: 禁止対象に(f)（`issues.json`、承認台帳、課題候補の下書き）を加える（Req 10.3、10.14）。共同開発者の承認記録が先で、本featureの実装者は着手しない。
     - **着手条件**: 共同開発者の承認（承認者名: ＿＿、承認日: ＿＿）を記録するまで着手しない。`apps/web/scripts/`を変更するため、承認が必須である（Req 10.9）。
     - **共同開発者が使うAPI**: 7.3（`verifyBundleText`）、14.1のリリースビルド。
     - 内容: 新しいファイル`apps/web/scripts/release-boundary.mjs`に`evaluateReleaseArtifact`と`runReleaseBoundaryCheck`を実装し、既存の`check-build-boundary.mjs`がこれも実行して結果を合算する（`build-boundary.mjs`、`BUILD_BOUNDARY_TARGETS`、既存のテストの期待値は変更しない）。禁止対象(a)`FIXTURE`のデモデータ、(b)analystモードの画面、(c)承認ツール、(d)Bedrock呼出しのコード、(e)選挙公報の原本を検出して記号で報告し終了コード1にする。追加の検査として、外部スクリプトの不在、初回に読むJSと`bundle.json`のgzip後の合計500,000バイト以下、認証情報の値の不在、`bundle.json`の`meta.buildKind`と対象の一致を行う。
@@ -744,19 +773,145 @@
     - 焦点テスト: `npx.cmd vitest run apps/web/scripts/release-boundary.test.ts apps/web/scripts/release-boundary.property.test.ts`
     - _Requirements: 9.8, 9.10, 11.8_
 
+- [x] 16. 地域課題発見・受け渡し基盤（暫定承認 2026-11-13。質問方式の契約v2とは別の変更単位）
+  - 前提: 本章は新しい変更単位であり、質問方式v2（共同開発者の担当。章番号15を予定）は本章に含めず、実装しない。15章はまだ存在しない。`[x]`の既存タスク（5.2、7.1、8.7、9.2、9.4、10.1、10.3など）の完了状態は変えない。コード・データの変更、実Bedrockの呼出し、公式データの追加取得、依存の追加は、本章の実装タスクの範囲でだけ行い、仕様書の整合修正では行っていない。
+  - 整合修正（2026-11-13）: 16.13は廃止した（検査用の語の一覧の承認は13.1へ、変換の記録の確認は13.15へ統合した）。番号は再利用しない。16.14（FIXTUREの入力記録）と16.15（ブラウザ入口の独立性）を追加し、16.11を、`issues/`が価値観マップへ依存しない検査だけにした。続けて、最終判断（2026-11-13）で、`aggregate`を分類Aの独立したタスク16.16に、受領記録の作成を16.17に追加し、`issues export`の失敗時の扱いを16.6で状態記録による無効化に改めた。本章は、12.xの前の波に置く（分類Aの完了確認は、本章の完了後）。続けて、承認された7判断（2026-11-13）で、入力長のUTF-16コード単位（旧13.2を11.2へ統合）、`dedupeColumns`と重複除外の件数、読込みでの`validateDataBoundary`（11.4の`readRecords`）、送信可否の再確認、受領記録の自己申告、`issues.json`の有効性の検査（状態記録、`inputDigest`、SHA-256、契約の版、受領記録との照合）を反映した。
+  - 方針（承認済み）: 承認台帳は記録ごとの不変ファイル。`disposition`は保存せず導出。ビルドは`IssueSource`を注入して課題を得て、`issues.json`を読まない。課題IDは維持し、再承認で版を上げる。質問と課題カードが参照する課題は、非公開の対応の記録（`issue-links.json`）に課題IDと版で残す。無効化は`issues export`とビルドの計算で判定する。`issues export`の失敗時は、出力先の状態記録で古い`issues.json`を無効にする（削除に失敗しても、正常な出力として扱わない）。実データの`issues.json`はGit管理外で共有し、本文を含まない受領記録を残す。`HUMAN_ADOPTED`は下書きの採否の記録（`DraftEvent`）で、AIの貢献を示す4つの数に数えない。
+  - 未決事項（design.mdのOpen Decisionsの(i-6)と(i-13)）に関わる部分は、決定まで実装者が解釈せず、報告して停止する。(i-7)（入力長）、(i-8)（Req 7.10の記述）、(i-10)（送信可否の再確認）は決定済みである（D28、D35、D30）。各タスクの**依存**は、波の表と一致させる。
+
+  - [x] 16.1 【A】契約を追加する（データセット台帳、集計の記録、算出方法の拡張、変換記録）
+    - **依存**: なし（11.1と`regional/index.ts`のexportを書くので、11.1と同じ波に置かない）。
+    - `dataset.ts`（`DatasetRecord`と、`AggregationRecord`（集計の記録。非公開。`factId`、`inputSha256`、`methodHash`、`surveyDate`、`missingCount`、`duplicatesRemoved`、`locator`。Zod strict。`REAL_AI`だけ。本文を含まない））、`FactMethod`の拡張（`SUM_COLUMN`、`DERIVED`の`RATIO`・`DIFFERENCE`・`PERCENT_CHANGE`、`COMPUTED.sheet`の省略、`COMPUTED`の任意の`dedupeColumns`（重複除外の列。Req 7.27 c。指定がなければ行を除外しない））、出典（`RealSource`）への任意の`conversion`（原本と変換物のSHA-256、変換手順の識別子と手順書のSHA-256、変換者、変換日時、原本と変換後の行数）を、既存の契約と版を壊さずに追加する。`IssueCard`、`Question`には、課題への参照の項目を足さない。`FIXTURE`は算出方法を持たない（Req 7.18を維持）。`DERIVED`は`REAL_AI`だけが持てる。`DERIVED`の元に`DERIVED`は使えない（MVP。決定。D34。契約は、自分自身を元にすること、同じ元を2回使うことを拒否する。元が`DERIVED`の組は、2件を見られる`checkFactComparison`と`deriveFact`（16.3）が拒否する）。`dedupeColumns`は、1列以上の配列か省略のどちらかで、`null`は受け付けない（算出方法のハッシュの形を1つにするため）。`SUM_COLUMN`は`whereColumn`を必ず書く（条件がなければ`null`）。
+    - 公開バンドルの契約への影響: `RealFact.method`と`RealSource`は公開バンドルのカードに含まれるため、値（算出方法の種類）と任意の項目（`conversion`、`dedupeColumns`）の追加になる。版1に入れ、共同開発者へ通知する。`AggregationRecord`は非公開で、公開バンドルの契約に含めない。
+    - テスト: 各契約の合格例と拒否例（`DERIVED`の自己参照と重複、`FIXTURE`の`DERIVED`、行数の不一致を持つ`conversion`、行の本文を含む`AggregationRecord`、負の`missingCount`または`duplicatesRemoved`、`dataKind`が`FIXTURE`の`AggregationRecord`）、既存の契約テストが変更なしで成功すること。
+    - 焦点テスト: `npx.cmd vitest run packages/contracts/src/models/regional`
+    - _Requirements: 7.23, 7.24, 7.25, 7.27_
+
+  - [x] 16.2 【A】`IssueSourceRecord`、`ApprovedIssue`、`IssuesFile`、`IssueLinksFile`の契約（`issues.ts`）を追加する
+    - **依存**: 11.1（`FactGroundedSentence`、`ResponseDirectionCandidate`を使う）、16.1（`DERIVED`を含む`FactItem`）。
+    - `ISSUES_SCHEMA_VERSION = 1`（質問方式の版とは別）。`IssueSourceRecord`（版ごとの不変の課題の記録。`issueId`、`version`、`themeId`（6テーマのみ。`UNCLASSIFIED`は不可）、`basisFactIds`など）、`ApprovedIssue`（`basisFacts`と`sources`は既存の`FactItem`と`RegionalSource`をそのまま使う。`issueHash`は`IssueSourceRecord`の正準JSONのSHA-256）、`WithdrawnIssue`（`issueId`、`version`、`reason`の7種類。日時を持たない）、`IssuesFile`（`meta`（`inputDigest`を含む）、`issues`、`withdrawn`、`coverage`）、`IssueLinksFile`（`links`の`targetKind`は`QUESTION`または`ISSUE_CARD`）、`IssuesExportReport`（出力の状態記録。`status`は`RUNNING`・`SUCCESS`・`FAILED`。失敗した実行の`inputDigest`と、直前の成功した出力`lastSuccess`を保持する。`SUCCESS`の`output`は、`fileSha256`、`contentHash`、`inputDigest`、`generatedAt`、`issuesSchemaVersion`（契約の版）、課題の数、無効になった課題の数を持つ）、`IssuesReceipt`（受領記録。`dataKind`は`REAL_AI`だけ。本文を含まない。`issuesSchemaVersion`、`generatedAt`、`fileSha256`、`contentHash`、`inputDigest`、渡した人、受け取った人、受領日時と、それらが自己申告であることを示す固定の値`attestation: "SELF_REPORTED"`を持つ）をstrictで定義する。`regional/index.ts`へ`issues.js`のexportを1行追加する。
+    - テスト: 合格例と拒否例（`UNCLASSIFIED`、順位・スコア・推奨の項目の混入、`REFERENCE_ONLY`以外の対応方向、理由が7種類以外、`withdrawnAt`の項目の混入、`issues`と`withdrawn`の`issueId`の重複、データ種別の混在、`inputDigest`の欠落、`IssueLinksFile`の`(targetKind, targetId, issueId)`の重複、`IssuesExportReport`の組合せの矛盾（`SUCCESS`で`output`がない、`FAILED`で`failureCode`がない、`RUNNING`で`exitCode`がある）、`IssuesReceipt`の余剰項目（課題の本文）、`dataKind`が`FIXTURE`、`attestation`の欠落と`SELF_REPORTED`以外の値、`SUCCESS`の`output`に`issuesSchemaVersion`がない）。
+    - 焦点テスト: `npx.cmd vitest run packages/contracts/src/models/regional/issues.test.ts`
+    - _Requirements: 13.1, 13.2, 13.3, 13.6, 13.7, 13.9, 13.11_
+
+  - [x] 16.3 【A】`checkFactComparison`、`deriveFact`、`factGroundingText`を実装する
+    - **依存**: 16.1。
+    - `packages/domain/src/regional-values/content/`に、純関数を実装する。(a)`checkFactComparison`: 比較の条件（単位、対象地域、調査年または基準日。割合は分子と分母の単位の組の明記。時系列は同じ定義と同じ対象地域）を検査し、満たさなければ`FACT_COMPARISON_INVALID`を返す。(b)`deriveFact`: `DERIVED`の事実項目を、元の事実項目から決定的に算出する。元の事実項目が`VERIFIED`でなければ算出しない。算出した事実項目は`PROVISIONAL`。(c)`effectiveVerification`: `DERIVED`の有効な検証状態を導く（元のいずれかが`VERIFIED`でない、元の原本のSHA-256が変わった、再計算値が保存値と異なる場合は`PROVISIONAL`。保存データは書き換えない）。(d)`factGroundingText(fact)`: 事実の文、数値と単位、対象地域、調査年または基準日を連結し、日付はISO形式と和文形式の両方（年だけの場合は「2025」と「2025年」）を含める。11.3の`DR_CANDIDATE_FACTS`が使う。これらは、ブラウザ向けの入口（10.1）には含めない。
+    - **Property 58: 比較の条件と導出の有効な状態**（design.mdの定義に従う）
+    - **Validates: Requirements 7.25, 7.26, 8.26, 12.20**
+    - 例示テスト: `factGroundingText`が、`checkGrounding`で「2025年4月1日」と「2025-04-01」の両方を一致させること。`deriveFact`の3つの演算。`DERIVED`の元に`DERIVED`を使えないこと。
+    - 焦点テスト: `npx.cmd vitest run packages/domain/src/regional-values/content/factComparison.test.ts packages/domain/src/regional-values/content/factComparison.property.test.ts packages/domain/src/regional-values/content/deriveFact.test.ts packages/domain/src/regional-values/content/factGroundingText.test.ts`
+    - _Requirements: 7.25, 7.26, 8.24_
+
+  - [x] 16.4 【A】`loadIssueSnapshot`、`buildApprovedIssue`、`verifyIssuesText`を実装する（承認、無効化、再承認）
+    - **依存**: 16.2、16.3、11.3（`DR_*`の再検査）、11.6（承認台帳）。
+    - `apps/api/src/regional-values/issues/`に実装する。`loadIssueSnapshot(store, { dataKind })`は読取りだけの関数で、課題の記録（最大の版）、承認台帳、事実項目、出典、設定から、`issues`（有効な課題）と`withdrawn`（承認の記録が1件以上あって無効な課題。理由は7種類の優先順位で1つ）と`inputDigest`を導く。有効な承認は、現在の版の`targetHash`に一致し、`REVOKE`より後に付いた`APPROVE`の、異なる承認者IDの数が`requiredApprovers`以上。根拠の事実項目が`VERIFIED`（`DERIVED`は有効な状態）、出典の利用条件が`CONFIRMED`、原本のSHA-256が記録と一致、`DR_*`に現在の語の一覧で合格、を満たす課題だけを`ApprovedIssue`にする（`buildApprovedIssue`）。承認の記録が1件もない課題は、どちらにも入れない。保存データ（台帳、課題の記録、課題候補）を書き換えない（書込みの呼出しが0回であることをテストで確認する）。再承認は、課題IDを維持した次の版の課題の記録に対する、新しい承認の記録で成り立ち、以前の版の承認は引き継がない。`verifyIssuesText`（契約、契約の版（`meta.schemaVersion`）、`contentHash`の検証。`inputDigest`の照合は現在の入力を渡す引数で行う）は、ブラウザ入口`browser.ts`に含めない。出典の外部AIへの送信可否（`REAL_AI`の`transmission.status`が`ALLOWED`）も、利用条件（`CONFIRMED`）と同じ場所で再確認し、満たさなければ`USAGE_CHANGED`にする（決定。D30。ローカルの出典の記録だけを見て、外部へ通信しない）。課題の記録、承認台帳、事実項目、出典の読込みは、11.4の`readRecords`を通し、`validateDataBoundary`で種別の混在と保存先を検査する（決定。D29）。混在があれば、`issues export`とビルドの課題の読込みは、固定の符号で失敗する。
+    - 例示テスト: 送信可否が`ALLOWED`でない（`UNKNOWN`、記録なし）出典の課題が、`withdrawn`に`USAGE_CHANGED`で入ること。利用条件と送信可否の両方が崩れても、理由は`USAGE_CHANGED`の1つであること。種別が混在する入力で、`issues`と`withdrawn`を作らずに失敗すること。`fetch`の呼出しが0回であること。
+    - **Property 62: 承認の無効化と再承認**（design.mdの定義に従う）
+    - **Validates: Requirements 13.3, 13.5, 13.7, 8.28, 7.14**
+    - 焦点テスト: `npx.cmd vitest run apps/api/src/regional-values/issues/loadIssueSnapshot.test.ts apps/api/src/regional-values/issues/loadIssueSnapshot.property.test.ts apps/api/src/regional-values/issues/verifyIssuesText.test.ts`
+    - _Requirements: 13.2, 13.3, 13.4, 13.5, 8.27_
+
+  - [x] 16.5 【A】理由コード`QUESTION_ISSUE_INVALID`を追加する
+    - **依存**: なし（`bundle.ts`だけを変える。16.1、16.2とは別のファイル）。
+    - `packages/contracts/src/models/regional/bundle.ts`の`GATE_REASON_CODES`に`QUESTION_ISSUE_INVALID`を1件足し、`GATE_REASON_CLASS`で不足（`SHORTAGE`）にする。既存の理由コードは変えない。`resolveDataMode`の既存の動作（`REAL`と公開版は失敗、`REAL_PREFERRED`は`FIXTURE`へ切替、`FIXTURE`は失敗）が、この符号にも当てはまることを確認する。`CONTRACT_VIOLATION`（欠陥。存在しない参照）の使い分けは16.9が実装する。公開バンドルの`meta.switchReasonCodes`が取りうる値が1件増えるので、版1に入れて共同開発者へ通知する。完了済みの`bundle.ts`の変更なので、16.12で影響を確認する。
+    - 焦点テスト: `npx.cmd vitest run packages/contracts/src/models/regional/bundle.test.ts packages/domain/src/regional-values/gate`
+    - _Requirements: 13.7_
+
+  - [x] 16.6 【A】`issues export`、`issues list`、`issues verify`を実装する
+    - **依存**: 16.4、11.7（`cli.ts`を書くので、11.7の後）。
+    - `issues export --data-mode FIXTURE|REAL [--generated-at <ISO>]`は、`build`と独立した工程とし（`--kind`を持たない。`REAL_PREFERRED`は受け付けない）、`loadIssueSnapshot`の結果から`dist/regional-values/issues/<fixture又はreal>/issues.json`を出力する。失敗しても古い出力を正常として扱わないために、design.mdの「失敗時の扱い」の手順を実装する。(1)出力先の状態記録を読み、直前の成功を`lastSuccess`として保持する。(2)状態記録を`RUNNING`へ書き換える（`atomicReplaceFile`。書けなければ、何も変えずに終了コード1、符号`EXPORT_STATE_NOT_RECORDED`）。(3)古い`issues.json`を削除する（失敗したら、状態記録を`FAILED`（`DELETE_FAILED`）にして終了コード1）。(4)計算して`IssuesFile`の契約で検証する（計算できた`inputDigest`は、失敗しても状態記録に保持する）。(5)合格したときだけ`atomicReplaceFile`で`issues.json`を書く。(6)最後に状態記録を`SUCCESS`へ書き換える（`output`は、`fileSha256`、`contentHash`、`inputDigest`、`generatedAt`、`issuesSchemaVersion`、課題の数、無効になった課題の数。書けなければ`RUNNING`のままで、終了コード1、符号`EXPORT_STATE_NOT_FINALIZED`）。時計は注入する。標準出力は固定の符号だけ。
+    - `issues list --data-mode FIXTURE|REAL`は、現在の入力から導いた課題と`withdrawn`（該当する理由をすべて）を表示し、先頭に出力の状態（`OK`、`STALE`、`INVALIDATED`、出力なし）と`lastSuccess`を出す。`issues.json`の中身は読まない。`issues verify --file <path>`は、受け取ったファイルの契約、契約の版、`contentHash`、データ種別を検証する（状態記録は見ない）。`REAL_AI`のファイルは（決定。D33）、最新の受領記録（`records/issues-receipts/`。16.17が書く。置き場所は注入できる。最新の判定は、生成日時だけでは決めず、未決(i-13)の決定に従う）の`fileSha256`、`contentHash`、`inputDigest`、`generatedAt`、`issuesSchemaVersion`との一致も必須とし、受領記録がなければ`RECEIPT_MISSING`、1つでも違えば`RECEIPT_MISMATCH`で、終了コード1とする。ファイル全体のSHA-256と契約の検査結果は、拒否のときも表示する。`FIXTURE`の見本は、受領記録を要さない。`issues verify --output --data-mode FIXTURE|REAL [--current]`は、状態記録と照合して（状態記録が`SUCCESS`、ファイルのSHA-256、契約と契約の版（`meta.schemaVersion`が`ISSUES_SCHEMA_VERSION`と一致）、`meta`と状態記録の`output`の一致、`--current`のときは現在の入力の`inputDigest`の順に確認し、最初に満たさなかった項目で決める）`OK`、`STALE`、`INVALIDATED`、`CONTRACT_INVALID`を報告し、`OK`以外は終了コード1とする。外部AIへの送信可否の再確認は、16.4が実装する（決定。D30）。
+    - **Property 61: `issues.json`の出力**（design.mdの定義に従う）
+    - **Validates: Requirements 13.1, 13.2, 13.3, 13.4, 13.11, 12.19**
+    - テスト: 一時ディレクトリと、注入した操作（ビルドの`OutputOperations`と同じ方式）で確認する。出力の内容、同じ入力と`generatedAt`から同じバイト列。(a)入力の不正で失敗させると、古い`issues.json`が削除され、状態記録が`FAILED`で、失敗した実行の`inputDigest`と`lastSuccess`を保持する。(b)古い`issues.json`の削除を失敗させると、古いファイルが残っても、状態記録が`FAILED`（`DELETE_FAILED`、`invalidated.deleted`が`false`）で、`issues verify --output`が`INVALIDATED`を報告し、`issues receipt`（16.17）が拒否する。(c)最後の`SUCCESS`の書込みを失敗させると、`RUNNING`のままで、書いた`issues.json`も`INVALIDATED`になる。(d)最初の`RUNNING`の書換えを失敗させると、何も変わらず、符号`EXPORT_STATE_NOT_RECORDED`で終了コード1。(e)`issues.json`を書き換える（SHA-256が状態記録と合わない）と`INVALIDATED`。(f)出力の後に入力を変えると、`--current`が`STALE`。(g)引数の誤りで終了コード1。(h)状態記録が`SUCCESS`でも`issues.json`がない場合は`INVALIDATED`。`meta.schemaVersion`が現在の版と異なる場合は`CONTRACT_INVALID`。`meta`の`inputDigest`が状態記録と異なる場合は`INVALIDATED`。(i)`issues verify --file`（`REAL_AI`）は、受領記録がなければ`RECEIPT_MISSING`、受領記録の5項目のどれか1つを変えると`RECEIPT_MISMATCH`、新しい受領記録があるとき古いファイルは`RECEIPT_MISMATCH`（最新の判定は未決(i-13)の決定に従う）、受領記録と一致するファイルは`OK`。`FIXTURE`の見本は、受領記録なしで`OK`。受領記録は、16.2の契約で作った試験用のものを一時ディレクトリへ置く（16.17には依存しない）。(j)どの検査も`fetch`を呼ばない。
+    - 焦点テスト: `npx.cmd vitest run apps/api/src/regional-values/issues/exportIssues.test.ts apps/api/src/regional-values/issues/exportIssues.property.test.ts apps/api/src/regional-values/issuesCli.test.ts`
+    - **実装メモ（2026-11-13）**: `issues verify --file`の実データの照合は、最新の受領記録の判定が未決(i-13)なので、推測で選ばない。受領記録が0件なら`RECEIPT_MISSING`、1件ならその1件との照合（`OK`または`RECEIPT_MISMATCH`）、2件以上なら`RECEIPT_LATEST_UNDECIDED`で拒否し、置き場所に受領記録でないファイルがあれば`RECEIPT_INVALID`で拒否する。語の一覧と検査の設定は、13.1が`draft.json`を作るまで、`--draft-settings`で人が渡す（`build`にも同じ任意の引数を足した。なければビルドは課題を見ない）。実データの事実項目と出典記録の置き場（`facts/<factId>.json`、`sources/<sourceId>/<revision>.json`）は、13.10と13.11が従う形として`issues/inputs.ts`に定めた。
+    - _Requirements: 13.1, 13.3, 13.4, 13.11, 12.19_
+
+  - [x] 16.7 【A】FIXTUREの見本`issues.json`を追加する
+    - **依存**: 16.6、16.14。
+    - `packages/fixtures/src/regional-values/issues.json`を、16.14の入力記録に`issues export --data-mode FIXTURE --generated-at 2026-01-04T09:00:00Z`を実行した出力として追加する（手書きしない）。テストは、見本が出力と1バイトも違わないこと、契約と決定的検査を通ること（指摘0件）、拒否されるべき見本（因果の断定、根拠にない数値、計算値の数値、地域間の優劣、否定表現を含む対応方向、仮説でない文末、存在しない根拠の事実項目ID、年を書かない異なる年の比較、推奨の語を含む対応方向）が必ず拒否されること（見本はテストの中で作り、ファイルには含めない）を確認する。内容はdesign.mdの「FIXTUREの課題情報」に従う。`cards.json`は変えない。
+    - 焦点テスト: `npx.cmd vitest run packages/fixtures tests/regional-values/issuesSample.test.ts`
+    - _Requirements: 7.9, 7.18, 13.1, 13.3_
+
+  - [x] 16.8 【A】課題候補から課題カードまでの一巡の統合テストを追加する
+    - **依存**: 11.4、16.6、16.9、16.14。
+    - `tests/regional-values/issueFlow.test.ts`に、`VERIFIED`の事実→課題候補（fake）→`DR_*`検査→人の編集（`HUMAN_EDITED`）→課題の記録（版1）→承認（確認項目6つ、2人）→`issues export`→根拠の原本のSHA-256を変えて無効化（`SOURCE_CHANGED`）→新しい版→再承認を、一時ディレクトリで通しで確認する。課題カードの下書き（fake）を作り、別の承認でカードになること、対応の記録で課題を指すこと、課題が無効になるとカードの承認が`PENDING`として扱われ、質問が`QUESTION_ISSUE_INVALID`になることも確認する。`fetch`が呼ばれないこと、公開バンドルに課題が含まれないことも確認する。
+    - 焦点テスト: `npx.cmd vitest run tests/regional-values/issueFlow.test.ts`
+    - _Requirements: 8.24, 8.28, 12.19, 13.1, 13.5, 13.7_
+
+  - [x] 16.9 【A】対応の記録の検査と、ビルドへの課題の接続を実装する
+    - **依存**: 16.2、16.4、16.5、16.14。
+    - `packages/domain/src/regional-values/gate/`に、`checkIssueLinks`（対応の記録、質問、課題カード、`IssueSnapshot`を受け取る純関数。契約に適合しない、存在しない質問・課題カード・課題を指す、版が最大の版より大きい場合は`CONTRACT_VIOLATION`（欠陥）、質問が指す課題が`withdrawn`にある、または版が現在の有効な版より小さい場合は`QUESTION_ISSUE_INVALID`（不足））と`applyIssueValidity`（課題カードの承認を、指す課題が無効または版が古い場合に`PENDING`とした写しを返す。保存されたカードは書き換えない。組立ては既存どおり`CARD_NOT_APPROVED`で除く）を実装する。`apps/api/src/regional-values/build/runBuild.ts`に、`BuildDependencies.issueSource`（注入。既定は空の`IssueSnapshot`）と、対応の記録の読込み（`loadFixtureData.ts`）を足し、`factNumeralsOf`に有効な課題の根拠の事実項目の値と調査年を足して`inspectQuestionBank`へ渡す（署名は変えない）。`FIXTURE`の`IssueSource`は、Git管理の入力記録（16.14）から`loadIssueSnapshot`で作る。`REAL`の配線は13.12。ビルドは`issues.json`のファイルを読まない。公開バンドルの契約は変えない（質問、課題カードに項目を足さない。対応の記録は`MapQuestion`、`toMapInput`に届かないことを、型のテスト（`@ts-expect-error`）で確認する）。既存のFIXTUREの質問が、追加された数値（課題の事実の値と調査年）で`NO_FACT_NUMBERS`に違反しないことを確認する（違反する場合は、質問の文面を変えず、報告して停止する）。
+    - **Property 63: 独立性**（design.mdの定義に従う）
+    - **Validates: Requirements 13.1, 13.7, 13.8, 7.22, 12.18**
+    - 焦点テスト: `npx.cmd vitest run packages/domain/src/regional-values/gate apps/api/src/regional-values/build`
+    - _Requirements: 8.28, 13.7, 13.8_
+
+  - [x] 16.10 【A】課題情報の受け渡し手引き（`issue-handoff-guide.md`）と同期テストを追加する
+    - **依存**: 16.6、16.7、16.9、16.17。
+    - `.kiro/specs/regional-values-map/issue-handoff-guide.md`に、`issues.ts`の契約（`IssuesFile`、`ApprovedIssue`、`IssueLinksFile`。`import type`だけを使うこと）、`issues.json`の出力手順、古さの確認（`meta.generatedAt`、`meta.inputDigest`、`issues verify --file`と`--output --current`）、使う前の検査（`issues.json`は存在するだけでは有効としないこと。状態記録、SHA-256、`inputDigest`、契約の版。受け取った側は、最新の受領記録との照合で、`RECEIPT_MISSING`と`RECEIPT_MISMATCH`の意味。失敗した出力と古い出力を使わないこと）、出力の失敗時の扱い（状態記録と`INVALIDATED`）、無効になった課題の7種類の理由、対応の記録の書き方（課題IDと版）、`QUESTION_ISSUE_INVALID`と`CONTRACT_VIOLATION`の区別、実データの受け渡し経路（Git管理外のファイルの受け渡しと、受領記録。`issues receipt`。渡した人、受け取った人、受領日時は自己申告）、責務分担を書く。`tests/regional-values/issueGuideSync.test.ts`で、手引きの契約名・版・項目・理由の符号が実装と一致することを検査する（10.3と同じ方式）。
+    - 焦点テスト: `npx.cmd vitest run tests/regional-values/issueGuideSync.test.ts`
+    - _Requirements: 13.10, 13.11_
+
+  - [x] 16.11 【A】`issues/`が価値観マップの計算に触れないことを静的に検査する
+    - **依存**: 11.9、16.4。
+    - 11.9の`tests/regional-values/draftIndependence.test.ts`に、`apps/api/src/regional-values/issues/`のモジュールと、それが直接または間接に取り込むすべてのモジュールに、`packages/domain/src/regional-values/`の`map/`、`session/`、`view/`のモジュールの取込みが0件であることを、3.10の`importGraph.ts`で確認する検査を追加する（Property 63の静的な部分）。`gate/checkIssueLinks`、`gate/applyIssueValidity`も、`map/`、`session/`、`view/`を取り込まないことを確認する。
+    - 焦点テスト: `npx.cmd vitest run tests/regional-values/draftIndependence.test.ts`
+    - _Requirements: 12.18, 13.1_
+
+  - [x] 16.12 【A】完了済みタスクの影響確認（完了状態は変えない）
+    - **依存**: 16.1〜16.11、16.14〜16.17。
+    - 本章が変更する完了済みタスクの成果物（5.2の`content.ts`、10.1の`browser.dependencyClosure.test.ts`、9.4の`runBuild.ts`と`loadFixtureData.ts`、`bundle.ts`、`index.ts`）の既存のテストが、変更なしで成功することを、既存テストの成功と差分の確認で確かめる。10.3の`ui-integration-guide.md`と`guideSync.test.ts`、公開バンドルの契約（`Question`、`IssueCard`）が変わらないことも確認する（公開バンドルの契約の変更は、算出方法（`SUM_COLUMN`、`DERIVED`、`dedupeColumns`）と`conversion`の追加（16.1）と、理由コード1件（16.5）だけ）。読み取りだけの`git ls-files`で、追跡されている`issues.json`が`packages/fixtures/src/regional-values/issues.json`だけであることも確認する（Req 13.11）。`[x]`は変更しない。変更が必要と判明した場合は、変更せず報告して停止する。
+    - _Requirements: 10.11（基準10の2つ目の「11」。全体のテストの記録）, 12.19, 13.11_
+
+  - 16.13 は廃止した（13.1と13.15へ統合）。番号は再利用しない。
+
+  - [x] 16.14 【A】FIXTUREの入力記録（架空の事実項目の登録簿、課題候補の下書き、課題の記録、承認台帳、対応の記録）を追加する
+    - **依存**: 11.1、16.2、16.4（`targetHash`と`issueHash`の計算を使うため）。
+    - `packages/fixtures/src/regional-values/`に、design.mdの「FIXTUREの入力記録」の表のとおり、`facts.json`（既存3件と追加4件）、`drafts/ISSUE_CANDIDATE/<draftId>.json`と`events/<eventId>.json`（3件。下書き工程の関数とBedrockのfakeの台本で作り、`draftId`と`eventId`は計算する）、`issues/<issueId>/v1.json`（3件）、`approvals/ISSUE/<issueId>/<記録のSHA-256>.json`（3件。承認者`fixture-issue-approver-v1`、承認日時`2026-01-04T09:00:00Z`、確認項目6つは`true`）、`issue-links.json`（`links`は空）を追加する。既存の`sources/*.json`の既存の文は変えず、架空の自治体名で始まる文を追記する（架空であることを明示する）。`cards.json`、`question-bank.json`、既存の文面は変えない。`DERIVED`と計算値の事実は作らない。FIXTUREの変更は、利用者が2026-11-13に条件付きで承認した範囲（既存の意味を変えない、架空であることを明示する）に限る。
+    - テスト: 各記録が契約に適合すること、`facts.json`の既存3件が`cards.json`の事実項目と一致すること、既存の3つのFIXTUREのテスト（`cards.test.ts`、`questionBank.test.ts`、`texts.test.ts`）が変更なしで成功すること、追記した文が実在名の一覧に一致しないこと、追加の事実項目が架空の自治体名を含むこと。
+    - 焦点テスト: `npx.cmd vitest run packages/fixtures`
+    - _Requirements: 7.9, 7.17, 7.18_
+
+  - [x] 16.15 【A】ブラウザ入口と公開成果物が`issues/`・承認台帳・下書きに依存しないことを検査する
+    - **依存**: 16.6（`issues/`のモジュールがあること）。
+    - 10.1の`packages/domain/src/regional-values/browser.dependencyClosure.test.ts`に、ブラウザ向けの入口の依存の閉包に、`apps/api`の`issues/`・`draft/`のモジュール、承認台帳、課題候補の下書き、対応の記録、`verifyIssuesText`が含まれないことの検査を追加する（Req 10.3の(f)。向きは、ブラウザ入口から`issues/`への取込みが0件）。`check:build-boundary`の拡張（成果物の検査。(f)）は、`apps/web`を変えるので14.8（分類C。共同開発者の承認が先）が担当する。
+    - 焦点テスト: `npx.cmd vitest run packages/domain/src/regional-values/browser.dependencyClosure.test.ts`
+    - _Requirements: 10.3, 10.14_
+
+  - [x] 16.16 【A】`aggregate`（CSVのテキストから事実の値を決定的に集計する純関数）を実装する
+    - **依存**: 16.1（`COUNT_ROWS`、`COUNT_ROWS_WHERE`、`SUM_COLUMN`、`dedupeColumns`の契約）。13.x（取り込み、CSVの文字コードの判定）には依存しない。
+    - `packages/domain/src/regional-values/content/aggregate.ts`に、design.mdの「`aggregate`の仕様と実装順序」の純関数を実装する。入力は、UTF-8・LFに展開済みのCSVのテキスト、元のファイルのSHA-256（呼出し側が渡す）、算出方法、調査年または基準日。ファイルを読まず、実データと文字コードの判定（13.15）を使わない。時計、乱数、現在時刻を使わない。規則はReq 7.27（全角の正規化と桁区切りの除去、欠損の件数の記録、重複の扱い（`dedupeColumns`）、単位の混在の拒否、基準日が読めない場合の拒否）。結果に、入力のSHA-256と算出方法のハッシュ、集計に使ったデータ行の範囲（`text-lines`）、欠損の件数（`missingCount`）、重複除外の件数（`duplicatesRemoved`）を含める。`dedupeColumns`は、算出方法に明記された場合だけ使い、明記がなければ行を除外せず、完全に同じ行は`DUPLICATE_ROWS`で拒否する（勝手な既定を持たない。決定。D31）。ブラウザ向けの入口（10.1）には含めない。
+    - **Property 59: 集計の規則と再現性**（CSVの小さな架空の行列（欠損、重複、単位の混在、数値でない値、読めない基準日を含む）と算出方法で、Req 7.27の規則どおりに値または拒否を返し、同じ入力から同じ結果になる。`dedupeColumns`がなければ行は除外されず、あれば除外した件数が`duplicatesRemoved`と一致する。期待値は、実装を読まずに書いた参照実装（3.2と同じ方式）と、手計算した固定値で持つ）
+    - **Validates: Requirements 7.25, 7.27, 12.14**
+    - 例示テスト: `COUNT_ROWS`、`COUNT_ROWS_WHERE`、`SUM_COLUMN`（条件つき）の合格例、全角の数字と桁区切り、欠損、`dedupeColumns`の有無（明記がない入力で完全に同じ行があれば`DUPLICATE_ROWS`。明記があれば除外した件数が`duplicatesRemoved`）、各拒否の符号。実データと実在名を使わない（架空の小さな行列だけ）。
+    - 13.11は、この関数を呼ぶ側（原本の読込み、`PROVISIONAL`の事実項目の作成、`verify-fact`）だけを実装する。
+    - 焦点テスト: `npx.cmd vitest run packages/domain/src/regional-values/content/aggregate.test.ts packages/domain/src/regional-values/content/aggregate.property.test.ts`
+    - _Requirements: 7.25, 7.27, 12.14_
+
+  - [x] 16.17 【A】受領記録の作成コマンド（`issues receipt`）と、Git管理外の確認を実装する
+    - **依存**: 16.2（`IssuesReceipt`の契約）、16.6（出力の状態の判定）。
+    - `issues receipt --data-mode REAL --delivered-by <id> --received-by <id> --received-at <ISO> --received-sha256 <SHA-256>`を実装する。出力の状態が`OK`（`--current`と同じ判定。`STALE`、`INVALIDATED`、`CONTRACT_INVALID`では拒否）で、伝えられたSHA-256が出力の`fileSha256`と一致するときだけ、受領記録（`IssuesReceipt`。本文を含まない）を、`.kiro/specs/regional-values-map/records/issues-receipts/<記録のSHA-256>.json`へ`atomicWriteImmutableFile`で書く。不一致や拒否では何も書かない。渡した人、受け取った人、受領日時は、引数で受ける自己申告の値で、`attestation: "SELF_REPORTED"`を持たせる（決定。D32。本人確認や署名の証明ではない。引数の形式（ID、ISO日時、64桁の16進）だけを検査する）。受領記録は、状態記録の`output`の`fileSha256`、`contentHash`、`inputDigest`、`generatedAt`、`issuesSchemaVersion`、課題の数、無効になった課題の数を写す。`dataKind`が`REAL_AI`以外（`FIXTURE`）の指定は拒否する（架空データの見本はGit管理のため、受領記録は要らない）。テストでは、受領記録の置き場所に一時ディレクトリを注入する。
+    - テスト: 受領記録が契約に適合し、課題の本文や`ApprovedIssue`の項目を含まないこと。状態が`OK`でない場合（状態記録が`RUNNING`または`FAILED`、契約の版が現在と異なる、入力が変わった場合を含む）と、SHA-256が一致しない場合に、何も書かないこと。`attestation`が`SELF_REPORTED`であること、`generatedAt`と`issuesSchemaVersion`が出力の値と一致すること。書いた受領記録で、16.6の`issues verify --file`が`OK`になること。受領記録の最新の判定のための項目（`supersedes`など）は、未決(i-13)の決定まで契約に足さない。同じ入力の2回目が冪等であること。`.gitignore`が`data/real/**`と`dist`を除外していることの静的な検査。
+    - 焦点テスト: `npx.cmd vitest run apps/api/src/regional-values/issues/receipt.test.ts tests/regional-values/issuesNotTracked.test.ts`
+    - _Requirements: 13.11_
+
 ## Notes
 
 ### (a) 分類別のタスク番号
 
-- 【A】65件: 1.1〜1.2、2.1、3.1〜3.10、4.1〜4.5、5.1〜5.12、6.1〜6.4、7.1〜7.4、8.1〜8.8、9.1〜9.5、10.1〜10.3、11.1〜11.9、12.1〜12.2
-- 【B】17件: 13.1〜13.17
+- 【A】81件: 1.1〜1.2、2.1、3.1〜3.10、4.1〜4.5、5.1〜5.12、6.1〜6.4、7.1〜7.4、8.1〜8.8、9.1〜9.5、10.1〜10.3、11.1〜11.9、12.1〜12.2、16.1〜16.12、16.14〜16.17
+- 【B】16件: 13.1、13.3〜13.17
 - 【C】8件: 14.1〜14.8
+- 13.2は廃止した（入力長の事前判定は11.2へ統合。番号は再利用しない）。
+- 16.13は廃止した（13.1と13.15へ統合。番号は再利用しない）。質問方式v2の15章は、共同開発者の担当で、未作成（本featureでは実装しない）。
 - 実行順は`## Task Dependency Graph`のwaveに従う。waveは依存と同じファイルへの書込みの競合から決めており、番号順とは一致しない箇所がある（例: 5.1〜5.4は3.xより先に着手できる）。分類Cは、決定待ちの分類Bに止められないよう、13.1を除く分類Bより前のwaveに置いた。待つ条件が解決済みの分類Bは、依存するタスクが終わっていればwaveより先に実施してよい。
 
 ### (b) 分類Bの待つ条件の一覧
 
-- 13.1: 検査用の語の一覧（Open Decisionsの(7)(18)、固有名詞・実在名の一覧、【要確認7】、`wordCategories`、誘導語、候補者名・政党名、`dataVersion`、`draft.json`の値）の利用者の承認。デモ版のバンドルをリポジトリの設定で生成するための前提なので、最初に解決することを勧める。
-- 13.2: 【要確認24】（入力長の「文字」の数え方の要件更新）。
+- 13.1: 検査用の語の一覧（因果語・仮説語・比較語（旧16.13）を含む。承認の流れはdesign.mdの「因果語・仮説語・比較語の承認の流れ」。Open Decisionsの(7)(18)、固有名詞・実在名の一覧、【要確認7】、`wordCategories`、誘導語、候補者名・政党名、`dataVersion`、`draft.json`の値）の利用者の承認。デモ版のバンドルをリポジトリの設定で生成するための前提なので、最初に解決することを勧める。
 - 13.3: 【要確認23】（`BIAS_SUSPECTED`の質問の承認の扱い）の利用者の判断。
 - 13.4: 【要確認18】（非公式表示の文言を禁止語検査の免除に加える要件更新）、「(6) ライセンス表示の文面」の承認、「愛媛県」の名称を使う範囲の決定。
 - 13.5: 【要確認19】（結果画面の表示順）の利用者の判断。
@@ -781,14 +936,27 @@
 - バンドルは`regional-values build`（9.5）が`dist/regional-values/<kind>/bundle.json`に出す。13.1の承認前は、9.5の`--config-dir`に試験専用の設定を指定して検証用のバンドルを作る。
 - 契約と関数の版は1。項目の削除・型の変更は版を上げ、項目の追加は同じ版に入れて共同開発者へ通知する。`.gitignore`と`packages/*/package.json`の`exports`の変更は`apps/web`の外だが、共同開発者へ通知する。
 - 14.1〜14.8は、共同開発者の承認（承認者名、承認日）を各タスクに記録してから着手する。
+- 課題情報（`issues.json`）の受け渡しは、16.10の手引き（`issue-handoff-guide.md`）に従う。質問と課題カードが根拠とした課題は、非公開の対応の記録（`issue-links.json`）に、課題IDと版で書く（`Question`、`IssueCard`の契約には足さない）。公開バンドルの契約に触れる変更は、算出方法と`conversion`の追加（16.1）と、理由コード`QUESTION_ISSUE_INVALID`の追加（16.5）だけで、どちらも版1の値または任意の項目の追加として、共同開発者へ通知する。実データの`issues.json`は、Git管理外のファイルとして渡し、本文を含まない受領記録（16.17。`records/issues-receipts/`）をGitに残す（design.mdの「実データの受け渡し経路」）。
 
 ### (d) 本featureの完了条件（MVP。分類Aの範囲）
 
 - クイック版（`QUICK`、3テーマ6問）の診断が、架空データ（代替データとテスト基盤）で、`diagnosticReducer`（回答、戻る、変更、やり直し）から`generateValuesMap`、`buildResultViewModel`まで通しで動き（6.4）、価値観マップが大切さの段階ごとのグループ、優先条件、未出題のテーマ、「最優先テーマを聞いていません」を含んで返る。
-- 金テストベクタ（V01〜V18）と属性テスト（Property 1〜25、27〜52、55のうち分類Aに割り当てたもの）が成功する。
+- 金テストベクタ（V01〜V18）と属性テスト（Property 1〜63のうち分類Aに割り当てたもの。59は`aggregate`（16.16）でMVPの範囲に含む。26は13.11、53は13.8、54は14.8の担当で、MVPの範囲に含まない）が成功する。
 - `FIXTURE`のビルド（9.5）が、試験専用の設定でバンドルを生成し、`verifyBundleText`に合格する。リポジトリの設定での実行は13.1の承認後。
 - 既存資産が保全され（12.1）、全体のテストが開始前と比べて悪化していない（12.2、Req 10.11）。
 - 画面（分類C）、実データ（分類B）、実Bedrockの呼出しは、MVPの完了条件に含めない。実データでの完了は13.17で確認する。
+
+### (e) 既知の制限事項（Task 11・12・16の統合時点）
+
+統合の時点で、実装していない点、または決定を待っている点。公開バンドルの契約と`apps/web`の動作には影響しない。
+
+- **旧承認の復活（再承認の隙間）。決定待ち**: 課題の承認は、現在の課題の記録のSHA-256（`targetHash`）に付く。根拠の原本が変わると、課題は`SOURCE_CHANGED`で無効になる。その後、新しいrevisionを取り込み、事実項目を再集計して人が再び`VERIFIED`にし、課題の文が現在の事実項目に対して決定的検査（`DR_*`）を通り、課題の版を上げていなければ、課題の記録は変わらない。このとき`targetHash`が一致するので、以前の承認が再び有効になる。確認項目6つの再確認も、新しい承認も、計算では強制されない（`loadIssueSnapshot`）。設計の「再承認では課題の版を上げ、以前の版の承認は引き継がない」は、人の手順としてだけ守られる。防ぐには、承認の記録に、承認時の根拠の事実項目と出典のSHA-256を持たせ、`issues export`が現在の値と照合する契約の追加が要る。完了済みの16.2の契約の変更になるので、決定が先である。当面の運用: 原本が変わった課題は、必ず課題の版を上げ、確認項目6つと新しい承認をやり直す。
+- **受領記録の最新の判定（未決(i-13)）**: 受領記録が2件以上あると、`issues verify --file`は`RECEIPT_LATEST_UNDECIDED`で拒否する（推測で最新を選ばない）。設計の案B（受領記録が直前の記録のSHA-256を`supersedes`に持つ）の決定待ち。受領記録は、実データの`issues.json`が現れるまで、1件もない。
+- **検査用の語の一覧が未承認（13.1）**: 因果語、仮説の語尾、比較語は、案（`records/word-lists-proposal.md`）のままで、承認も実ファイルもない。下書きと`issues export`の決定的検査は、`--draft-settings`で人が渡す語を使う。試験専用の語は、承認済みの語として扱わない。リポジトリの設定のうち`neutrality.json`、`build.json`、`draft.json`はなく、`config/regional-values/`には`map.json`だけがある。3つの一覧の置き場所は、設計（`neutrality.json`）と実装（`--draft-settings`の設定）で食い違っているので、13.1の前にそろえる。
+- **実データ未対応（分類B）**: 原本の取り込み（13.10、13.15）、集計の呼出し側と`verify-fact`（13.11）、`REAL`・`REAL_PREFERRED`のビルド（13.12）、公開版（13.13）、公式データの棚卸し（13.14）、xlsxの読取り（13.9。新しい依存の承認が先）は、未実装または未実施である。`data/real/`に取り込み済みの実データはなく、`regional-values build`は、リポジトリの設定だけでは`CONFIG_UNREADABLE`で止まる。`--config-dir`に試験専用の設定を渡すと、`FIXTURE`のバンドルだけを作れる。
+- **実Bedrock未使用**: AI下書き工程は、fakeのクライアントだけで検証した。`FIXTURE`の下書きの`modelId`は`fixture-draft-model-v1`で、実在のモデルではない（`runDraft`は実モデルIDだけを許す）。実モデルの出力は未検証である。
+- **`build`と課題**: `build`は、`--draft-settings`を渡さないと課題を見ない（課題0件として扱う）。`FIXTURE`の対応の記録（`issue-links.json`）は、`links`が空である。
+- **質問方式v2との境界**: v2は共同開発者の担当（15章。未作成）である。本featureは、`Question`、`QuestionBank`、`DiagnosticSet`、`MapQuestion`、`MapInput`を変更していない。`bundle.ts`の`GATE_REASON_CODES`への`QUESTION_ISSUE_INVALID`の追加と、`content.ts`の事実項目・出典の任意項目の追加は、v2が同じファイルを変更する場合、マージの順序を調整する。
 
 ### tasks.md作成時の解釈（要レビュー）
 
@@ -798,16 +966,18 @@
 - マップ生成の依存検査（3.10）: 設計書は「`Date`を取り込まない」と書くが、`core.ts`が取り込む既存の`primitives.ts`は`Date.parse`を使う。要件12.9の文言に合わせ、禁止は「現在時刻の取得」と乱数に限った。また、パッケージ名での取込みはバレル経由で`content.ts`に届くため、取り込む名前が`core.ts`で定義されていることを名前単位で検査する。
 - 質問の型の受け口（4.1）: reducerを先に作る優先順位を保つため、`Session.bundle`は構造的な最小型`SessionBundle`とし、`VerifiedBundle`は7.3で構造的に満たすことを確認する。
 - 検査用設定（8.1、13.1）: 設定の契約と読込みは分類A、設定の実体（語の一覧）は分類Bとした。要件に値のない語を実装者が決めないため。
-- AI下書き工程（11）: 実Bedrockを呼ばず、設計で確定した部分（契約、入力の門、決定的検査、冪等性、4つの数、承認台帳）を分類Aとした。要件更新を要する入力長の数え方（13.2）と偏りの疑いの承認（13.3）だけを分類Bにした。承認者数は設計で決定済みで、要件更新を要さない。
+- AI下書き工程（11）: 実Bedrockを呼ばず、設計で確定した部分（契約、入力の門、決定的検査、冪等性、4つの数、承認台帳）を分類Aとした。要件更新を要する偏りの疑いの承認（13.3）だけを分類Bにした（入力長の数え方はUTF-16コード単位に決定し、11.2に含めた）。承認者数は設計で決定済みで、要件更新を要さない。
 - 診断セット種別の誤り（3.3）は設計どおり`INVALID_CONFIG`にする（【要確認6】は要件側の更新待ちだが、設計の決定で実装できる）。`UNKNOWN_QUESTION`・`INVALID_ANSWER`の質問IDは、列挙順に依存させないため昇順で返す。
 - `term`（用語の見出し語）の上限40文字は設計書の仮の値（5.2）。`ui.appName`は未決事項(10)の案（5.1）。
 - 例外境界（承認済み。`records/exception-boundary-notes.md`）: `diagnosticReducer`が想定外の例外を捕捉して終端の`UNEXPECTED_ERROR`へ遷移し、固定文言だけを表示する。`RESTART`で回答を破棄し、そのことを固定文言で明示する。この決定により、利用者の指示でrequirements.md（Req 5.19）とdesign.mdを更新した。`MapError`の4種は変更しない。
 
 ### その他
 
-- テストはoptional（`*`）にしない（既存の2つのtasks.mdに合わせる）。property testは各propertyをちょうど1つのsub-taskへ割り当てた（Property 1・13・14・16・17: 3.9、2: 3.1、3〜6: 3.7、7〜12・15: 3.8、18: 8.3、19〜21: 8.4、22〜23: 8.5、24〜25: 8.6、26: 13.11、27: 11.3、28: 11.2、29: 11.4、30: 11.5、31: 11.6、32・40: 9.1、33・34・37: 9.4、35: 9.2、36: 7.1、38: 7.2、39: 7.3、41〜47: 4.5、48〜49: 5.9、50: 8.8、51: 5.8、52: 10.1、53: 13.8、54: 14.8、55: 6.4、57: 11.3）。
+- テストはoptional（`*`）にしない（既存の2つのtasks.mdに合わせる）。property testは各propertyをちょうど1つのsub-taskへ割り当てた（Property 1・13・14・16・17: 3.9、2: 3.1、3〜6: 3.7、7〜12・15: 3.8、18: 8.3、19〜21: 8.4、22〜23: 8.5、24〜25: 8.6、26: 13.11、27: 11.3、28: 11.2、29: 11.4、30: 11.5、31: 11.6、32・40: 9.1、33・34・37: 9.4、35: 9.2、36: 7.1、38: 7.2、39: 7.3、41〜47: 4.5、48〜49: 5.9、50: 8.8、51: 5.8、52: 10.1、53: 13.8、54: 14.8、55: 6.4、56: 4.5、57: 11.3、58: 16.3、59: 16.16、60: 11.3、61: 16.6、62: 16.4、63: 16.9）。
+- 番号の注意: requirements.mdのRequirement 10には「11」が2つある（`Values_Route`の追加と、全体のテストの記録）。本書の`_Requirements: 10.11`は、後者（全体のテストの記録）を指す。番号の振り直しは、別の承認が要る。
+- 依存関係の記録: 11.x、13.x、16.xの各タスクに**依存**を書いた。波は、その依存と、同じファイルを書くタスクを同じ波に置かないことから決めた（例: 11.1、16.1、16.2は`regional/index.ts`を、11.7、16.6は`cli.ts`を書くので、別の波）。分類Aの16.xは、分類Aの完了確認（12.x）の前に完了する。
 - スコープ外: 完全版（`FULL`）の質問の起案と承認、クイック版の3つ目のテーマの最終決定、実データの質問バンクと結果解説の起案、利用条件・個別注記・送信可否・法務の確認（人の作業）、実Bedrockを呼ぶ`draft run`の実行、性能計測（Req 11.1）と利用者テスト（Req 11.2）、市町別の集計。
-- ドキュメントの新規作成は10.3の連携ガイドだけとする。`requirements.md`と`design.md`は、利用者が承認した更新（D1〜D6）を除いて変更しない。他のspec、`.kiro/specs/**/tasks.meta.json`は変更しない。
+- ドキュメントの新規作成は10.3の連携ガイドと、16.10の課題情報の手引きだけとする。`requirements.md`と`design.md`は、利用者が承認した更新（D1〜D6、2026-11-13の地域課題発見・受け渡し基盤とその整合修正のD7〜D22）を除いて変更しない。他のspec、`.kiro/specs/**/tasks.meta.json`は変更しない。
 
 ## Task Dependency Graph
 
@@ -826,24 +996,29 @@
     { "id": 9, "tasks": ["4.4", "5.7"] },
     { "id": 10, "tasks": ["4.5", "5.8"] },
     { "id": 11, "tasks": ["5.9", "6.4", "8.8", "10.1"] },
-    { "id": 12, "tasks": ["9.2", "10.2", "10.3", "11.1"] },
-    { "id": 13, "tasks": ["9.4", "11.2", "11.3", "11.5"] },
-    { "id": 14, "tasks": ["9.5", "11.4"] },
-    { "id": 15, "tasks": ["11.6", "11.9"] },
-    { "id": 16, "tasks": ["11.7"] },
-    { "id": 17, "tasks": ["11.8"] },
-    { "id": 18, "tasks": ["12.1"] },
-    { "id": 19, "tasks": ["12.2"] },
-    { "id": 20, "tasks": ["13.1", "13.14"] },
-    { "id": 21, "tasks": ["14.1"] },
-    { "id": 22, "tasks": ["14.2", "14.3", "14.4"] },
-    { "id": 23, "tasks": ["14.5"] },
-    { "id": 24, "tasks": ["14.6", "14.7", "14.8"] },
-    { "id": 25, "tasks": ["13.2", "13.3", "13.4", "13.5", "13.7", "13.8", "13.9", "13.15"] },
-    { "id": 26, "tasks": ["13.6", "13.10", "13.16"] },
-    { "id": 27, "tasks": ["13.11"] },
-    { "id": 28, "tasks": ["13.12"] },
-    { "id": 29, "tasks": ["13.13", "13.17"] }
+    { "id": 12, "tasks": ["9.2", "10.2", "10.3", "11.1", "16.5"] },
+    { "id": 13, "tasks": ["9.4", "11.5", "16.1"] },
+    { "id": 14, "tasks": ["9.5", "11.2", "16.2", "16.3"] },
+    { "id": 15, "tasks": ["11.3", "16.16"] },
+    { "id": 16, "tasks": ["11.4"] },
+    { "id": 17, "tasks": ["11.6", "11.9"] },
+    { "id": 18, "tasks": ["11.7", "16.4"] },
+    { "id": 19, "tasks": ["16.6", "16.11", "16.14"] },
+    { "id": 20, "tasks": ["11.8", "16.7", "16.9", "16.15", "16.17"] },
+    { "id": 21, "tasks": ["16.8", "16.10"] },
+    { "id": 22, "tasks": ["16.12"] },
+    { "id": 23, "tasks": ["12.1"] },
+    { "id": 24, "tasks": ["12.2"] },
+    { "id": 25, "tasks": ["13.1", "13.14"] },
+    { "id": 26, "tasks": ["14.1"] },
+    { "id": 27, "tasks": ["14.2", "14.3", "14.4"] },
+    { "id": 28, "tasks": ["14.5"] },
+    { "id": 29, "tasks": ["14.6", "14.7", "14.8"] },
+    { "id": 30, "tasks": ["13.3", "13.4", "13.5", "13.7", "13.8", "13.9", "13.15"] },
+    { "id": 31, "tasks": ["13.6", "13.10", "13.16"] },
+    { "id": 32, "tasks": ["13.11"] },
+    { "id": 33, "tasks": ["13.12"] },
+    { "id": 34, "tasks": ["13.13", "13.17"] }
   ]
 }
 ```

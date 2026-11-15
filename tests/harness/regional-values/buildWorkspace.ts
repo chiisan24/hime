@@ -1,6 +1,6 @@
 import { cp, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import type { NeutralityConfig } from "@ehime-vote-navigator/contracts";
@@ -48,11 +48,19 @@ export function testBuildSettings(): { map: unknown; neutrality: NeutralityConfi
  */
 export async function createBuildWorkspace(
   override: Partial<Record<"map" | "neutrality" | "build", unknown>> = {},
+  options: Readonly<{ issueRecords?: boolean }> = {},
 ): Promise<BuildWorkspace> {
   const root = await mkdtemp(join(tmpdir(), "regional-values-build-"));
   const configDir = join(root, "config", "regional-values");
   await mkdir(configDir, { recursive: true });
-  await cp(REPOSITORY_FIXTURES, join(root, "packages", "fixtures", "src", "regional-values"), { recursive: true });
+  // The records of the issues (the registry of facts, the drafts and their events, the issues, the approvals and the sample
+  // of `issues.json`) are not what the build reads, and they are not copied unless a test asks for them: a test of the
+  // draft process counts the events of the place that it is given, and must count its own.
+  const issueEntries = new Set(["facts.json", "issues.json", "drafts", "events", "issues", "approvals"]);
+  await cp(REPOSITORY_FIXTURES, join(root, "packages", "fixtures", "src", "regional-values"), {
+    recursive: true,
+    filter: (source) => options.issueRecords === true || !issueEntries.has(relative(REPOSITORY_FIXTURES, source).split(/[\\/]/u)[0] ?? ""),
+  });
 
   const settings = testBuildSettings();
   const files: Record<"map" | "neutrality" | "build", string> = {

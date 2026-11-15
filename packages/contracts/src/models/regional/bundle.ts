@@ -33,6 +33,9 @@ export const GATE_REASON_CODES = [
   "RELEASE_APPROVAL_MISSING",
   "APPROVER_COUNT_INSUFFICIENT",
   "FIXED_TEXT_NOT_APPROVED",
+  // A question rests on an issue that is withdrawn or whose version is old (Req 13.7). The record of
+  // links is right and the issue changed, so a person can supply the missing check: a shortage.
+  "QUESTION_ISSUE_INVALID",
   "CONFIG_UNREADABLE",
   "CONTRACT_VIOLATION",
   "DATA_KIND_INVALID",
@@ -68,6 +71,7 @@ export const GATE_REASON_CLASS = {
   RELEASE_APPROVAL_MISSING: "SHORTAGE",
   APPROVER_COUNT_INSUFFICIENT: "SHORTAGE",
   FIXED_TEXT_NOT_APPROVED: "SHORTAGE",
+  QUESTION_ISSUE_INVALID: "SHORTAGE",
   CONFIG_UNREADABLE: "DEFECT",
   CONTRACT_VIOLATION: "DEFECT",
   DATA_KIND_INVALID: "DEFECT",

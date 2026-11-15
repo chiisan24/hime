@@ -1,0 +1,48 @@
+{
+  "command": "npm.cmd test -- --reporter=json --outputFile=dist/regional-values-records/vitest-after.raw.json",
+  "note": "The console output was redirected to a file; the command itself is unchanged. Run for task 12.2.",
+  "acquiredAt": "2026-11-15T05:33:42.798Z",
+  "recordedAt": "2026-11-15T05:35:34.292Z",
+  "rawReport": "dist/regional-values-records/vitest-after.raw.json",
+  "success": true,
+  "counts": {
+    "numTotalTests": 3629,
+    "numPassedTests": 3629,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTodoTests": 0,
+    "testFiles": 209,
+    "numTotalTestSuites": 796,
+    "numPassedTestSuites": 796,
+    "numFailedTestSuites": 0
+  },
+  "assertionStatusCounts": {
+    "passed": 3629
+  },
+  "testNameFormat": "<repo-relative test file path using '/'> > <vitest fullName>",
+  "sortOrder": "ascending by UTF-16 code unit (ordinal), not locale-dependent",
+  "failedTests": [],
+  "failedTestFiles": [],
+  "comparisonWithBefore": {
+    "before": {
+      "numTotalTests": 1344,
+      "numPassedTests": 1344,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "testFiles": 89,
+      "numTotalTestSuites": 259,
+      "numPassedTestSuites": 259,
+      "numFailedTestSuites": 0
+    },
+    "testsPassedBeforeAndMissingNow": 0,
+    "newlyExecutedTests": 2285,
+    "judgement": {
+      "(a) failed after <= failed before": true,
+      "(b) every test that passed before still passes": true,
+      "(c) executed after >= executed before": true,
+      "(d) skipped after <= skipped before": true
+    },
+    "allSatisfied": true
+  }
+}

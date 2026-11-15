@@ -1,0 +1,31 @@
+{
+  "maxEvidenceUnits": 10,
+  "evidenceMaxChars": 400,
+  "sentenceMaxChars": 60,
+  "causalWords": [
+    "が原因",
+    "のせいで",
+    "が理由で",
+    "によってもたらされ"
+  ],
+  "hedgeEndings": [
+    "可能性があります",
+    "かもしれません"
+  ],
+  "comparisonWords": [
+    "比べて",
+    "と比較",
+    "より多",
+    "より少",
+    "上回",
+    "下回"
+  ],
+  "themes": [
+    { "themeId": "TRANSPORT", "label": "地域交通" },
+    { "themeId": "EDUCATION_CHILDCARE", "label": "教育・子育て" },
+    { "themeId": "ECONOMY_EMPLOYMENT", "label": "地域経済・雇用" },
+    { "themeId": "HEALTHCARE_WELFARE", "label": "医療・福祉" },
+    { "themeId": "DISASTER_PREVENTION", "label": "防災" },
+    { "themeId": "POPULATION_REVITALIZATION", "label": "人口減少・地域活性化" }
+  ]
+}

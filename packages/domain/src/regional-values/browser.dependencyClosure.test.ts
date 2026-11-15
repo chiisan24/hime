@@ -110,6 +110,45 @@ describe("browser.ts: the contracts that it imports", () => {
   });
 });
 
+describe("browser.ts: the issues, the approval ledger and the drafts are not reachable (Req 10.3 f, 10.14; task 16.15)", () => {
+  /** What only the build, the draft process and the export use: the browser does not take it in, so the public build cannot carry it. */
+  const BUILD_ONLY_NAMES = [
+    "verifyIssuesText",
+    "loadIssueSnapshot",
+    "buildApprovedIssue",
+    "buildIssuesFile",
+    "runIssuesExport",
+    "checkIssueLinks",
+    "applyIssueValidity",
+    "createDraftStore",
+    "appendLedgerRecord",
+    "readLedger",
+    "countValidApprovals",
+    "runDraft",
+    "runDraftChecks",
+  ];
+
+  it("reaches no module of the application of the API, where the issues, the ledger and the drafts are", () => {
+    for (const file of [...closure.files, ...contractsRegional.files, ...contractsRoot.files]) {
+      expect(file.replaceAll("\\", "/")).not.toContain("/apps/");
+    }
+  });
+
+  it("reaches no module of the issues, of the record of links, of the drafts or of the ledger in the domain", () => {
+    for (const file of closure.files.map(belowDomainSrc)) {
+      expect(file, file).not.toMatch(/issue|ledger|draft|aggregate\.ts|checkGrounding/iu);
+    }
+  });
+
+  it("names none of the functions of the build and the draft process in the modules that it reaches", () => {
+    for (const [file, text] of [...closure.sources, ...contractsRegional.sources, ...contractsRoot.sources]) {
+      for (const name of BUILD_ONLY_NAMES) {
+        expect(new RegExp(`\\b${name}\\b`, "u").test(text), `${name} in ${file}`).toBe(false);
+      }
+    }
+  });
+});
+
 describe("browser.ts: the detector for the Node.js globals", () => {
   it("finds Buffer, process and require", () => {
     expect(findNodeGlobals("const a = Buffer.from(x); const b = process.env.A; const c = require('fs');")).toEqual([

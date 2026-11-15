@@ -1,0 +1,86 @@
+[
+  {
+    "area": "架空市あおば",
+    "dataKind": "FIXTURE",
+    "factId": "fixture-fact-population-v1",
+    "fictionalSourceId": "fixture-source-population-v1",
+    "sentence": "架空市あおばの地域活動は12件です。",
+    "surveyDate": "2025-04-01",
+    "value": {
+      "amount": 12,
+      "unit": "件"
+    }
+  },
+  {
+    "area": "架空町みなと",
+    "dataKind": "FIXTURE",
+    "factId": "fixture-fact-disaster-v1",
+    "fictionalSourceId": "fixture-source-disaster-v1",
+    "sentence": "架空町みなとの避難場所は8か所です。",
+    "surveyDate": 2025,
+    "value": {
+      "amount": 8,
+      "unit": "か所"
+    }
+  },
+  {
+    "area": "架空村ひなた",
+    "dataKind": "FIXTURE",
+    "factId": "fixture-fact-education-v1",
+    "fictionalSourceId": "fixture-source-education-v1",
+    "sentence": "架空村ひなたの子育て相談は6回です。",
+    "surveyDate": "2025-09-01",
+    "value": {
+      "amount": 6,
+      "unit": "回"
+    }
+  },
+  {
+    "area": "架空市あおば",
+    "dataKind": "FIXTURE",
+    "factId": "fixture-fact-population-2023-v1",
+    "fictionalSourceId": "fixture-source-population-v1",
+    "sentence": "架空市あおばの地域の集まりの参加者は、2023年度が延べ480人です。",
+    "surveyDate": 2023,
+    "value": {
+      "amount": 480,
+      "unit": "人"
+    }
+  },
+  {
+    "area": "架空市あおば",
+    "dataKind": "FIXTURE",
+    "factId": "fixture-fact-population-2024-v1",
+    "fictionalSourceId": "fixture-source-population-v1",
+    "sentence": "架空市あおばの地域の集まりの参加者は、2024年度が延べ420人です。",
+    "surveyDate": 2024,
+    "value": {
+      "amount": 420,
+      "unit": "人"
+    }
+  },
+  {
+    "area": "架空町みなと",
+    "dataKind": "FIXTURE",
+    "factId": "fixture-fact-disaster-hills-v1",
+    "fictionalSourceId": "fixture-source-disaster-v1",
+    "sentence": "架空町みなとの高台にある避難場所は3か所です。",
+    "surveyDate": 2025,
+    "value": {
+      "amount": 3,
+      "unit": "か所"
+    }
+  },
+  {
+    "area": "架空村ひなた",
+    "dataKind": "FIXTURE",
+    "factId": "fixture-fact-education-users-v1",
+    "fictionalSourceId": "fixture-source-education-v1",
+    "sentence": "架空村ひなたの子育て相談の利用は延べ54人です。",
+    "surveyDate": "2025-09-01",
+    "value": {
+      "amount": 54,
+      "unit": "人"
+    }
+  }
+]

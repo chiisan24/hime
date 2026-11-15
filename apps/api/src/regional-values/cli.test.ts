@@ -64,7 +64,8 @@ async function readBundleText(base: BuildWorkspace, kind: "demo" | "public"): Pr
 describe("runRegionalValuesCli: arguments", () => {
   it("prints the usage and exits with 1 for no command and for an unknown command", async () => {
     workspace = await createBuildWorkspace();
-    for (const argv of [[], ["unknown"], ["draft", "run"]]) {
+    // `draft run` is a command now (11.7); a `draft` without a known subcommand is still the usage.
+    for (const argv of [[], ["unknown"], ["draft"], ["draft", "unknown"]]) {
       const result = await run(argv, workspace);
       expect(result.exitCode).toBe(1);
       expect(result.lines.at(-1)).toBe("code=USAGE");

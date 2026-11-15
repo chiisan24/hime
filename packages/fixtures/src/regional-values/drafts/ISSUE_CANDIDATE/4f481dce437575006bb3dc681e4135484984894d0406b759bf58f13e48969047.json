@@ -1,0 +1,64 @@
+{
+  "aiClass": "AI_DRAFT",
+  "dataKind": "FIXTURE",
+  "draftId": "4f481dce437575006bb3dc681e4135484984894d0406b759bf58f13e48969047",
+  "generatedAt": "2026-01-04T08:00:04.000Z",
+  "inputSources": [],
+  "key": {
+    "inputHash": "3a3264ce05b56ac98f7f903a9ea667b93c662476d64fa4b592e624783589327c",
+    "modelId": "fixture-draft-model-v1",
+    "promptVersion": "rv-draft-1",
+    "task": "ISSUE_CANDIDATE"
+  },
+  "modelId": "fixture-draft-model-v1",
+  "output": {
+    "additionalChecks": [
+      "相談の開催時間帯を確かめる必要があります。",
+      "利用者の年齢や世帯の状況を確かめる必要があります。"
+    ],
+    "background": [],
+    "basisFactIds": [
+      "fixture-fact-education-v1",
+      "fixture-fact-education-users-v1"
+    ],
+    "decisionScenes": [
+      "子育てを支える機会の持ち方を考える場面",
+      "子どもの学びを支える方法を考える場面"
+    ],
+    "factSummary": [
+      {
+        "groundFactIds": [
+          "fixture-fact-education-v1"
+        ],
+        "text": "架空村ひなたの子育て相談は、2025年9月1日時点で6回です。"
+      },
+      {
+        "groundFactIds": [
+          "fixture-fact-education-users-v1"
+        ],
+        "text": "架空村ひなたの子育て相談の利用は、2025年9月1日時点で延べ54人です。"
+      }
+    ],
+    "notDeterminable": [
+      "利用した人が相談に満足したかどうかは、この資料からは分かりません。",
+      "相談を必要とする人の数は、この資料からは分かりません。"
+    ],
+    "responseDirections": [
+      {
+        "category": "CHANGE",
+        "description": "相談できる時間や場所を増やす取り組みです。",
+        "label": "相談の機会を増やす",
+        "status": "REFERENCE_ONLY"
+      },
+      {
+        "category": "CONTINUE",
+        "description": "今ある相談の機会を続ける取り組みです。",
+        "label": "今ある相談を続ける",
+        "status": "REFERENCE_ONLY"
+      }
+    ],
+    "statement": "架空村ひなたの子育て相談の利用状況を、確かめる必要があるかもしれません。",
+    "themeId": "EDUCATION_CHILDCARE",
+    "title": "子育て相談の機会と利用"
+  }
+}
