@@ -27,7 +27,10 @@ export type UiValueAxis = Readonly<{
 
 export type UiDilemmaOption = Readonly<{
   text: string;
-  /** この考え方に割り当てた暫定の価値観軸。画面には出さず、レーダーの接続に備えて持つだけ */
+  /**
+   * この考え方に割り当てた暫定の価値観軸。質問の画面には出さない（回答を誘導しないため）。
+   * 結果画面で、回答と軸の対応を示すのに使う（axisAnalysis.ts の traceAxisAnswers）
+   */
   valueAxisId: UiValueAxisId;
 }>;
 
@@ -51,7 +54,42 @@ export type DilemmaAnswer = TradeoffCode | "SKIPPED";
 
 export type DilemmaAnswers = Readonly<Record<string, DilemmaAnswer>>;
 
-/** 価値観レーダーに渡す、軸ごとの表示用の値（計算処理とは未接続） */
+/**
+ * 価値観レーダーに渡す、軸ごとの表示用の値。
+ * 回答からこの値を作るのは UiAxisAnalyzer（計算方法が未確定のため、今は作らない）。
+ */
 export type UiAxisDisplayValue =
   | Readonly<{ axisId: UiValueAxisId; state: "DETERMINED"; level: Level; usableQuestions: number }>
   | Readonly<{ axisId: UiValueAxisId; state: "UNDETERMINED" }>;
+
+/**
+ * 価値観6軸の分析の結果。
+ * - ANALYZED: 回答から計算した軸ごとの値。正式な計算（共同開発者の generateValuesProfile）ができたら返す。
+ * - PENDING : 計算方法が未確定のため、回答から値を計算していない。結果画面は、レーダーをサンプル表示にする。
+ */
+export type UiAxisAnalysis =
+  | Readonly<{ status: "ANALYZED"; values: readonly UiAxisDisplayValue[] }>
+  | Readonly<{ status: "PENDING" }>;
+
+export type UiAxisAnalysisInput = Readonly<{
+  questions: readonly UiDilemmaQuestion[];
+  axes: readonly UiValueAxis[];
+  /** スキップ（SKIPPED）と未回答（キーなし）は、0点や中立に変えずにそのまま渡す */
+  answers: DilemmaAnswers;
+}>;
+
+/** 回答から価値観6軸の分析の結果を作る関数 */
+export type UiAxisAnalyzer = (input: UiAxisAnalysisInput) => UiAxisAnalysis;
+
+/** 1つの軸が、ある質問のA側またはB側に現れることと、その質問への回答（計算はしない） */
+export type UiAxisTraceLink = Readonly<{
+  question: UiDilemmaQuestion;
+  side: "A" | "B";
+  answer: DilemmaAnswer | undefined;
+}>;
+
+/** 軸ごとの、回答との対応（質問の提示順） */
+export type UiAxisTrace = Readonly<{
+  axis: UiValueAxis;
+  links: readonly UiAxisTraceLink[];
+}>;

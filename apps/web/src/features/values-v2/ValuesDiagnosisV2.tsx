@@ -1,11 +1,12 @@
 import { TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { DEMO_DILEMMAS } from "./demoDilemmas.js";
+import { analyzeValueAxes } from "./axisAnalysis.js";
+import { DEMO_DILEMMAS, UI_VALUE_AXES } from "./demoDilemmas.js";
 import { DilemmaQuestionPage } from "./pages/DilemmaQuestionPage.js";
 import { DilemmaResultPage } from "./pages/DilemmaResultPage.js";
 import { DilemmaStartPage } from "./pages/DilemmaStartPage.js";
-import type { UiDilemmaQuestion } from "./uiTypes.js";
+import type { UiAxisAnalyzer, UiDilemmaQuestion, UiValueAxis } from "./uiTypes.js";
 import { useDilemmaAnswers } from "./useDilemmaAnswers.js";
 
 /*
@@ -13,6 +14,8 @@ import { useDilemmaAnswers } from "./useDilemmaAnswers.js";
  * - v1（features/values）とは独立した部品。どのルートにも登録していない（/values は v1 のまま）。
  * - URL は変えず、画面の中の状態で切り替える。回答はこの部品の state にだけ持つ。
  * - 質問は UI 専用の仮データ（demoDilemmas.ts）。正式な v2 の契約ができたら差し替える。
+ * - 結果画面の価値観レーダーの値は analyzeAxes が回答から作る。計算方法が未確定のため、既定の
+ *   analyzeValueAxes は値を作らず（PENDING）、レーダーはサンプル表示になる（axisAnalysis.ts）。
  */
 
 type Step =
@@ -22,6 +25,10 @@ type Step =
 
 type ValuesDiagnosisV2Props = Readonly<{
   questions?: readonly UiDilemmaQuestion[];
+  /** 価値観の6軸（レーダーの軸の順番） */
+  axes?: readonly UiValueAxis[];
+  /** 回答から価値観6軸を分析する関数。既定は計算方法の確定待ち（PENDING を返す） */
+  analyzeAxes?: UiAxisAnalyzer;
 }>;
 
 /** デモ用の架空データの常時表示（v1 と同じ見た目。768px以上は共通ナビの下に固定） */
@@ -51,7 +58,11 @@ function useLeaveGuard(active: boolean) {
   }, [active]);
 }
 
-export function ValuesDiagnosisV2({ questions = DEMO_DILEMMAS }: ValuesDiagnosisV2Props) {
+export function ValuesDiagnosisV2({
+  questions = DEMO_DILEMMAS,
+  axes = UI_VALUE_AXES,
+  analyzeAxes = analyzeValueAxes,
+}: ValuesDiagnosisV2Props) {
   const { answers, answer, skip, reset } = useDilemmaAnswers();
   const [step, setStep] = useState<Step>({ kind: "start" });
   const [hasMoved, setHasMoved] = useState(false);
@@ -102,7 +113,9 @@ export function ValuesDiagnosisV2({ questions = DEMO_DILEMMAS }: ValuesDiagnosis
   } else {
     screen = (
       <DilemmaResultPage
+        analyzeAxes={analyzeAxes}
         answers={answers}
+        axes={axes}
         isDemo={isDemo}
         onEdit={(index) => goTo({ kind: "question", index })}
         onRestart={() => {
