@@ -6,7 +6,10 @@
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["node", "vite/client"]
+    "types": ["node", "vite/client"],
+    "paths": {
+      "#past-election": ["./apps/web/src/app/public/pastElection.tsx"]
+    }
   },
   "include": [
     "apps/**/*.ts",

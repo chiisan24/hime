@@ -13,10 +13,13 @@ import {
   assertIsolatedOutputRoot,
   BUILD_BOUNDARY_TARGETS,
   evaluateBuildBoundary,
+  evaluatePastElectionExclusion,
   evaluateSourceContractModules,
   extractAnalystHomeTexts,
+  extractPastElectionTexts,
   extractRouteDescriptors,
   inspectBuildArtifact,
+  inspectEmittedPastElectionTexts,
   parseWebModuleManifest,
   WEB_MODULE_MANIFEST_FILENAME,
   type BuildBoundaryMode,
@@ -42,6 +45,30 @@ const VISITOR_LAYOUT_VIOLATION =
 
 /** The analyst navigation label as raw UTF-8 and as a lowercased JavaScript unicode escape. */
 const ANALYST_NAVIGATION_LABEL_FORMS = ["分析状態", "\\u5206\\u6790\\u72b6\\u614b"] as const;
+
+/** The past election (PAST_REAL) data module and the modules that only the Analyst Build may bundle. */
+const PAST_ELECTION_DATA_MODULE = "src/data/visitorDisplayData.ts";
+const PAST_ELECTION_MODULE_PATHS = [
+  PAST_ELECTION_DATA_MODULE,
+  "src/services/visitorData.ts",
+  "src/app/public/pastElection.tsx",
+] as const;
+
+/** `\uXXXX` escapes for every non-ASCII code unit; `upperCase` picks the hex digit case. */
+function unicodeEscaped(text: string, upperCase = false): string {
+  let escaped = "";
+  for (let index = 0; index < text.length; index += 1) {
+    const codeUnit = text.charCodeAt(index);
+    const hex = codeUnit.toString(16).padStart(4, "0");
+    escaped += codeUnit < 0x80 ? (text[index] ?? "") : `\\u${upperCase ? hex.toUpperCase() : hex}`;
+  }
+  return escaped;
+}
+
+/** A text as raw UTF-8 and as a lowercased JavaScript unicode escape, for lowercased bundle text. */
+function emittedForms(text: string): readonly string[] {
+  return [...new Set([text.toLowerCase(), unicodeEscaped(text).toLowerCase()])];
+}
 
 type CheckerRun = Readonly<{
   status: number | null;
@@ -113,6 +140,7 @@ describe("Visitor/Analyst build boundary checker", () => {
   let artifacts: Readonly<Record<BuildBoundaryMode, BuildArtifact>>;
   let analystHomeTexts: readonly string[];
   let webDependencies: readonly string[];
+  let pastElectionTexts: readonly string[];
 
   async function loadArtifact(mode: BuildBoundaryMode): Promise<BuildArtifact> {
     const target = BUILD_BOUNDARY_TARGETS[mode];
@@ -187,6 +215,10 @@ describe("Visitor/Analyst build boundary checker", () => {
       await readFile(path.join(webRoot, "package.json"), "utf8"),
     ) as { dependencies?: Record<string, string> };
     webDependencies = Object.keys(webPackage.dependencies ?? {});
+    pastElectionTexts = extractPastElectionTexts(
+      PAST_ELECTION_DATA_MODULE,
+      await readFile(path.join(webRoot, PAST_ELECTION_DATA_MODULE), "utf8"),
+    );
   }, CHECKER_TIMEOUT_MS);
 
   afterAll(async () => {
@@ -300,6 +332,157 @@ describe("Visitor/Analyst build boundary checker", () => {
     expect(ANALYST_NAVIGATION_LABEL_FORMS.some((form) => analystJavaScript.includes(form))).toBe(
       true,
     );
+  });
+
+  it("extracts the identifying past election texts from the past election data module", () => {
+    expect(pastElectionTexts).toEqual(
+      expect.arrayContaining([
+        "ehime-governor-2022-20",
+        "令和4年（2022年）第20回愛媛県知事選挙",
+        "2022-11-20",
+        "nakamura-tokihiro",
+        "中村時広氏",
+        "hayashi-noriko",
+        "林紀子氏",
+      ]),
+    );
+    // Shared vocabulary such as the policy theme names does not identify the past election.
+    expect(pastElectionTexts).not.toContain("子育て");
+  });
+
+  it("keeps the past election modules and texts out of the Visitor Build, while the Analyst Build keeps them", async () => {
+    async function emittedText(outputDirectory: string): Promise<string> {
+      const assetsDirectory = path.join(outputRoot, outputDirectory, "assets");
+      const files = (await readdir(assetsDirectory)).filter((name) => /\.(?:js|css)$/u.test(name));
+      expect(files.length).toBeGreaterThan(0);
+      const texts = await Promise.all(
+        files.map((name) => readFile(path.join(assetsDirectory, name), "utf8")),
+      );
+      const indexHtml = await readFile(path.join(outputRoot, outputDirectory, "index.html"), "utf8");
+      return [...texts, indexHtml].join("\n").toLowerCase();
+    }
+
+    const visitorPaths = artifacts.visitor.manifest.modules.map(({ path: modulePath }) => modulePath);
+    const analystPaths = artifacts.analyst.manifest.modules.map(({ path: modulePath }) => modulePath);
+    // The Visitor replacement only exports `null`, so the bundler may inline it away;
+    // the boundary is the absence of every past election module.
+    for (const modulePath of PAST_ELECTION_MODULE_PATHS) {
+      expect(visitorPaths).not.toContain(modulePath);
+      expect(analystPaths).toContain(modulePath);
+    }
+
+    expect(checkerRun.stdout).toMatch(
+      new RegExp(
+        `^BUILD_BOUNDARY_OK PAST_ELECTION_EXCLUDED VISITOR dist texts=${pastElectionTexts.length} assets=[1-9]\\d*`,
+        "mu",
+      ),
+    );
+    expect(checkerRun.stdout).not.toContain("PAST_ELECTION_EXCLUDED ANALYST");
+
+    const visitorText = await emittedText("dist");
+    const analystText = await emittedText("dist-analyst");
+    for (const text of pastElectionTexts) {
+      for (const form of emittedForms(text)) {
+        expect(visitorText).not.toContain(form);
+      }
+    }
+    // The same scan finds the past candidates in the Analyst bundle, so the absence above is meaningful.
+    for (const candidateName of ["中村時広氏", "林紀子氏"]) {
+      expect(emittedForms(candidateName).some((form) => analystText.includes(form))).toBe(true);
+    }
+  });
+
+  it("rejects a Visitor Build that bundles the past election module or embeds a past election text", () => {
+    const visitor = artifacts.visitor;
+    const analyst = artifacts.analyst;
+    const pastModulePath = "src/app/public/pastElection.tsx";
+    const pastCandidateName = "中村時広氏";
+    const evaluatePast = (
+      overrides: Partial<{
+        manifest: WebModuleManifest;
+        sources: ReadonlyMap<string, string>;
+        texts: readonly string[];
+      }> = {},
+    ) =>
+      evaluatePastElectionExclusion({
+        target: visitor.target,
+        manifest: overrides.manifest ?? visitor.manifest,
+        sources: overrides.sources ?? visitor.sources,
+        pastElectionTexts: overrides.texts ?? pastElectionTexts,
+      });
+
+    expect(evaluatePast()).toEqual([]);
+    // The Analyst Build may keep the past election.
+    expect(
+      evaluatePastElectionExclusion({
+        target: analyst.target,
+        manifest: analyst.manifest,
+        sources: analyst.sources,
+        pastElectionTexts,
+      }),
+    ).toEqual([]);
+
+    expect(
+      evaluatePast({
+        manifest: {
+          ...visitor.manifest,
+          modules: [...visitor.manifest.modules, moduleEntry(analyst, pastModulePath)],
+        },
+        sources: new Map([...visitor.sources, [pastModulePath, analyst.sources.get(pastModulePath) ?? ""]]),
+      }),
+    ).toEqual(
+      expect.arrayContaining([
+        `${pastModulePath}: past election module is bundled into the Visitor Build`,
+        `${pastModulePath}: contains the past election text "${pastCandidateName}" in the Visitor Build`,
+      ]),
+    );
+
+    expect(
+      evaluatePast({
+        sources: withSource(
+          visitor,
+          "src/app/public/pages.tsx",
+          (sourceText) => `${sourceText}\nexport const LEAKED_LINK = "${pastCandidateName}の詳細を見る";\n`,
+        ),
+      }),
+    ).toEqual([
+      `src/app/public/pages.tsx: contains the past election text "${pastCandidateName}" in the Visitor Build`,
+    ]);
+
+    // Without reference texts the check fails closed instead of passing vacuously.
+    expect(evaluatePast({ texts: [] })).toEqual([
+      `${PAST_ELECTION_DATA_MODULE}: past election reference texts could not be extracted`,
+    ]);
+  });
+
+  it("finds a past election text emitted into a Visitor asset as raw UTF-8 or as unicode escapes", async () => {
+    const leakedText = "中村時広氏";
+    await expect(
+      inspectEmittedPastElectionTexts({
+        outputDirectory: path.join(outputRoot, "dist"),
+        displayDirectory: "dist",
+        pastElectionTexts,
+      }),
+    ).resolves.toMatchObject({ violations: [] });
+
+    for (const [index, encoded] of [
+      leakedText,
+      unicodeEscaped(leakedText),
+      unicodeEscaped(leakedText, true),
+    ].entries()) {
+      const root = path.join(workspace.path, `past-election-leak-${index}`);
+      await cp(outputRoot, root, { recursive: true });
+      await writeFile(
+        path.join(root, "dist", "assets", "leaked.js"),
+        `export const leaked = "${encoded}";\n`,
+        "utf8",
+      );
+
+      const inspection = await inspectBuildArtifact({ webRoot, outputRoot: root, requestedMode: "visitor" });
+      expect(inspection.violations).toEqual([
+        `dist/assets/leaked.js: emits the past election text "${leakedText}"`,
+      ]);
+    }
   });
 
   it("extracts normalized route descriptors that match both route contract matrices", async () => {

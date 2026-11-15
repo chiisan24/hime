@@ -15,18 +15,16 @@ import {
   HOME_NAVIGATION_STATE,
 } from "../../app/navigation.js";
 import { projectVisitorPresentation } from "../../app/public/visitorPresentation.js";
-import {
-  getElectionDataSource,
-  projectAvailableElectionDestinations,
-} from "../../services/electionData.js";
+import { getActivePastElection } from "../../services/electionData.js";
 import { BrandLogo } from "./BrandLogo.js";
 
-const DATA_KIND_LABELS = {
-  REAL_AI: "2022年実資料・AI解析",
-  FIXTURE: "架空fixture・UIテスト専用",
-} as const;
+/**
+ * データ種別。表示するのは過去の選挙の表示のときだけ。
+ * REAL_AI（過去の選挙の実資料）の表示名は、過去の選挙の側（#past-election）が持つ。
+ */
+type DataKind = "REAL_AI" | "FIXTURE";
 
-type DataKind = keyof typeof DATA_KIND_LABELS;
+const FIXTURE_DATA_KIND_LABEL = "架空fixture・UIテスト専用";
 
 export type SharedNavigationItem = Readonly<{
   to: string;
@@ -54,13 +52,10 @@ const PUBLIC_NAV_ITEMS = [
 ] as const;
 
 /**
- * 利用者向けの共通ナビゲーション。表示できるデータがない選挙関連ページ
- * （モックデータが未提供の選挙日程・候補者・政策比較・会場閲覧）の項目は、一時的に外す。
- * ルートは残してあり、データが提供されると項目が戻る（services/electionData.ts）。
+ * 利用者向けの共通ナビゲーション。選挙関連ページ（選挙日程・候補者・政策比較・会場閲覧）の項目は、
+ * モックデータが未設定でも外さない。データがないページは、既存のデザインのまま「開発中」の空状態を表示する。
  */
-export const VISITOR_NAV_ITEMS = projectAvailableElectionDestinations(
-  projectVisitorPresentation(PUBLIC_NAV_ITEMS),
-);
+export const VISITOR_NAV_ITEMS = projectVisitorPresentation(PUBLIC_NAV_ITEMS);
 
 /** 選挙に依存しない画面（価値観診断）。2022年選挙専用の表示を出さない */
 const ELECTION_INDEPENDENT_PATH = "/values";
@@ -154,10 +149,13 @@ export function AppShell({
 }: AppShellProps) {
   // 2022年選挙専用の表示（過去選挙表示・データ種別・フッター）は、次のときに出さない。
   // - 価値観診断（/values）。選挙に依存しない画面のため。
-  // - 過去の選挙データを使わない設定（モックデータ）のとき。どの画面にも過去の選挙のデータを出さないため。
+  // - 過去の選挙データを使わない設定（モックデータ）のときと、過去の選挙を含まないビルド
+  //   （利用者向けの公開ビルド）のとき。どの画面にも過去の選挙のデータを出さないため。
+  //   表示する文言も過去の選挙の側（#past-election）が持つので、公開ビルドには入らない。
   // デモ版の表示は、公開形態についての表示のため、どの画面でも残す。
-  const electionIndependent =
-    useIsElectionIndependentRoute() || getElectionDataSource() !== "PAST_REAL";
+  const electionIndependent = useIsElectionIndependentRoute();
+  const pastElection = getActivePastElection();
+  const pastShell = electionIndependent ? null : (pastElection?.shell ?? null);
 
   return (
     // スマホでは、下部固定ナビの高さ分だけ下に余白を取り、フッターが隠れないようにする
@@ -174,9 +172,9 @@ export function AppShell({
         <div className="bg-primary-dark px-4 py-1 text-center text-xs font-bold leading-5 text-white">
           デモ版・コンテスト審査用の試作アプリです
         </div>
-        {electionIndependent ? null : (
+        {pastShell === null ? null : (
           <div className="bg-accent-light px-4 py-1 text-center text-xs font-bold leading-5 text-accent-dark">
-            2022年に終了した過去選挙です。現在または将来の投票所判断には使えません
+            {pastShell.notice}
           </div>
         )}
 
@@ -192,12 +190,12 @@ export function AppShell({
                 えひめ投票ナビ
               </span>
             </AppLink>
-            {electionIndependent ? null : (
+            {pastShell === null ? null : (
               <p
                 className="mb-1.5 inline-flex min-h-7 items-center rounded-full bg-primary-light px-3 text-xs font-bold text-primary-dark sm:mb-0 sm:ml-auto"
                 data-kind={dataKind}
               >
-                データ種別: {DATA_KIND_LABELS[dataKind]}
+                データ種別: {dataKind === "FIXTURE" ? FIXTURE_DATA_KIND_LABEL : pastShell.realAiDataKindLabel}
               </p>
             )}
           </div>
@@ -217,9 +215,9 @@ export function AppShell({
         <Outlet />
       </main>
 
-      {electionIndependent ? null : (
+      {pastShell === null ? null : (
         <footer className="border-t border-line bg-white px-4 py-5 text-center text-xs leading-5 text-ink-soft">
-          <p>対象: 令和4年（2022年）第20回愛媛県知事選挙</p>
+          <p>{pastShell.footerTarget}</p>
           <p className="mt-1">政策解析準備状態: NOT_READY</p>
         </footer>
       )}

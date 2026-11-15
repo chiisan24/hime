@@ -15,6 +15,8 @@ type HomeTileProps = Readonly<{
   icon: LucideIcon;
   /** 行き先の中身がまだ準備中なら true */
   preparing: boolean;
+  /** preparing のときに出すラベル。省略すると「準備中」 */
+  preparingLabel?: string;
   /** カードの下に並べる追加のリンク（候補者ごとの詳細など）。ある場合はカード全体ではなく上部がリンクになる */
   subLinks?: ReactNode;
 }>;
@@ -38,6 +40,7 @@ export function HomeTile({
   description,
   icon: Icon,
   preparing,
+  preparingLabel = PREPARING_LABEL,
   subLinks,
 }: HomeTileProps) {
   const descriptionId = useId();
@@ -52,11 +55,11 @@ export function HomeTile({
       </span>
       <span className="text-xs leading-5 text-ink-soft" id={descriptionId}>
         {description}
-        {preparing ? <span className="sr-only">、{PREPARING_LABEL}</span> : null}
+        {preparing ? <span className="sr-only">、{preparingLabel}</span> : null}
       </span>
       {preparing ? (
         <span aria-hidden="true" className="mt-auto">
-          <Badge>{PREPARING_LABEL}</Badge>
+          <Badge>{preparingLabel}</Badge>
         </span>
       ) : null}
     </>
