@@ -16,12 +16,13 @@ type ValueAxisRadarProps = Readonly<{
 
 /*
  * 価値観レーダーの表示部品（v2）。軸ごとの値（UiAxisDisplayValue）を受け取って描くだけで、計算はしない。
- * 回答から値を作るのは UiAxisAnalyzer（axisAnalysis.ts。計算方法が未確定のため、今は値を作らない）。
+ * 回答から値を作るのは UiAxisAnalyzer（既定は axisAnalysis.ts の analyzeValueAxes）。
  *
  * 形: 正六角形の外枠、内側の六角形の目盛り（−2〜+2 の5段）、中心から各頂点への軸、頂点の外側の軸名。
  * 値は −2〜+2 の「比べたときの傾き」で、0 を真ん中の六角形に置く（v1 の ValuesRadarChart の「0〜満点」とは違う）。
  * 値の多角形は半透明の青で塗る（利用者の指示）。面積の大きさに意味がないことは、図の下の説明で伝える。
- * 分析できない軸（値がない軸を含む）は、軸を点線にして「分析できません」と出し、点を置かず、0 として描かない。
+ * 分析できない軸（値がない軸と、未出題の軸を含む）は、軸を点線にして「分析できません」（未出題は「未出題」）と出し、
+ * 点を置かず、0 として描かない。
  * その軸に接する部分は塗らない（隣り合う2軸がどちらも分析できたところだけを塗る）。
  */
 
@@ -85,6 +86,13 @@ const LEVEL_TEXT: Readonly<Record<Level, string>> = {
 };
 
 const UNDETERMINED_TEXT = "分析できません（根拠になる回答がありません）";
+/** 分析できない理由ごとの文。スキップと未回答を分けて示し、0点や「同程度」と書かない */
+const UNDETERMINED_REASON_TEXT: Readonly<Record<string, string>> = {
+  SKIPPED: "分析できません（この考え方が出てくる質問をスキップしました）",
+  UNANSWERED: "分析できません（この考え方が出てくる質問が未回答です）",
+  "SKIPPED,UNANSWERED": "分析できません（この考え方が出てくる質問は、スキップと未回答です）",
+};
+const NOT_ASKED_TEXT = "この診断には、この考え方が出てくる質問がありません（未出題）";
 const SAMPLE_LABEL = "サンプル表示";
 
 function levelSign(level: Level): string {
@@ -92,11 +100,25 @@ function levelSign(level: Level): string {
 }
 
 export function describeAxisValue(value: UiAxisDisplayValue | undefined): string {
-  if (value === undefined || value.state === "UNDETERMINED") {
+  if (value === undefined) {
     return UNDETERMINED_TEXT;
+  }
+  if (value.state === "NOT_ASKED") {
+    return NOT_ASKED_TEXT;
+  }
+  if (value.state === "UNDETERMINED") {
+    return UNDETERMINED_REASON_TEXT[(value.reasons ?? []).join(",")] ?? UNDETERMINED_TEXT;
   }
   const basis = value.usableQuestions === 1 ? "（1問から）" : "";
   return `${LEVEL_TEXT[value.level]}${basis}`;
+}
+
+/** 図の軸名の下に出す短い値 */
+function shortValueText(value: UiAxisDisplayValue | undefined): string {
+  if (value?.state === "DETERMINED") {
+    return levelSign(value.level);
+  }
+  return value?.state === "NOT_ASKED" ? "未出題" : "分析できません";
 }
 
 type LabelLayout = Readonly<{
@@ -258,10 +280,7 @@ export function ValueAxisRadar({ axes, values, sample = false }: ValueAxisRadarP
           {entries.map((entry) => {
             const lines = axisLabelLines(entry.axis.label);
             const layout = labelLayout(entry.index, count, lines.length);
-            const valueText =
-              entry.value !== undefined && entry.value.state === "DETERMINED"
-                ? levelSign(entry.value.level)
-                : "分析できません";
+            const valueText = shortValueText(entry.value);
             return (
               <text aria-hidden="true" key={entry.axis.axisId} textAnchor={layout.anchor}>
                 {lines.map((line, lineIndex) => (

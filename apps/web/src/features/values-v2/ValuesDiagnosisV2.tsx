@@ -14,8 +14,8 @@ import { useDilemmaAnswers } from "./useDilemmaAnswers.js";
  * - v1（features/values）とは独立した部品。どのルートにも登録していない（/values は v1 のまま）。
  * - URL は変えず、画面の中の状態で切り替える。回答はこの部品の state にだけ持つ。
  * - 質問は UI 専用の仮データ（demoDilemmas.ts）。正式な v2 の契約ができたら差し替える。
- * - 結果画面の価値観レーダーの値は analyzeAxes が回答から作る。計算方法が未確定のため、既定の
- *   analyzeValueAxes は値を作らず（PENDING）、レーダーはサンプル表示になる（axisAnalysis.ts）。
+ * - 結果画面の価値観レーダーの値は analyzeAxes が回答から作る。既定の analyzeValueAxes（axisAnalysis.ts）は、
+ *   回答から6軸を計算する。答え直すと、結果画面を開くたびに今の回答から計算し直す（前の結果を持ち越さない）。
  */
 
 type Step =
@@ -27,7 +27,7 @@ type ValuesDiagnosisV2Props = Readonly<{
   questions?: readonly UiDilemmaQuestion[];
   /** 価値観の6軸（レーダーの軸の順番） */
   axes?: readonly UiValueAxis[];
-  /** 回答から価値観6軸を分析する関数。既定は計算方法の確定待ち（PENDING を返す） */
+  /** 回答から価値観6軸を分析する関数。既定は analyzeValueAxes */
   analyzeAxes?: UiAxisAnalyzer;
 }>;
 

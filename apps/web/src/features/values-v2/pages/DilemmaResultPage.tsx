@@ -8,9 +8,9 @@ import { ConfirmDialog } from "../../values/components/ConfirmDialog.js";
 import { SECONDARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "../../values/styles.js";
 import { THEME_ICONS } from "../../values/themeIcons.js";
 import { useHeadingFocus } from "../../values/useHeadingFocus.js";
-import { analyzeValueAxes, SAMPLE_AXIS_VALUES, traceAxisAnswers } from "../axisAnalysis.js";
+import { analyzeValueAxes, contributionOf, SAMPLE_AXIS_VALUES, traceAxisAnswers } from "../axisAnalysis.js";
 import { IssuePosition } from "../components/IssuePosition.js";
-import { ValueAxisRadar } from "../components/ValueAxisRadar.js";
+import { describeAxisValue, ValueAxisRadar } from "../components/ValueAxisRadar.js";
 import { DILEMMA_PROMPT, DILEMMA_SCALE, UI_VALUE_AXES } from "../demoDilemmas.js";
 import type {
   DilemmaAnswer,
@@ -31,9 +31,22 @@ type DilemmaResultPageProps = Readonly<{
   onRestart: () => void;
   /** 価値観の6軸（この順番で描く。値の大きい順に並べ替えない） */
   axes?: readonly UiValueAxis[];
-  /** 回答から価値観6軸を分析する関数。計算方法が未確定のため、既定は PENDING を返す（axisAnalysis.ts） */
+  /** 回答から価値観6軸を分析する関数。既定は axisAnalysis.ts の analyzeValueAxes */
   analyzeAxes?: UiAxisAnalyzer;
 }>;
+
+/** 1つの質問がこの軸に与えた寄与の短い表示。スキップと未回答は「計算に入れていません」とし、0と書かない */
+function contributionLabelOf(answer: DilemmaAnswer | undefined, side: "A" | "B"): string {
+  const value = contributionOf(answer, side);
+  if (value === null) {
+    return "計算に入れていません（回答なし）";
+  }
+  if (value === 0) {
+    return "どちらにも動かしていません（同程度）";
+  }
+  const direction = value > 0 ? "この考え方の側" : "比べた相手の側";
+  return `${direction}へ${Math.abs(value) === 2 ? "強く" : "やや"}`;
+}
 
 /** 回答の振り返りの文。回答の事実だけを述べ、性格や思想を推測しない */
 function reflectionOf(answer: DilemmaAnswer | undefined): string {
@@ -64,8 +77,10 @@ function answerLabelOf(answer: DilemmaAnswer | undefined): string {
  * テーマの回答を合算せず、順位も付けない。スキップ・未回答は「回答なし」として0点に変えない。
  * 判断に迷った・回答しなかった・判定できない・未出題の4枚のカードは置かず、回答状況を1行にまとめる。
  *
- * レーダーの値は analyzeAxes が返す。計算方法が未確定のあいだは PENDING が返り、
- * レーダーは見本の値のサンプル表示にして、あなたの回答の分析結果ではないことを示す。
+ * レーダーの値は analyzeAxes が返す。
+ * - ANALYZED: 回答から計算した値で描く（既定の analyzeValueAxes）。サンプルの値は混ぜない。
+ * - INVALID : 入力に誤りがあるため、図を描かずに、表示できないことを示す（サンプルにも切り替えない）。
+ * - PENDING : 差し替えた分析の関数が値を作らないときだけ、見本の値のサンプル表示にして、分析結果ではないと示す。
  */
 export function DilemmaResultPage({
   questions,
@@ -113,26 +128,38 @@ export function DilemmaResultPage({
         </p>
       </div>
 
-      {/* 2. 六角形の価値観レーダー */}
+      {/* 2. 六角形の価値観レーダー（価値観の分析） */}
       <SectionCard
         aside={analysis.status === "PENDING" ? <Badge tone="primary">サンプル表示</Badge> : null}
         icon={Radar}
         title="価値観レーダー"
       >
         {analysis.status === "PENDING" ? (
-          <NoticeBar className="mb-4">
-            回答から価値観の傾きを計算する方法は、まだ決まっていません（準備中）。下の図は表示の見本（サンプル）で、あなたの回答から計算した結果ではありません。あなたの回答は、下の「6つの考え方」と「地域課題ごとの回答の振り返り」で確かめられます。
-          </NoticeBar>
+          <>
+            <NoticeBar className="mb-4">
+              回答から価値観の傾きを計算する方法は、まだ決まっていません（準備中）。下の図は表示の見本（サンプル）で、あなたの回答から計算した結果ではありません。あなたの回答は、下の「6つの考え方」と「地域課題ごとの回答の振り返り」で確かめられます。
+            </NoticeBar>
+            <ValueAxisRadar axes={axes} sample values={SAMPLE_AXIS_VALUES} />
+          </>
+        ) : analysis.status === "INVALID" ? (
+          <div data-radar-invalid="true">
+            <NoticeBar>
+              質問か回答のデータに誤りがあるため、価値観レーダーを表示できません。あなたの回答は、下の「地域課題ごとの回答の振り返り」で確かめられます。
+            </NoticeBar>
+          </div>
         ) : (
-          <p className="mb-4 text-sm leading-6 text-ink-soft">
-            あなたの回答から、6つの考え方を比べたときの傾きを図にしました。
-          </p>
+          <>
+            <div className="mb-4 grid gap-2 text-sm leading-6 text-ink-soft">
+              <p>
+                あなたの回答から、6つの考え方を比べたときの傾きを図にしました。どの考え方も、2つの質問に考え方Aまたは考え方Bとして出てきます。その考え方の側を選ぶと外側へ、比べた相手の考え方を選ぶと内側へ動きます。
+              </p>
+              <p>
+                スキップした質問と未回答の質問は、計算に入れていません（0点や「同程度」にはしていません）。根拠になる回答がない考え方は、点線で「分析できません」と示します。
+              </p>
+            </div>
+            <ValueAxisRadar axes={axes} values={analysis.values} />
+          </>
         )}
-        <ValueAxisRadar
-          axes={axes}
-          sample={analysis.status === "PENDING"}
-          values={analysis.status === "PENDING" ? SAMPLE_AXIS_VALUES : analysis.values}
-        />
       </SectionCard>
 
       {/* 3. 6つの考え方（軸の意味と、どの質問の回答と対応するか） */}
@@ -149,9 +176,16 @@ export function DilemmaResultPage({
             >
               <h3 className="text-base font-bold text-primary-dark">{axis.label}</h3>
               <p className="mt-1 text-sm leading-6 text-ink">{axis.definition}</p>
+              {analysis.status === "ANALYZED" ? (
+                <p className="mt-2 text-sm font-bold leading-6 text-ink" data-axis-result={axis.axisId}>
+                  <span className="font-normal text-ink-soft">分析：</span>
+                  {describeAxisValue(analysis.values.find((value) => value.axisId === axis.axisId))}
+                </p>
+              ) : null}
               <ul className="mt-3 grid gap-2" role="list">
                 {links.map((link) => {
                   const option = link.side === "A" ? link.question.optionA : link.question.optionB;
+                  const opposing = link.side === "A" ? link.question.optionB : link.question.optionA;
                   return (
                     <li
                       className="rounded-lg bg-surface px-3 py-2 text-xs leading-5 text-ink"
@@ -163,10 +197,20 @@ export function DilemmaResultPage({
                       <span className="font-bold text-primary-dark">{link.question.themeLabel}</span>
                       <span className="text-ink-soft">（考え方{link.side}）</span>
                       <span className="block">{option.text}</span>
+                      <span className="block text-ink-soft">
+                        比べた相手：考え方{link.side === "A" ? "B" : "A"}（
+                        {axisLabels.get(opposing.valueAxisId) ?? opposing.valueAxisId}）
+                      </span>
                       <span className="mt-0.5 block font-bold">
                         <span className="font-normal text-ink-soft">あなたの回答：</span>
                         {answerLabelOf(link.answer)}
                       </span>
+                      {analysis.status === "ANALYZED" ? (
+                        <span className="block" data-trace-contribution={contributionOf(link.answer, link.side) ?? "NONE"}>
+                          <span className="text-ink-soft">この軸への反映：</span>
+                          {contributionLabelOf(link.answer, link.side)}
+                        </span>
+                      ) : null}
                     </li>
                   );
                 })}
