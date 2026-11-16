@@ -172,14 +172,32 @@ describe("ValuesDiagnosisV2（地域課題ジレンマ診断）", () => {
     for (const name of ["判断に迷ったテーマ", "回答しなかったテーマ", "判定できない項目", "未出題のテーマ"]) {
       expect(screen.queryByRole("region", { name })).not.toBeInTheDocument();
     }
-    // レーダーは、計算方法が未確定のため回答から値を出さない。以前は図を出さずに「準備中」とだけ示していた。
-    // 利用者の指示で図を出すようにしたため、図は見本の値のサンプル表示で、分析結果ではないと示すことを確かめる
-    //（サンプルが回答によって変わらないことは、下の別のテストで確かめる）
+    // レーダーは、以前は計算方法が未確定のためサンプル表示だった。計算の仕様（records/values-v2-axis-analysis.md）を
+    // 実装したため、回答から計算した値で描き、サンプル表示や「準備中」を出さないことを確かめる
+    //（分析の関数が値を作らないときのサンプル表示は、下の別のテストで確かめる）
     const radar = screen.getByRole("region", { name: "価値観レーダー" });
-    expect(radar).toHaveTextContent("準備中");
-    expect(radar).toHaveTextContent("あなたの回答から計算した結果ではありません");
-    expect(within(radar).getByRole("img")).toHaveAccessibleName(/^サンプル表示の価値観レーダー/u);
-    expect(radar.querySelector("figure")).toHaveAttribute("data-radar-mode", "sample");
+    expect(radar.querySelector("figure")).toHaveAttribute("data-radar-mode", "analysis");
+    expect(radar).not.toHaveTextContent(/準備中|サンプル|見本/u);
+    expect(within(radar).getByRole("img")).toHaveAccessibleName(/^価値観レーダー/u);
+    // 公平性: 地域交通A「Aを強く重視」(+2) と医療・福祉B「Bをやや重視」(+1) → 得点150 → +2
+    // 暮らしの安定: 地域交通B (−2) と、スキップした教育・子育て（計算に入れない）→ 1問から −2
+    // 将来への投資: 地域経済・雇用A「同程度」(0) と人口減少B「Bを強く重視」(+2) → 得点100 → +1
+    // 個人の可能性: スキップした教育・子育てと、人口減少A (−2) → 1問から −2
+    // 地域のつながり: 地域経済・雇用B (0) と防災A「Aをやや重視」(+1) → 得点50 → +1
+    // 公共基盤の充実: 医療・福祉A (−1) と防災B (−1) → 得点−100 → −1
+    const expected = {
+      FAIRNESS: "この考え方の側を選ぶことが多かった",
+      STABILITY: "もう一方の考え方を選ぶことが多かった（1問から）",
+      FUTURE: "この考え方の側をやや選んだ",
+      OPPORTUNITY: "もう一方の考え方を選ぶことが多かった（1問から）",
+      COMMUNITY: "この考え方の側をやや選んだ",
+      INFRASTRUCTURE: "もう一方の考え方をやや選んだ",
+    } as const;
+    for (const [axisId, text] of Object.entries(expected)) {
+      expect(radar.querySelector(`[data-axis-description='${axisId}']`), axisId).toHaveTextContent(text);
+    }
+    expect(radar.querySelectorAll("figure circle")).toHaveLength(6);
+    expect(radar.querySelector("polygon[data-result='area']")).not.toBeNull();
     expect(document.body).not.toHaveTextContent(/一致率|ランキング|[0-9０-９]+位/u);
     expect(window.localStorage.length).toBe(0);
     expect(window.sessionStorage.length).toBe(0);
@@ -271,9 +289,11 @@ describe("ValuesDiagnosisV2（地域課題ジレンマ診断）", () => {
     expect(mapItem(transport.questionId)).toHaveTextContent("軸：暮らしの安定");
   });
 
-  it("計算方法が未確定のあいだのレーダーは、回答によって変わらないサンプル表示になる", () => {
+  // 以前は既定の分析が PENDING を返していた。既定は計算するようになったため、PENDING を返す分析を差し替えて確かめる
+  it("分析の関数が値を作らない（PENDING）あいだのレーダーは、回答によって変わらないサンプル表示になる", () => {
+    const pendingAnalyzer: UiAxisAnalyzer = () => ({ status: "PENDING" });
     const radarShapeAfter = (plan: readonly string[]) => {
-      const { unmount } = render(<ValuesDiagnosisV2 />);
+      const { unmount } = render(<ValuesDiagnosisV2 analyzeAxes={pendingAnalyzer} />);
       fireEvent.click(screen.getByRole("button", { name: /診断をはじめる/u }));
       answerAll(plan);
       const radar = screen.getByRole("region", { name: "価値観レーダー" });
@@ -295,6 +315,169 @@ describe("ValuesDiagnosisV2（地域課題ジレンマ診断）", () => {
     const mixed = radarShapeAfter(["Bを強く重視", "skip", "同程度", "skip", "Bをやや重視", "Aをやや重視"]);
     expect(allA.mode).toBe("sample");
     expect(mixed).toEqual(allA);
+  });
+
+  /** 結果画面のレーダーの値の多角形・点・説明文 */
+  function radarSnapshot() {
+    const radar = screen.getByRole("region", { name: "価値観レーダー" });
+    return {
+      mode: radar.querySelector("figure")?.getAttribute("data-radar-mode"),
+      shapes: Array.from(radar.querySelectorAll("polygon[data-result]")).map((polygon) =>
+        polygon.getAttribute("points"),
+      ),
+      dots: Object.fromEntries(
+        Array.from(radar.querySelectorAll<SVGCircleElement>("figure circle[data-axis]")).map((circle) => [
+          circle.dataset.axis,
+          `${circle.getAttribute("cx")},${circle.getAttribute("cy")}`,
+        ]),
+      ),
+      texts: Object.fromEntries(
+        Array.from(radar.querySelectorAll<HTMLElement>("[data-axis-description]")).map((item) => [
+          item.dataset.axisDescription,
+          item.textContent,
+        ]),
+      ),
+    };
+  }
+
+  it("既定の分析では、回答に応じて六角形の形が変わり、答え直すと、その質問の2つの軸だけが更新される", () => {
+    const shapeAfter = (plan: readonly string[]) => {
+      const { unmount } = render(<ValuesDiagnosisV2 />);
+      fireEvent.click(screen.getByRole("button", { name: /診断をはじめる/u }));
+      answerAll(plan);
+      const snapshot = radarSnapshot();
+      unmount();
+      return snapshot;
+    };
+    // すべて「Aを強く重視」と、すべて「Bを強く重視」は、どちらも全軸が0になる（各軸がA側とB側に1回ずつ出るため）。
+    // A と B を交互に強く選ぶと、形が変わる
+    const allA = shapeAfter(Array.from({ length: 6 }, () => "Aを強く重視"));
+    const allB = shapeAfter(Array.from({ length: 6 }, () => "Bを強く重視"));
+    const alternating = shapeAfter(Array.from({ length: 6 }, (_, index) => (index % 2 === 0 ? "Aを強く重視" : "Bを強く重視")));
+    expect(allA.mode).toBe("analysis");
+    expect(allB.shapes).toEqual(allA.shapes);
+    expect(alternating.shapes).not.toEqual(allA.shapes);
+    expect(alternating.texts.FAIRNESS).toContain("この考え方の側を選ぶことが多かった");
+
+    render(<ValuesDiagnosisV2 />);
+    fireEvent.click(screen.getByRole("button", { name: /診断をはじめる/u }));
+    answerAll(Array.from({ length: 6 }, () => "Aを強く重視"));
+    const before = radarSnapshot();
+    // すべて「Aを強く重視」なら、どの軸も A側の質問で +2、B側の質問で −2 となり、得点0（同じくらい）
+    for (const text of Object.values(before.texts)) {
+      expect(text).toContain("どちらとも同じくらいだった");
+    }
+
+    // 地域交通（A: 公平性、B: 暮らしの安定）を「Bを強く重視」に答え直す
+    const [transport] = DEMO_DILEMMAS;
+    if (transport === undefined) {
+      throw new Error("demo data is incomplete");
+    }
+    fireEvent.click(within(mapItem(transport.questionId)).getByRole("button", { name: /この質問に答え直す/u }));
+    choose("Bを強く重視");
+    for (let index = 1; index <= 6; index += 1) {
+      fireEvent.click(nextButton());
+    }
+    const after = radarSnapshot();
+    expect(after.shapes).not.toEqual(before.shapes);
+    // 公平性は −2+(−2) = −4 → −2、暮らしの安定は +2+(+2) = +4 → +2
+    expect(after.texts.FAIRNESS).toContain("もう一方の考え方を選ぶことが多かった");
+    expect(after.texts.STABILITY).toContain("この考え方の側を選ぶことが多かった");
+    for (const axisId of ["FUTURE", "OPPORTUNITY", "COMMUNITY", "INFRASTRUCTURE"]) {
+      expect(after.texts[axisId], axisId).toBe(before.texts[axisId]);
+      expect(after.dots[axisId], axisId).toBe(before.dots[axisId]);
+    }
+    expect(after.dots.FAIRNESS).not.toBe(before.dots.FAIRNESS);
+    expect(after.dots.STABILITY).not.toBe(before.dots.STABILITY);
+  });
+
+  it("すべてスキップすると、6軸とも点を置かずに点線で「スキップしました」と示し、0（同じくらい）に描かない", () => {
+    start();
+    answerAll(Array.from({ length: 6 }, () => "skip"));
+    const radar = screen.getByRole("region", { name: "価値観レーダー" });
+    expect(radar.querySelector("figure")).toHaveAttribute("data-radar-mode", "analysis");
+    expect(radar.querySelectorAll("figure circle")).toHaveLength(0);
+    expect(radar.querySelectorAll("polygon[data-result]")).toHaveLength(0);
+    expect(radar.querySelectorAll("line[data-undetermined='true']")).toHaveLength(6);
+    for (const axis of UI_VALUE_AXES) {
+      const text = radar.querySelector(`[data-axis-description='${axis.axisId}']`);
+      expect(text).toHaveTextContent("分析できません（この考え方が出てくる質問をスキップしました）");
+      expect(text).not.toHaveTextContent("同じくらい");
+    }
+  });
+
+  /*
+   * 画面の流れでは、どの質問も回答かスキップをしないと次へ進めないため、結果画面に未回答の質問は残らない。
+   * 未回答（とスキップとの区別）は、axisAnalysis.test.ts と ValueAxisRadar.test.tsx で確かめる。
+   */
+  it("2問ともスキップした軸は分析できないと示し、片方だけスキップした軸は、もう1問から計算する", () => {
+    start();
+    // 地域交通と医療・福祉をスキップし、ほかは「同程度」
+    answerAll(["skip", "同程度", "同程度", "skip", "同程度", "同程度"]);
+    const radar = screen.getByRole("region", { name: "価値観レーダー" });
+    // 公平性は、地域交通と医療・福祉の両方をスキップした
+    expect(radar.querySelector("[data-axis-description='FAIRNESS']")).toHaveTextContent(
+      "分析できません（この考え方が出てくる質問をスキップしました）",
+    );
+    expect(radar.querySelector("figure circle[data-axis='FAIRNESS']")).toBeNull();
+    // 暮らしの安定は、地域交通をスキップし、教育・子育てで「同程度」→ 1問から0（同程度は回答として数える）
+    expect(radar.querySelector("[data-axis-description='STABILITY']")).toHaveTextContent(
+      "どちらとも同じくらいだった（1問から）",
+    );
+    expect(radar.querySelector("figure circle[data-axis='STABILITY']")).not.toBeNull();
+  });
+
+  it("6つの考え方に、軸ごとの分析と、各質問の回答がその軸にどう反映されたかを出す", () => {
+    start();
+    answerAll(["Aを強く重視", "skip", "同程度", "Bをやや重視", "Aをやや重視", "Bを強く重視"]);
+    const section = screen.getByRole("region", { name: "6つの考え方（価値観の軸）" });
+    expect(section.querySelector("[data-axis-result='FAIRNESS']")).toHaveTextContent(
+      "分析：比べたときに、この考え方の側を選ぶことが多かった",
+    );
+    const [transport, education, , healthcare] = DEMO_DILEMMAS;
+    if (transport === undefined || education === undefined || healthcare === undefined) {
+      throw new Error("demo data is incomplete");
+    }
+    const fairnessTransport = section.querySelector(
+      `[data-axis-trace='FAIRNESS'] [data-trace-question='${transport.questionId}']`,
+    );
+    expect(fairnessTransport).toHaveTextContent("比べた相手：考え方B（暮らしの安定）");
+    expect(fairnessTransport).toHaveTextContent("この軸への反映：この考え方の側へ強く");
+    // 医療・福祉では公平性は考え方B。「Bをやや重視」は公平性の側へやや
+    const fairnessHealthcare = section.querySelector(
+      `[data-axis-trace='FAIRNESS'] [data-trace-question='${healthcare.questionId}']`,
+    );
+    expect(fairnessHealthcare).toHaveTextContent("比べた相手：考え方A（公共基盤の充実）");
+    expect(fairnessHealthcare).toHaveTextContent("この軸への反映：この考え方の側へやや");
+    // 地域交通の暮らしの安定（考え方B）は、比べた相手の側へ強く
+    expect(
+      section.querySelector(`[data-axis-trace='STABILITY'] [data-trace-question='${transport.questionId}']`),
+    ).toHaveTextContent("この軸への反映：比べた相手の側へ強く");
+    // スキップした質問は計算に入れない（0 や「同程度」と書かない）
+    for (const link of Array.from(section.querySelectorAll(`[data-trace-question='${education.questionId}']`))) {
+      expect(link).toHaveTextContent("この軸への反映：計算に入れていません（回答なし）");
+      expect(link.querySelector("[data-trace-contribution]")).toHaveAttribute("data-trace-contribution", "NONE");
+    }
+  });
+
+  it("質問のデータに誤りがあると、レーダーを描かず、サンプル表示にも切り替えない", () => {
+    const [first, ...rest] = DEMO_DILEMMAS;
+    if (first === undefined) {
+      throw new Error("demo data is incomplete");
+    }
+    // 考え方AとBが同じ軸の質問（誤り）
+    const broken = [{ ...first, optionB: { ...first.optionB, valueAxisId: first.optionA.valueAxisId } }, ...rest];
+    render(<ValuesDiagnosisV2 questions={broken} />);
+    fireEvent.click(screen.getByRole("button", { name: /診断をはじめる/u }));
+    answerAll(Array.from({ length: 6 }, () => "同程度"));
+    const radar = screen.getByRole("region", { name: "価値観レーダー" });
+    expect(radar.querySelector("[data-radar-invalid='true']")).toHaveTextContent(
+      "価値観レーダーを表示できません",
+    );
+    expect(radar.querySelector("figure")).toBeNull();
+    expect(radar).not.toHaveTextContent(/サンプル|見本/u);
+    // 回答の振り返りは残る
+    expect(screen.getByRole("region", { name: "地域課題ごとの回答の振り返り" })).toBeInTheDocument();
   });
 
   it("分析の関数を差し替えると、その値でレーダーを描き、答え直すと図が変わり、スキップは変えずに渡す", () => {

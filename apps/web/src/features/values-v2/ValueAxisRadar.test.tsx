@@ -7,7 +7,8 @@ import { axisLabelLines, ValueAxisRadar } from "./components/ValueAxisRadar.js";
 import { UI_VALUE_AXES } from "./demoDilemmas.js";
 
 /*
- * 価値観レーダーの表示部品の確認（計算処理とは未接続。ここではテスト用の値だけを渡す）。
+ * 価値観レーダーの表示部品の確認（部品は計算しない。ここではテスト用の値だけを渡す。
+ * 回答からの計算は axisAnalysis.test.ts、画面での接続は ValuesDiagnosisV2.test.tsx で確かめる）。
  */
 
 type Point = Readonly<{ x: number; y: number }>;
@@ -237,6 +238,37 @@ describe("ValueAxisRadar（v2・表示部品）", () => {
         expect(Array.from(line).length, axis.label).toBeLessThanOrEqual(5);
       }
     }
+  });
+
+  it("分析できない理由（スキップ、未回答、その両方）と未出題を、文で分けて示し、どれも点を置かない", () => {
+    const { container } = render(
+      <ValueAxisRadar
+        axes={UI_VALUE_AXES}
+        values={[
+          { axisId: "FAIRNESS", state: "UNDETERMINED", reasons: ["SKIPPED"] },
+          { axisId: "STABILITY", state: "UNDETERMINED", reasons: ["UNANSWERED"] },
+          { axisId: "FUTURE", state: "UNDETERMINED", reasons: ["SKIPPED", "UNANSWERED"] },
+          { axisId: "OPPORTUNITY", state: "NOT_ASKED" },
+          { axisId: "COMMUNITY", state: "UNDETERMINED" },
+          { axisId: "INFRASTRUCTURE", state: "DETERMINED", level: 0, usableQuestions: 2 },
+        ]}
+      />,
+    );
+    const text = (axisId: string) => container.querySelector(`[data-axis-description='${axisId}']`);
+    expect(text("FAIRNESS")).toHaveTextContent("分析できません（この考え方が出てくる質問をスキップしました）");
+    expect(text("STABILITY")).toHaveTextContent("分析できません（この考え方が出てくる質問が未回答です）");
+    expect(text("FUTURE")).toHaveTextContent("分析できません（この考え方が出てくる質問は、スキップと未回答です）");
+    expect(text("OPPORTUNITY")).toHaveTextContent("この考え方が出てくる質問がありません（未出題）");
+    expect(text("COMMUNITY")).toHaveTextContent("分析できません（根拠になる回答がありません）");
+    // 0 の軸（同じくらい）だけに点を置き、ほかの5軸は点線にする
+    expect(container.querySelectorAll("circle")).toHaveLength(1);
+    expect(container.querySelector("circle[data-axis='INFRASTRUCTURE']")).not.toBeNull();
+    expect(container.querySelectorAll("line[data-undetermined='true']")).toHaveLength(5);
+    const opportunity = Array.from(container.querySelectorAll("svg text[aria-hidden='true']")).find((label) =>
+      label.textContent?.startsWith("個人の"),
+    );
+    expect(opportunity).toHaveTextContent("未出題");
+    expect(screen.getByRole("img").getAttribute("aria-label")).toContain("個人の可能性：この診断には");
   });
 
   it("軸が3つ未満なら何も描かない", () => {
