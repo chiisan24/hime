@@ -11,14 +11,14 @@ import { ValuesDiagnosisV2 } from "../ValuesDiagnosisV2.js";
 import "../../../styles.css";
 
 /*
- * 開発中の画面確認専用（v2 はどのルートにも登録していないため）。
+ * 開発中の画面確認専用。
  * `npm run dev` のあと http://127.0.0.1:5173/values-v2-preview.html で開く。
  * Vite のビルドは index.html だけを入口にするため、この画面は dist に入らない。
- * 共通の枠は /values と同じ見た目にするため、MemoryRouter の "/values" の上に AppShell を置く。
- * URL の末尾に #radar-sample を付けて開くと、診断の代わりに、レーダーの表示部品をサンプル値で確かめられる
- * （分析結果ではない）。
+ * v2 の診断は /values/v2 に登録したため、アプリの中ではそちらで確かめられる。この画面は、主に
+ * #radar-sample（URL の末尾に付けて開くと、診断の代わりに、レーダーの表示部品をサンプル値で確かめられる。
+ * 分析結果ではない）のために残している。
+ * 共通の枠は /values/v2 と同じ見た目にするため、MemoryRouter の "/values/v2" の上に AppShell を置く。
  * 診断の結果画面のレーダーは、回答から計算した値で描く（axisAnalysis.ts）。サンプル値は #radar-sample の欄だけに出す。
- * v2 をルートに登録したら、このフォルダーと values-v2-preview.html は削除してよい。
  */
 
 function RadarSample() {
@@ -43,7 +43,7 @@ if (rootElement === null) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <MemoryRouter initialEntries={["/values"]}>
+    <MemoryRouter initialEntries={["/values/v2"]}>
       <Routes>
         <Route element={<AppShell navigationItems={VISITOR_NAV_ITEMS} />}>
           <Route element={<PreviewPage />} path="*" />

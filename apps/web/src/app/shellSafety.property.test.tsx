@@ -5,6 +5,7 @@ import fc from "fast-check";
 import { isValidElement, type ReactElement, type ReactNode } from "react";
 import {
   createRoutesFromChildren,
+  matchPath,
   matchRoutes,
   type RouteObject,
 } from "react-router-dom";
@@ -17,6 +18,7 @@ vi.mock("../data/electionDataSource.js", () => ({ ELECTION_DATA_SOURCE: "PAST_RE
 
 import { renderWithRouter } from "../../../../tests/harness/react-renderer.js";
 import type { ApplicationMode } from "../config/applicationMode.js";
+import { ValuesDiagnosisV2 } from "../features/values-v2/ValuesDiagnosisV2.js";
 import { AppShell, VISITOR_NAV_ITEMS } from "../shared/ui/AppShell.js";
 import { ANALYST_NAV_ITEMS } from "./analyst/navigationItems.js";
 import {
@@ -171,13 +173,22 @@ const PUBLIC_ROUTE_SPECS: readonly AvailableRouteSpec[] = [
     currentNavHref: null,
     terminalStates: [],
   },
+  {
+    // 地域課題ジレンマ診断（v2）のデモ。/values（v1）とは別のルート。共通ナビの項目はない
+    category: "PUBLIC",
+    template: "/values/v2",
+    heading: "地域課題ジレンマ診断",
+    pageByMode: samePage(ValuesDiagnosisV2),
+    currentNavHref: null,
+    terminalStates: [],
+  },
 ];
 
 /**
  * 選挙に依存しない画面。2022年選挙専用の表示（過去選挙表示・データ種別・フッター）を出さず、
  * デモ用の架空データであることを出す。ローカル限定表示・ナビ・戻る操作などの共通の枠は保つ。
  */
-const ELECTION_INDEPENDENT_TEMPLATES: ReadonlySet<string> = new Set(["/values"]);
+const ELECTION_INDEPENDENT_TEMPLATES: ReadonlySet<string> = new Set(["/values", "/values/v2"]);
 const DEMO_DATA_TEXT = "デモ用の架空データです";
 
 const ANALYST_ROUTE_SPECS: readonly AvailableRouteSpec[] = [
@@ -308,6 +319,17 @@ const RESERVED_ANALYST_SEGMENTS: ReadonlySet<string> = new Set([
 const OVERLONG_BASE_TEMPLATES = [...PUBLIC_ROUTE_SPECS, ...ANALYST_ROUTE_SPECS]
   .map(({ template }) => template)
   .filter((template) => !["/", "/candidates", "/analyst/runs"].includes(template));
+
+/**
+ * 登録済みのルートの型（テンプレート）に、React Router と同じ規則で一致するか。
+ * `/values` に1つ足した `/values/v2`（大文字小文字と末尾の / の違いを含む）は登録済みのルートなので、
+ * 未定義のURLとしては生成しない。`/values` のほかの足し方（`/values/extra` など）は、引き続き未定義のURLとして確かめる。
+ */
+function matchesRegisteredTemplate(pathname: string): boolean {
+  return [...PUBLIC_ROUTE_SPECS, ...ANALYST_ROUTE_SPECS].some(
+    ({ template }) => matchPath({ path: template, end: true }, pathname) !== null,
+  );
+}
 
 const NAV_HREFS_BY_MODE = {
   VISITOR: ["/", "/schedule", "/candidates", "/comparison", "/venue"],
@@ -448,7 +470,8 @@ const overlongKnownPathArbitrary = fc
   .map(
     ([template, parameter, extra, trailingSlash]) =>
       `${instantiateTemplate(template, parameter)}${extra}${trailingSlash}`,
-  );
+  )
+  .filter((pathname) => !matchesRegisteredTemplate(pathname));
 
 const unknownRouteCaseArbitrary: fc.Arbitrary<RouteCase> = fc
   .oneof(unknownRootPathArbitrary, unknownAnalystPathArbitrary, overlongKnownPathArbitrary)

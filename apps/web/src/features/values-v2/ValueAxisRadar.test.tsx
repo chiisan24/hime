@@ -260,7 +260,7 @@ describe("ValueAxisRadar（v2・表示部品）", () => {
     expect(text("FUTURE")).toHaveTextContent("分析できません（この考え方が出てくる質問は、スキップと未回答です）");
     expect(text("OPPORTUNITY")).toHaveTextContent("この考え方が出てくる質問がありません（未出題）");
     expect(text("COMMUNITY")).toHaveTextContent("分析できません（根拠になる回答がありません）");
-    // 0 の軸（同じくらい）だけに点を置き、ほかの5軸は点線にする
+    // 傾き0の軸だけに点を置き、ほかの5軸は点線にする
     expect(container.querySelectorAll("circle")).toHaveLength(1);
     expect(container.querySelector("circle[data-axis='INFRASTRUCTURE']")).not.toBeNull();
     expect(container.querySelectorAll("line[data-undetermined='true']")).toHaveLength(5);
@@ -269,6 +269,53 @@ describe("ValueAxisRadar（v2・表示部品）", () => {
     );
     expect(opportunity).toHaveTextContent("未出題");
     expect(screen.getByRole("img").getAttribute("aria-label")).toContain("個人の可能性：この診断には");
+  });
+
+  /*
+   * 以前は、傾き0を「比べたときに、どちらとも同じくらいだった」と表示し、図の下でも真ん中の六角形を
+   * 「同じくらい」と説明していた。0 は相対的な選び方の差し引きで、中立や「同程度」の意味ではないため、
+   * 文を改めた（records/values-v2-axis-analysis.md の10の方針確認2）。0 以外の水準の文は変えていないことも確かめる。
+   */
+  it("傾き0を「同じくらい」と書かず、差し引きで0になったことと、中立や「同程度」の意味ではないことを示す", () => {
+    const { container } = render(
+      <ValueAxisRadar
+        axes={UI_VALUE_AXES}
+        values={[
+          { axisId: "FAIRNESS", state: "DETERMINED", level: 0, usableQuestions: 2 },
+          { axisId: "STABILITY", state: "DETERMINED", level: 0, usableQuestions: 1 },
+          { axisId: "FUTURE", state: "DETERMINED", level: 1, usableQuestions: 1 },
+          { axisId: "OPPORTUNITY", state: "DETERMINED", level: -2, usableQuestions: 2 },
+          { axisId: "COMMUNITY", state: "DETERMINED", level: 2, usableQuestions: 2 },
+          { axisId: "INFRASTRUCTURE", state: "DETERMINED", level: -1, usableQuestions: 2 },
+        ]}
+      />,
+    );
+    const text = (axisId: string) =>
+      container.querySelector(`[data-axis-description='${axisId}']`)?.textContent;
+    expect(text("FAIRNESS")).toBe(
+      "公平性：比べたときに、この考え方の側を選んだ分と、もう一方の考え方を選んだ分が、差し引きで0になった（中立という意味ではない）",
+    );
+    expect(text("STABILITY")).toBe(
+      "暮らしの安定：比べたときに、この考え方の側を選んだ分と、もう一方の考え方を選んだ分が、差し引きで0になった（1問から。中立という意味ではない）",
+    );
+    expect(text("FUTURE")).toBe("将来への投資：比べたときに、この考え方の側をやや選んだ（1問から）");
+    expect(text("OPPORTUNITY")).toBe("個人の可能性：比べたときに、もう一方の考え方を選ぶことが多かった");
+    expect(text("COMMUNITY")).toBe("地域のつながり：比べたときに、この考え方の側を選ぶことが多かった");
+    expect(text("INFRASTRUCTURE")).toBe("公共基盤の充実：比べたときに、もう一方の考え方をやや選んだ");
+
+    // 図の下の説明: 真ん中の六角形は傾き0。打ち消し合っても0になり、中立や「同程度」の意味ではない
+    const note = container.querySelector("[data-level-zero-note='true']");
+    expect(note).toHaveTextContent("真ん中の六角形は傾き0です。");
+    expect(note).toHaveTextContent("打ち消し合って0になります");
+    expect(note).toHaveTextContent(
+      "価値観が中立であることや、それぞれの質問で「同程度」を選んだことを意味しません。",
+    );
+    expect(note?.closest("figcaption")).not.toBeNull();
+    // 読み上げ用の名前も同じ文を使い、「同じくらい」はどこにも出さない
+    expect(screen.getByRole("img").getAttribute("aria-label")).toContain(
+      "公平性：比べたときに、この考え方の側を選んだ分と、もう一方の考え方を選んだ分が、差し引きで0になった",
+    );
+    expect(document.body).not.toHaveTextContent("同じくらい");
   });
 
   it("軸が3つ未満なら何も描かない", () => {

@@ -22,7 +22,7 @@
 - **Visitor_Router**: 会場利用者向けrouteとwildcard 404だけを登録するReact Router構成。
 - **Analyst_Router**: 会場利用者向けroute、既存の分析者route、およびwildcard 404を登録するReact Router構成。
 - **Visitor_Home**: Visitor_Modeで表示する`/`画面。
-- **Values_Route**: Visitor_ModeとAnalyst_Modeの両方で登録する、地域の価値観診断を表示するpublic route`/values`。診断の状態と回答由来の値をURL、query string、hashに持たない。
+- **Values_Route**: Visitor_ModeとAnalyst_Modeの両方で登録する、地域の価値観診断を表示するpublic route。`/values`（v1の価値観マップ）と、`/values/v2`（質問方式v2の地域課題ジレンマ診断のデモ。`.kiro/specs/regional-values-map/records/values-v2-axis-analysis.md`の10。正式な承認の記録は未了）の2つ。診断の状態と回答由来の値をURL、query string、hashに持たない。
 - **Shared_Navigation**: 既存`AppShell`内の共通ナビゲーション。
 - **Analyst_Internal_Content**: `/analyst/*`へのlink、分析者画面名、分析操作の説明、Source Manifest、run、検証、承認、評価、P0判定、AWS診断など共同開発者向けの導線または説明。
 - **Existing_Analyst_Route**: `/analyst/readiness`、`/analyst/sources`、`/analyst/runs`、`/analyst/runs/:runId`、`/analyst/verification/:artifactId`、`/analyst/review/:artifactId`、`/analyst/evaluation`、`/analyst/p0`、`/analyst/aws`。
@@ -138,7 +138,7 @@
 8. THE README SHALL query string、Web Storage、browser toggle、および暗黙fallbackではmodeを変更できないことを記載する
 9. THE visitor-analyst-mode-separation実装 SHALL Task_Metadata_Fileを変更しない
 10. THE visitor-analyst-mode-separation実装 SHALL `.kiro/specs/ehime-vote-navigator/requirements.md`、`.kiro/specs/ehime-vote-navigator/design.md`、および`.kiro/specs/ehime-vote-navigator/tasks.md`を変更しない
-11. THE えひめ投票ナビweb SHALL Visitor_ModeとAnalyst_Modeの両方で`Values_Route`をpublic routeとして自動テスト対象にし、`Values_Route`で2022年選挙のバナー、2022年のデータ種別表示、2022年選挙のフッターが0件であること、および`Values_Route`以外の既存routeで従来どおり表示されることを確認する。route contractとbuild-boundaryの期待値は、既存の期待値を削除・緩和せず`/values`の期待値を追加する
+11. THE えひめ投票ナビweb SHALL Visitor_ModeとAnalyst_Modeの両方で`Values_Route`をpublic routeとして自動テスト対象にし、`Values_Route`で2022年選挙のバナー、2022年のデータ種別表示、2022年選挙のフッターが0件であること、および`Values_Route`以外の既存routeで従来どおり表示されることを確認する。route contractとbuild-boundaryの期待値は、既存の期待値を削除・緩和せず`/values`と`/values/v2`の期待値を追加する
 
 ### Requirement 8: 公開Standalone Sourcesの限定廃止
 

@@ -6,6 +6,7 @@ import {
   Compass,
   Eye,
   FileText,
+  Radar,
   Scale,
   UserRound,
   Users,
@@ -17,6 +18,7 @@ import { PAST_ELECTION } from "#past-election";
 
 import type { MockCandidate } from "../../data/mock/types.js";
 import type { CandidateSummary } from "../../data/types.js";
+import { NEUTRALITY_PENDING_LABEL } from "../../features/values-v2/components/ProvisionalAxesNotice.js";
 import { formatJapaneseDate } from "../../services/dateLabel.js";
 import {
   candidateDetailPath,
@@ -792,6 +794,54 @@ function ValuesEntryCard() {
   );
 }
 
+/**
+ * 地域課題ジレンマ診断（v2）のデモの入口（/values/v2）。一次審査で六角形の価値観レーダーを見られるようにする。
+ * v1 の入口（/values）とは別のカードにし、架空のデモ用の質問であることと、中立性の点検前であることを出す。
+ * メインメニューの一覧には入れず、共通ナビゲーションにも足さない。
+ */
+const VALUES_V2_DEMO_PATH = "/values/v2";
+
+function ValuesV2DemoCard() {
+  const headingId = useId();
+  return (
+    <section
+      aria-labelledby={headingId}
+      className="rounded-[var(--radius-card)] border border-line bg-white p-4 shadow-[var(--shadow-card)] sm:p-5"
+      data-values-v2-demo="true"
+    >
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
+          <span
+            aria-hidden="true"
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary"
+          >
+            <Radar className="size-5" />
+          </span>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-base font-black text-primary-dark sm:text-lg" id={headingId}>
+                地域課題ジレンマ診断（試作）
+              </h2>
+              <Badge>デモ版</Badge>
+              <Badge>{NEUTRALITY_PENDING_LABEL}</Badge>
+            </div>
+            <p className="mt-1 text-sm leading-6 text-ink">
+              2つの考え方を比べて答え、6つの考え方を比べたときの傾きを、六角形の価値観レーダーで振り返ります。質問は架空のデモ用です。
+            </p>
+          </div>
+        </div>
+        <AppLink
+          className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-full border-2 border-primary bg-white px-5 py-2.5 text-sm font-bold text-primary-dark transition hover:bg-primary-light"
+          to={VALUES_V2_DEMO_PATH}
+        >
+          ジレンマ診断の試作版を見る
+          <ArrowRight aria-hidden="true" className="size-4 shrink-0" />
+        </AppLink>
+      </div>
+    </section>
+  );
+}
+
 export function VisitorHomePage() {
   // 候補者ごとの詳細リンクは「候補者一覧」カードの中に入れる（リンクの並び順は変えない）
   const candidateLinks = VISITOR_HOME_LINKS.filter((link) =>
@@ -826,6 +876,9 @@ export function VisitorHomePage() {
 
       {/* 価値観診断の入口：主要機能のメニューより上に置く */}
       <ValuesEntryCard />
+
+      {/* 地域課題ジレンマ診断（v2）のデモの入口：v1 の入口の下に、別のカードとして置く */}
+      <ValuesV2DemoCard />
 
       {/* モックデータを表示するときは、そのことを明示する（モックデータが1ページ分もないときは出さない） */}
       {mockProvided ? <MockDataNotice /> : null}

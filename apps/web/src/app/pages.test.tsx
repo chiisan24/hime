@@ -48,6 +48,8 @@ describe("split public and analyst page modules", () => {
     expect(destinations).toEqual([
       // 価値観診断の入口カード（regional-values-map tasks.md 14 の案Bの承認記録）
       "/values",
+      // 地域課題ジレンマ診断（v2）のデモの入口カード
+      "/values/v2",
       "/schedule",
       "/candidates",
       "/candidates/nakamura-tokihiro",

@@ -57,16 +57,20 @@ const PUBLIC_NAV_ITEMS = [
  */
 export const VISITOR_NAV_ITEMS = projectVisitorPresentation(PUBLIC_NAV_ITEMS);
 
-/** 選挙に依存しない画面（価値観診断）。2022年選挙専用の表示を出さない */
-const ELECTION_INDEPENDENT_PATH = "/values";
+/**
+ * 選挙に依存しない画面（価値観診断 v1 の /values と、地域課題ジレンマ診断 v2 のデモの /values/v2）。
+ * 2022年選挙専用の表示を出さない
+ */
+const ELECTION_INDEPENDENT_PATHS = ["/values", "/values/v2"] as const;
 
 /**
  * 今の画面が、選挙に依存しない画面かどうか。
  * React Router と同じ規則（大文字小文字を区別しない、末尾の / を許す）で判定する。
+ * どれも末尾まで一致したときだけ（/values/extra などは、選挙の表示を保った404のまま）。
  */
 function useIsElectionIndependentRoute(): boolean {
   const { pathname } = useLocation();
-  return matchPath({ path: ELECTION_INDEPENDENT_PATH, end: true }, pathname) !== null;
+  return ELECTION_INDEPENDENT_PATHS.some((path) => matchPath({ path, end: true }, pathname) !== null);
 }
 
 /**
@@ -148,7 +152,7 @@ export function AppShell({
   navigationItems,
 }: AppShellProps) {
   // 2022年選挙専用の表示（過去選挙表示・データ種別・フッター）は、次のときに出さない。
-  // - 価値観診断（/values）。選挙に依存しない画面のため。
+  // - 価値観診断（/values と /values/v2）。選挙に依存しない画面のため。
   // - 過去の選挙データを使わない設定（モックデータ）のときと、過去の選挙を含まないビルド
   //   （利用者向けの公開ビルド）のとき。どの画面にも過去の選挙のデータを出さないため。
   //   表示する文言も過去の選挙の側（#past-election）が持つので、公開ビルドには入らない。

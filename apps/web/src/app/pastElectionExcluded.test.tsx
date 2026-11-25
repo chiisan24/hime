@@ -81,7 +81,7 @@ describe("過去の選挙を含まないビルドで、設定を PAST_REAL に�
     expectNoPastElection();
   });
 
-  it.each(["/values", "/not-a-route"])("%s にも、過去の選挙の表示を出さない", (path) => {
+  it.each(["/values", "/values/v2", "/not-a-route"])("%s にも、過去の選挙の表示を出さない", (path) => {
     renderWithRouter(<VisitorRoutes />, { initialEntries: [path] });
 
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);

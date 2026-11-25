@@ -84,6 +84,69 @@ describe("ValuesDiagnosisV2（地域課題ジレンマ診断）", () => {
     expect(screen.getByRole("note")).toHaveTextContent("デモ用の架空データです");
   });
 
+  it("開始画面に、質問と6つの考え方が暫定で、中立性の点検前であることを出す", () => {
+    render(<ValuesDiagnosisV2 />);
+    const notice = document.querySelector<HTMLElement>("[data-provisional-axes='true']");
+    expect(notice).not.toBeNull();
+    expect(notice).toHaveTextContent("中立性の点検前");
+    expect(notice).toHaveTextContent(
+      "質問の文面、6つの考え方（価値観レーダーの軸）の名前と説明、各質問の考え方A・Bへの割り当ては、暫定です。",
+    );
+    expect(notice).toHaveTextContent("（中立性の点検）は、まだ終わっていません。");
+    // 架空のデモ用の質問であることの表示も残し、常に出す「デモ用の架空データです」の表示は1つのまま
+    expect(screen.getByText(/画面を確かめるための架空のデモ用の質問です/u)).toBeInTheDocument();
+    expect(screen.getAllByRole("note")).toHaveLength(1);
+  });
+
+  it("結果画面にも中立性の点検前であることを出し、分析できた軸がどれも0のときは、0が中立や「同程度」の意味ではないと注記する", () => {
+    start();
+    answerAll(Array.from({ length: 6 }, () => "Aを強く重視"));
+    expect(heading()).toHaveTextContent("あなたの地域課題マップ");
+    expect(document.querySelector("[data-provisional-axes='true']")).toHaveTextContent("中立性の点検前");
+    expect(screen.getAllByRole("note")).toHaveLength(1);
+
+    const radar = screen.getByRole("region", { name: "価値観レーダー" });
+    const allZero = radar.querySelector<HTMLElement>("[data-radar-all-zero='true']");
+    const figure = radar.querySelector("figure");
+    if (allZero === null || figure === null) {
+      throw new Error("the all-zero note or the radar is missing");
+    }
+    expect(allZero).toHaveTextContent("どの考え方も、傾きが0になりました。");
+    expect(allZero).toHaveTextContent(
+      "価値観が中立であることや、それぞれの質問で「同程度」を選んだことを意味しません。",
+    );
+    expect(allZero).toHaveTextContent("打ち消し合って0になります。");
+    // 注記は図より前に置き、図は分析結果として描く（6軸とも点を置く）
+    expect(allZero.compareDocumentPosition(figure) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(figure).toHaveAttribute("data-radar-mode", "analysis");
+    expect(figure.querySelectorAll("circle")).toHaveLength(6);
+    expect(document.body).not.toHaveTextContent("同じくらい");
+  });
+
+  it("一部の軸が分析できず、分析できた軸がどれも0のときは、分析できた考え方について注記する", () => {
+    start();
+    // 地域交通と医療・福祉をスキップ（公平性は分析できない）し、ほかは「同程度」
+    answerAll(["skip", "同程度", "同程度", "skip", "同程度", "同程度"]);
+    const allZero = document.querySelector("[data-radar-all-zero='true']");
+    expect(allZero).toHaveTextContent("分析できた考え方は、どれも傾きが0になりました。");
+    expect(allZero).not.toHaveTextContent("どの考え方も、傾きが0になりました。");
+  });
+
+  it("0でない軸があるときと、分析できた軸がないときは、傾き0の注記を出さない", () => {
+    const { unmount } = render(<ValuesDiagnosisV2 />);
+    fireEvent.click(screen.getByRole("button", { name: /診断をはじめる/u }));
+    answerAll(["Aを強く重視", "skip", "同程度", "Bをやや重視", "Aをやや重視", "Bを強く重視"]);
+    expect(screen.getByRole("region", { name: "価値観レーダー" })).toBeInTheDocument();
+    expect(document.querySelector("[data-radar-all-zero]")).toBeNull();
+    unmount();
+
+    // すべてスキップしたときは、0ではなく「分析できません」になる
+    start();
+    answerAll(Array.from({ length: 6 }, () => "skip"));
+    expect(screen.getByRole("region", { name: "価値観レーダー" })).toBeInTheDocument();
+    expect(document.querySelector("[data-radar-all-zero]")).toBeNull();
+  });
+
   it("6問をテーマ定義順に1問ずつ表示し、A・Bと5段階を出す", () => {
     start();
     DEMO_DILEMMAS.forEach((question, index) => {
@@ -363,9 +426,15 @@ describe("ValuesDiagnosisV2（地域課題ジレンマ診断）", () => {
     fireEvent.click(screen.getByRole("button", { name: /診断をはじめる/u }));
     answerAll(Array.from({ length: 6 }, () => "Aを強く重視"));
     const before = radarSnapshot();
-    // すべて「Aを強く重視」なら、どの軸も A側の質問で +2、B側の質問で −2 となり、得点0（同じくらい）
+    // すべて「Aを強く重視」なら、どの軸も A側の質問で +2、B側の質問で −2 となり、差し引きで得点0（傾き0）。
+    // 以前は「どちらとも同じくらいだった」と表示していた。0 は中立や「同程度」の意味ではないため、
+    // 差し引きで0になったことと、中立という意味ではないことを示す文に改めた
+    //（records/values-v2-axis-analysis.md の10の方針確認2）
+    expect(Object.keys(before.texts)).toHaveLength(6);
     for (const text of Object.values(before.texts)) {
-      expect(text).toContain("どちらとも同じくらいだった");
+      expect(text).toContain("差し引きで0になった");
+      expect(text).toContain("中立という意味ではない");
+      expect(text).not.toContain("同じくらい");
     }
 
     // 地域交通（A: 公平性、B: 暮らしの安定）を「Bを強く重視」に答え直す
@@ -420,10 +489,11 @@ describe("ValuesDiagnosisV2（地域課題ジレンマ診断）", () => {
       "分析できません（この考え方が出てくる質問をスキップしました）",
     );
     expect(radar.querySelector("figure circle[data-axis='FAIRNESS']")).toBeNull();
-    // 暮らしの安定は、地域交通をスキップし、教育・子育てで「同程度」→ 1問から0（同程度は回答として数える）
-    expect(radar.querySelector("[data-axis-description='STABILITY']")).toHaveTextContent(
-      "どちらとも同じくらいだった（1問から）",
-    );
+    // 暮らしの安定は、地域交通をスキップし、教育・子育てで「同程度」→ 1問から0（同程度は回答として数える）。
+    // 以前の文「どちらとも同じくらいだった（1問から）」は、傾き0の文と「（1問から。中立という意味ではない）」に改めた
+    const stability = radar.querySelector("[data-axis-description='STABILITY']");
+    expect(stability).toHaveTextContent("差し引きで0になった（1問から。中立という意味ではない）");
+    expect(stability).not.toHaveTextContent("同じくらい");
     expect(radar.querySelector("figure circle[data-axis='STABILITY']")).not.toBeNull();
   });
 

@@ -10,12 +10,14 @@ import { THEME_ICONS } from "../../values/themeIcons.js";
 import { useHeadingFocus } from "../../values/useHeadingFocus.js";
 import { analyzeValueAxes, contributionOf, SAMPLE_AXIS_VALUES, traceAxisAnswers } from "../axisAnalysis.js";
 import { IssuePosition } from "../components/IssuePosition.js";
+import { ProvisionalAxesNotice } from "../components/ProvisionalAxesNotice.js";
 import { describeAxisValue, ValueAxisRadar } from "../components/ValueAxisRadar.js";
 import { DILEMMA_PROMPT, DILEMMA_SCALE, UI_VALUE_AXES } from "../demoDilemmas.js";
 import type {
   DilemmaAnswer,
   DilemmaAnswers,
   UiAxisAnalyzer,
+  UiAxisDisplayValue,
   UiDilemmaQuestion,
   UiValueAxis,
 } from "../uiTypes.js";
@@ -48,6 +50,23 @@ function contributionLabelOf(answer: DilemmaAnswer | undefined, side: "A" | "B")
   return `${direction}へ${Math.abs(value) === 2 ? "強く" : "やや"}`;
 }
 
+/**
+ * 分析できた軸がどれも傾き0のとき（すべての質問でAを強く重視した場合など）に出す注記の書き出し。
+ * 分析できた軸がないときと、0でない軸があるときは null（注記を出さない）
+ */
+function allZeroLeadOf(axes: readonly UiValueAxis[], values: readonly UiAxisDisplayValue[]): string | null {
+  const determined = values.filter(
+    (value): value is Extract<UiAxisDisplayValue, { state: "DETERMINED" }> => value.state === "DETERMINED",
+  );
+  if (determined.length === 0 || determined.some((value) => value.level !== 0)) {
+    return null;
+  }
+  const everyAxisDetermined = axes.every((axis) => determined.some((value) => value.axisId === axis.axisId));
+  return everyAxisDetermined
+    ? "どの考え方も、傾きが0になりました。"
+    : "分析できた考え方は、どれも傾きが0になりました。";
+}
+
 /** 回答の振り返りの文。回答の事実だけを述べ、性格や思想を推測しない */
 function reflectionOf(answer: DilemmaAnswer | undefined): string {
   if (answer === undefined) {
@@ -76,6 +95,8 @@ function answerLabelOf(answer: DilemmaAnswer | undefined): string {
  * → 地域課題ごとの回答の振り返り（地域課題マップ。1問＝1行）→ 答え直しとやり直しの操作。
  * テーマの回答を合算せず、順位も付けない。スキップ・未回答は「回答なし」として0点に変えない。
  * 判断に迷った・回答しなかった・判定できない・未出題の4枚のカードは置かず、回答状況を1行にまとめる。
+ * 見出しの下に、質問と6軸が暫定で中立性の点検前であることを出す（ProvisionalAxesNotice）。
+ * 分析できた軸がどれも傾き0のときは、レーダーの上に、0は中立や「同程度」の意味ではないことの注記を出す。
  *
  * レーダーの値は analyzeAxes が返す。
  * - ANALYZED: 回答から計算した値で描く（既定の analyzeValueAxes）。サンプルの値は混ぜない。
@@ -95,6 +116,7 @@ export function DilemmaResultPage({
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
   const summary = summarizeDilemmaAnswers(questions, answers);
   const analysis = analyzeAxes({ questions, axes, answers });
+  const allZeroLead = analysis.status === "ANALYZED" ? allZeroLeadOf(axes, analysis.values) : null;
   const traces = traceAxisAnswers(questions, axes, answers);
   const axisLabels = new Map(axes.map((axis) => [axis.axisId, axis.label]));
 
@@ -120,6 +142,7 @@ export function DilemmaResultPage({
         <NoticeBar>
           この結果は、自己理解のための参考です。投票先の推奨ではありません。性格や政治思想を判定するものでもありません。
         </NoticeBar>
+        <ProvisionalAxesNotice />
         <p className="text-base font-bold text-ink" role="status">
           {summary.total}問中{summary.answered}問に回答しました
           {statusParts.length > 0 ? (
@@ -157,6 +180,14 @@ export function DilemmaResultPage({
                 スキップした質問と未回答の質問は、計算に入れていません（0点や「同程度」にはしていません）。根拠になる回答がない考え方は、点線で「分析できません」と示します。
               </p>
             </div>
+            {allZeroLead === null ? null : (
+              <div className="mb-4" data-radar-all-zero="true">
+                <NoticeBar>
+                  {allZeroLead}
+                  これは選び方を差し引きした結果で、価値観が中立であることや、それぞれの質問で「同程度」を選んだことを意味しません。たとえば、すべての質問で「Aを強く重視」を選ぶと、どの考え方も、強く選ばれた質問と、比べた相手が強く選ばれた質問が1問ずつになるため、打ち消し合って0になります。どちらを選んだかは、下の「地域課題ごとの回答の振り返り」で確かめられます。
+                </NoticeBar>
+              </div>
+            )}
             <ValueAxisRadar axes={axes} values={analysis.values} />
           </>
         )}
