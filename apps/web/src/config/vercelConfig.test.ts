@@ -50,6 +50,8 @@ describe("Vercel の SPA フォールバック設定", () => {
       "/",
       "/values",
       "/values/",
+      "/values/v2",
+      "/values/v2/",
       "/schedule",
       "/candidates",
       "/candidates/nakamura-tokihiro",

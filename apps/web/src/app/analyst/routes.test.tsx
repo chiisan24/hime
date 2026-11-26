@@ -41,13 +41,15 @@ const REMAINING_PUBLIC_ROUTE_PATHS = [
   "/comparison",
   "/venue",
   "/values",
+  // 地域課題ジレンマ診断（v2）のデモ。/values（v1）とは別のルート
+  "/values/v2",
 ] as const;
 
 /**
  * 選挙に依存しない画面（価値観診断）。2022年選挙専用の表示（過去選挙表示・データ種別・フッター）を出さない
- * （regional-values-map tasks.md 14 の案Bの承認記録）。
+ * （/values は regional-values-map tasks.md 14 の案Bの承認記録。/values/v2 は v2 のデモで、同じ扱いにする）。
  */
-const ELECTION_INDEPENDENT_PATHS: ReadonlySet<string> = new Set(["/values"]);
+const ELECTION_INDEPENDENT_PATHS: ReadonlySet<string> = new Set(["/values", "/values/v2"]);
 
 const SAMPLE_PATH_PARAMETERS: Readonly<Record<string, string>> = {
   candidateId: "nakamura-tokihiro",

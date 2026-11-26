@@ -11,7 +11,7 @@ import { useDilemmaAnswers } from "./useDilemmaAnswers.js";
 
 /*
  * 地域課題ジレンマ診断（v2）の流れ（開始 → 質問 → 結果）。
- * - v1（features/values）とは独立した部品。どのルートにも登録していない（/values は v1 のまま）。
+ * - v1（features/values）とは独立した部品。/values/v2 に登録している（一次審査のデモ。/values は v1 のまま）。
  * - URL は変えず、画面の中の状態で切り替える。回答はこの部品の state にだけ持つ。
  * - 質問は UI 専用の仮データ（demoDilemmas.ts）。正式な v2 の契約ができたら差し替える。
  * - 結果画面の価値観レーダーの値は analyzeAxes が回答から作る。既定の analyzeValueAxes（axisAnalysis.ts）は、

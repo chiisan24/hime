@@ -77,13 +77,25 @@ export function axisLabelLines(label: string): readonly string[] {
   return [characters.slice(0, cut).join(""), characters.slice(cut).join("")];
 }
 
+/*
+ * 水準の文。どれも、比べた相手の考え方に対する相対的な選び方を述べる（価値観の強さや中立を述べない）。
+ * 0 は「どちらとも同じくらい」と書かない（records/values-v2-axis-analysis.md の10の方針確認2）。
+ * 0 は、この考え方の側を選んだ分ともう一方を選んだ分の差し引きで、反対向きの選び方が打ち消し合っても 0 になる。
+ * 価値観の絶対的な中立や、各質問で「同程度」を選んだことを意味しない
+ * （その説明は、図の下の説明文と、結果画面の注記で示す）。
+ */
 const LEVEL_TEXT: Readonly<Record<Level, string>> = {
   2: "比べたときに、この考え方の側を選ぶことが多かった",
   1: "比べたときに、この考え方の側をやや選んだ",
-  0: "比べたときに、どちらとも同じくらいだった",
+  0: "比べたときに、この考え方の側を選んだ分と、もう一方の考え方を選んだ分が、差し引きで0になった",
   [-1]: "比べたときに、もう一方の考え方をやや選んだ",
   [-2]: "比べたときに、もう一方の考え方を選ぶことが多かった",
 };
+
+/** 傾き0の文に添える注記 */
+const LEVEL_ZERO_NOTE = "中立という意味ではない";
+/** 計算に使った質問が1問だけのときの注記 */
+const SINGLE_QUESTION_NOTE = "1問から";
 
 const UNDETERMINED_TEXT = "分析できません（根拠になる回答がありません）";
 /** 分析できない理由ごとの文。スキップと未回答を分けて示し、0点や「同程度」と書かない */
@@ -109,8 +121,11 @@ export function describeAxisValue(value: UiAxisDisplayValue | undefined): string
   if (value.state === "UNDETERMINED") {
     return UNDETERMINED_REASON_TEXT[(value.reasons ?? []).join(",")] ?? UNDETERMINED_TEXT;
   }
-  const basis = value.usableQuestions === 1 ? "（1問から）" : "";
-  return `${LEVEL_TEXT[value.level]}${basis}`;
+  const notes = [
+    value.usableQuestions === 1 ? SINGLE_QUESTION_NOTE : null,
+    value.level === 0 ? LEVEL_ZERO_NOTE : null,
+  ].filter((note): note is string => note !== null);
+  return notes.length > 0 ? `${LEVEL_TEXT[value.level]}（${notes.join("。")}）` : LEVEL_TEXT[value.level];
 }
 
 /** 図の軸名の下に出す短い値 */
@@ -326,7 +341,10 @@ export function ValueAxisRadar({ axes, values, sample = false }: ValueAxisRadarP
           </span>
         ) : null}
         <span>
-          6つの考え方を比べたときの傾きです。内側ほど「もう一方の考え方を選んだ」、外側ほど「この考え方を選んだ」を表し、真ん中の六角形は「同じくらい」です。全部の軸を外側にすることはできず、内側にあっても大切にしていないという意味ではありません。面積の大きさに意味はなく、順位でもありません。点線の軸は、根拠になる回答がないため分析できない軸です。
+          6つの考え方を比べたときの傾きです。内側ほど「もう一方の考え方を選んだ」、外側ほど「この考え方を選んだ」を表します。全部の軸を外側にすることはできず、内側にあっても大切にしていないという意味ではありません。面積の大きさに意味はなく、順位でもありません。点線の軸は、根拠になる回答がないため分析できない軸です。
+        </span>
+        <span data-level-zero-note="true">
+          真ん中の六角形は傾き0です。傾き0は、この考え方の側を選んだ分と、もう一方の考え方を選んだ分が、差し引きで0になったことを表します（ある質問でこの考え方の側を強く選び、別の質問でもう一方の考え方を強く選んだ場合も、打ち消し合って0になります）。価値観が中立であることや、それぞれの質問で「同程度」を選んだことを意味しません。
         </span>
       </figcaption>
       {sample ? (

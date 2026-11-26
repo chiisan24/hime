@@ -23,6 +23,7 @@ vi.mock("../../data/electionDataSource.js", () => ({ ELECTION_DATA_SOURCE: "PAST
 
 import { renderWithRouter } from "../../../../../tests/harness/react-renderer.js";
 import { ValuesDiagnosis } from "../../features/values/ValuesDiagnosis.js";
+import { ValuesDiagnosisV2 } from "../../features/values-v2/ValuesDiagnosisV2.js";
 import { AppShell } from "../../shared/ui/AppShell.js";
 import {
   CandidateDetailPage,
@@ -86,6 +87,8 @@ const PAGE_BY_CONTRACT_PATH = {
   "/venue": VenuePage,
   // 価値観診断（regional-values-map tasks.md 14 の案Bの承認記録）
   "/values": ValuesDiagnosis,
+  // 地域課題ジレンマ診断（v2）のデモ。/values（v1）とは別のルート
+  "/values/v2": ValuesDiagnosisV2,
   "/analyst/readiness": analystPages.AnalystReadinessPage,
   "/analyst/sources": analystPages.AnalystSourcesPage,
   "/analyst/runs": analystPages.AnalystRunsPage,

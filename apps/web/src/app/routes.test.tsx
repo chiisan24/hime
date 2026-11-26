@@ -70,11 +70,15 @@ const PUBLIC_HOME_LINK_CASES = [
   { link: "政策比較を見る", heading: "政策比較" },
   { link: "会場閲覧画面を見る", heading: "会場閲覧" },
   { link: "診断をはじめる", heading: "価値観マップ" },
+  // 地域課題ジレンマ診断（v2）のデモの入口カード
+  { link: "ジレンマ診断の試作版を見る", heading: "地域課題ジレンマ診断" },
 ] as const;
 
 const PUBLIC_HOME_LINK_HREFS = [
   // 価値観診断の入口カード（メインメニューより上。regional-values-map tasks.md 14 の案Bの承認記録）
   "/values",
+  // 地域課題ジレンマ診断（v2）のデモの入口カード（v1 の入口カードの下。メインメニューより上）
+  "/values/v2",
   "/schedule",
   "/candidates",
   "/candidates/nakamura-tokihiro",

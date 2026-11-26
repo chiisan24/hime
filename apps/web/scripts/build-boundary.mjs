@@ -68,6 +68,8 @@ const PUBLIC_ROUTE_PATHS = Object.freeze([
   "/venue",
   // 価値観診断（案B。regional-values-map tasks.md 14 の承認記録）
   "/values",
+  // 地域課題ジレンマ診断（v2）のデモ。/values とは別のルート（records/values-v2-axis-analysis.md の10。正式な承認の記録は未了）
+  "/values/v2",
 ]);
 
 const EXISTING_ANALYST_ROUTE_PATHS = Object.freeze([

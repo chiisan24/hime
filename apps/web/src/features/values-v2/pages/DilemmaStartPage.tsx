@@ -10,6 +10,7 @@ import { PRIMARY_BUTTON_CLASS } from "../../values/styles.js";
 import { THEME_ICONS } from "../../values/themeIcons.js";
 import { useHeadingFocus } from "../../values/useHeadingFocus.js";
 import { estimateMinutes } from "../../values/useValuesAnswers.js";
+import { ProvisionalAxesNotice } from "../components/ProvisionalAxesNotice.js";
 import type { UiDilemmaQuestion } from "../uiTypes.js";
 
 type DilemmaStartPageProps = Readonly<{
@@ -84,6 +85,7 @@ export function DilemmaStartPage({ questions, isDemo, focusHeading, onStart }: D
             質問は、画面を確かめるための架空のデモ用の質問です。状況は「ある町」の架空の話で、愛媛県の実際の状況を述べるものではありません。
           </NoticeBar>
         ) : null}
+        <ProvisionalAxesNotice />
 
         <SectionCard icon={ListChecks} title="答え方">
           <InfoList
